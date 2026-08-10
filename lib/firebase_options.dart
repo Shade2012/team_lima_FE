@@ -63,8 +63,10 @@ class DefaultFirebaseOptions {
     messagingSenderId: '902797635993',
     projectId: 'siagatani-ea8a5',
     storageBucket: 'siagatani-ea8a5.firebasestorage.app',
-    androidClientId: '902797635993-cco8686rmstaslrc483qf8rg57qi06gt.apps.googleusercontent.com',
-    iosClientId: '902797635993-790voddnq5105e0s69lk3uu27f332ha9.apps.googleusercontent.com',
+    androidClientId:
+        '902797635993-cco8686rmstaslrc483qf8rg57qi06gt.apps.googleusercontent.com',
+    iosClientId:
+        '902797635993-790voddnq5105e0s69lk3uu27f332ha9.apps.googleusercontent.com',
     iosBundleId: 'com.example.teamFiveFe',
   );
 }
