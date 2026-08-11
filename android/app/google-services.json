@@ -1,0 +1,90 @@
+{
+  "project_info": {
+    "project_number": "902797635993",
+    "project_id": "siagatani-ea8a5",
+    "storage_bucket": "siagatani-ea8a5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:902797635993:android:3f08dc9242494f0326e308",
+        "android_client_info": {
+          "package_name": "com.example.siaga_tani"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "902797635993-cco8686rmstaslrc483qf8rg57qi06gt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.siaga_tani",
+            "certificate_hash": "8a75aa87ddcc8e3703e8a65f9136c1651a26cadf"
+          }
+        },
+        {
+          "client_id": "902797635993-adpnanmglh6bdao491haidaldqtctuq3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCW8VxjKv0-exMeZXjnS6pRK7lAKRTnTic"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "902797635993-adpnanmglh6bdao491haidaldqtctuq3.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "902797635993-l5tlutmj7o05lgfh2gf1pat6tkoskc01.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.siagaTani"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:902797635993:android:626ac477aec8a60a26e308",
+        "android_client_info": {
+          "package_name": "com.example.team_five_fe"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "902797635993-adpnanmglh6bdao491haidaldqtctuq3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCW8VxjKv0-exMeZXjnS6pRK7lAKRTnTic"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "902797635993-adpnanmglh6bdao491haidaldqtctuq3.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "902797635993-l5tlutmj7o05lgfh2gf1pat6tkoskc01.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.siagaTani"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
