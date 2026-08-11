@@ -1,16 +1,18 @@
+import 'user_model.dart';
+
 class RegisterResponse {
   final String message;
-  final String? userId;
+  final UserModel? user;
 
   RegisterResponse({
     required this.message,
-    this.userId,
+    this.user,
   });
 
   factory RegisterResponse.fromJson(Map<String, dynamic> json) {
     return RegisterResponse(
       message: json['message'] ?? '',
-      userId: json['userId'],
+      user: json['user'] != null ? UserModel.fromJson(json['user']) : null,
     );
   }
 }

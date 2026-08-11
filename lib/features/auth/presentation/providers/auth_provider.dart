@@ -10,7 +10,7 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 });
 
 class AuthState {
-  final String fullName;
+  final String username;
   final String email;
   final String password;
   final String confirmPassword;
@@ -22,7 +22,7 @@ class AuthState {
   final RegisterResponse? registerResponse;
 
   AuthState({
-    this.fullName = '',
+    this.username = '',
     this.email = '',
     this.password = '',
     this.confirmPassword = '',
@@ -35,7 +35,7 @@ class AuthState {
   });
 
   AuthState copyWith({
-    String? fullName,
+    String? username,
     String? email,
     String? password,
     String? confirmPassword,
@@ -47,7 +47,7 @@ class AuthState {
     RegisterResponse? registerResponse,
   }) {
     return AuthState(
-      fullName: fullName ?? this.fullName,
+      username: username ?? this.username,
       email: email ?? this.email,
       password: password ?? this.password,
       confirmPassword: confirmPassword ?? this.confirmPassword,
@@ -68,8 +68,8 @@ class AuthNotifier extends Notifier<AuthState> {
     return AuthState();
   }
 
-  void setFullName(String fullName) {
-    state = state.copyWith(fullName: fullName);
+  void setUsername(String username) {
+    state = state.copyWith(username: username);
   }
 
   void setEmail(String email) {
@@ -126,7 +126,7 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   Future<bool> register() async {
-    if (state.fullName.isEmpty ||
+    if (state.username.isEmpty ||
         state.email.isEmpty ||
         state.password.isEmpty ||
         state.confirmPassword.isEmpty) {
@@ -144,7 +144,7 @@ class AuthNotifier extends Notifier<AuthState> {
     try {
       final authRepository = ref.read(authRepositoryProvider);
       final request = RegisterRequest(
-        fullName: state.fullName,
+        username: state.username,
         email: state.email,
         password: state.password,
         confirmPassword: state.confirmPassword,

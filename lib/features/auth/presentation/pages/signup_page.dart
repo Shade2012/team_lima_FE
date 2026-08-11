@@ -14,14 +14,14 @@ class SignupPage extends ConsumerStatefulWidget {
 
 class _SignupPageState extends ConsumerState<SignupPage> {
   final _formKey = GlobalKey<FormState>();
-  final _fullNameController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
   @override
   void dispose() {
-    _fullNameController.dispose();
+    _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -65,7 +65,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                     const SizedBox(height: 8),
                     _buildSubtitle(isDarkMode),
                     const SizedBox(height: 32),
-                    _buildFullNameField(authState, authNotifier),
+                    _buildUsernameField(authState, authNotifier),
                     const SizedBox(height: 16),
                     _buildEmailField(authState, authNotifier),
                     const SizedBox(height: 16),
@@ -159,12 +159,12 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     );
   }
 
-  Widget _buildFullNameField(AuthState state, AuthNotifier notifier) {
+  Widget _buildUsernameField(AuthState state, AuthNotifier notifier) {
     return CustomTextField(
-      controller: _fullNameController,
-      hintText: 'Full Name',
+      controller: _usernameController,
+      hintText: 'Username',
       prefixIcon: Icons.person_outline,
-      onChanged: (value) => notifier.setFullName(value),
+      onChanged: (value) => notifier.setUsername(value),
     );
   }
 

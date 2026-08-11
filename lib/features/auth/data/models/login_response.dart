@@ -1,19 +1,21 @@
+import 'user_model.dart';
+
 class LoginResponse {
   final String token;
   final String message;
-  final String? userId;
+  final UserModel? user;
 
   LoginResponse({
     required this.token,
     required this.message,
-    this.userId,
+    this.user,
   });
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) {
     return LoginResponse(
       token: json['token'] ?? '',
       message: json['message'] ?? '',
-      userId: json['userId'],
+      user: json['user'] != null ? UserModel.fromJson(json['user']) : null,
     );
   }
 }

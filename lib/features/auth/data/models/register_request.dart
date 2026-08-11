@@ -1,11 +1,11 @@
 class RegisterRequest {
-  final String fullName;
+  final String username;
   final String email;
   final String password;
   final String confirmPassword;
 
   RegisterRequest({
-    required this.fullName,
+    required this.username,
     required this.email,
     required this.password,
     required this.confirmPassword,
@@ -13,16 +13,15 @@ class RegisterRequest {
 
   Map<String, dynamic> toJson() {
     return {
-      'fullName': fullName,
+      'username': username,
       'email': email,
       'password': password,
-      'confirmPassword': confirmPassword,
     };
   }
 
   factory RegisterRequest.fromJson(Map<String, dynamic> json) {
     return RegisterRequest(
-      fullName: json['fullName'] ?? '',
+      username: json['username'] ?? '',
       email: json['email'] ?? '',
       password: json['password'] ?? '',
       confirmPassword: json['confirmPassword'] ?? '',
