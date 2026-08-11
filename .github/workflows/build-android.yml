@@ -3,9 +3,19 @@ name: Android Build & Distribution Pipeline
 on:
   push:
     branches: [ "develop", "master" ]
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+      - '.github/workflows/**'
+      - 'docs/**'
     tags: [ "v*.*.*" ]
   pull_request:
     branches: [ "develop", "master" ]
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+      - '.github/workflows/**'
+      - 'docs/**'
   workflow_dispatch:
 
 jobs:
