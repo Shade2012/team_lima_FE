@@ -4,10 +4,7 @@ class RegisterResponse {
   final String message;
   final UserModel? user;
 
-  RegisterResponse({
-    required this.message,
-    this.user,
-  });
+  RegisterResponse({required this.message, this.user});
 
   factory RegisterResponse.fromJson(Map<String, dynamic> json) {
     return RegisterResponse(
