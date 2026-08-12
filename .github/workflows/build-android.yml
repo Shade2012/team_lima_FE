@@ -8,14 +8,8 @@ on:
       - '.gitignore'
       - '.github/workflows/**'
       - 'docs/**'
+      - 'mock_server/**'
     tags: [ "v*.*.*" ]
-  pull_request:
-    branches: [ "develop", "master" ]
-    paths-ignore:
-      - '**.md'
-      - '.gitignore'
-      - '.github/workflows/**'
-      - 'docs/**'
   workflow_dispatch:
 
 jobs:
