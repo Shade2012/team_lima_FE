@@ -90,6 +90,7 @@ Server sudah dilengkapi data awal (*seed data*) dari file `mock_server/data/init
 ### A. User Auth & Profile (`/users`)
 
 #### 1. Register User (`POST /users/register`)
+- **Auth**: Public
 - **Headers**: `Content-Type: application/json`
 - **Body Request**:
   ```json
@@ -100,7 +101,7 @@ Server sudah dilengkapi data awal (*seed data*) dari file `mock_server/data/init
     "role": "CUSTOMER"
   }
   ```
-  *(Catatan: Jika `role == "GATE_OPERATOR"`, wajib menyertakan `"eventId": "<uuid_event>"`)*
+  *(Catatan: Role `GATE_OPERATOR` tidak diizinkan melalui endpoint ini. Gunakan `POST /users/register/gate-operator`)*
 - **Response 201 Created**:
   ```json
   {
@@ -116,7 +117,39 @@ Server sudah dilengkapi data awal (*seed data*) dari file `mock_server/data/init
   }
   ```
 
-#### 2. Login User (`POST /users/login`)
+#### 2. Register Gate Operator (`POST /users/register/gate-operator`)
+- **Auth**: Bearer Token (Role: `ORGANIZER` - Harus pemilik event)
+- **Headers**: `Authorization: Bearer <organizer_token>`, `Content-Type: application/json`
+- **Body Request**: Array of `CreateGateOperatorDto` atau Single Object
+  ```json
+  [
+    {
+      "username": "gate_operator_north",
+      "email": "operator_north@example.com",
+      "password": "Password123!",
+      "eventId": "019146a0-7d1e-7abc-9a12-abcdef123456"
+    }
+  ]
+  ```
+- **Response 201 Created**:
+  ```json
+  {
+    "message": "Success",
+    "data": [
+      {
+        "id": "019146a0-7d1e-7abc-9a12-gateop000001",
+        "username": "gate_operator_north",
+        "email": "operator_north@example.com",
+        "role": "GATE_OPERATOR",
+        "eventId": "019146a0-7d1e-7abc-9a12-abcdef123456",
+        "createdAt": "2026-08-12T10:00:00.000Z",
+        "updatedAt": "2026-08-12T10:00:00.000Z"
+      }
+    ]
+  }
+  ```
+
+#### 3. Login User (`POST /users/login`)
 - **Body Request**:
   ```json
   {

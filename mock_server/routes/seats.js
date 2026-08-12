@@ -35,7 +35,7 @@ module.exports = function (db) {
     });
   });
 
-  // 2. POST /seats/bulk (Role: ORGANIZER)
+  // 2. POST /seats/bulk (Role: ORGANIZER - Only event owner)
   router.post('/bulk', (req, res) => {
     const user = getUserFromToken(req, db);
     if (!user || user.role !== 'ORGANIZER') {
@@ -66,6 +66,13 @@ module.exports = function (db) {
       return res.status(404).json({
         status_code: 404,
         message: 'Event associated with this category not found'
+      });
+    }
+
+    if (event.organizerId !== user.id) {
+      return res.status(403).json({
+        status_code: 403,
+        message: 'Forbidden: You do not own the event associated with this category'
       });
     }
 
@@ -118,13 +125,29 @@ module.exports = function (db) {
     });
   });
 
-  // 3. DELETE /seats/category/:categoryId (Role: ORGANIZER)
+  // 3. DELETE /seats/category/:categoryId (Role: ORGANIZER - Only event owner)
   router.delete('/category/:categoryId', (req, res) => {
     const user = getUserFromToken(req, db);
     if (!user || user.role !== 'ORGANIZER') {
       return res.status(403).json({
         status_code: 403,
         message: 'Forbidden'
+      });
+    }
+
+    const category = db.categories.find(c => c.id === req.params.categoryId);
+    if (!category) {
+      return res.status(404).json({
+        status_code: 404,
+        message: 'Ticket category not found'
+      });
+    }
+
+    const event = db.events.find(e => e.id === category.eventId);
+    if (!event || event.organizerId !== user.id) {
+      return res.status(403).json({
+        status_code: 403,
+        message: 'Forbidden: You do not own the event associated with this category'
       });
     }
 
