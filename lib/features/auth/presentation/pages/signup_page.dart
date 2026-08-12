@@ -59,12 +59,15 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const SizedBox(height: 60),
                     _buildLogo(isDarkMode),
                     const SizedBox(height: 24),
                     _buildTitle(isDarkMode),
                     const SizedBox(height: 8),
                     _buildSubtitle(isDarkMode),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
+                    _buildRoleSelector(authState, authNotifier, isDarkMode),
+                    const SizedBox(height: 20),
                     _buildUsernameField(authState, authNotifier),
                     const SizedBox(height: 16),
                     _buildEmailField(authState, authNotifier),
@@ -75,11 +78,8 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                     const SizedBox(height: 24),
                     _buildCreateAccountButton(authState, authNotifier),
                     const SizedBox(height: 24),
-                    _buildDivider(),
-                    const SizedBox(height: 24),
-                    _buildGoogleButton(isDarkMode),
-                    const SizedBox(height: 24),
                     _buildLoginLink(),
+                    const SizedBox(height: 40),
                   ],
                 ),
               ),
@@ -156,6 +156,81 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     return Text(
       'Create an account to start discovering events.',
       style: AppTextStyles.subtitle.copyWith(color: AppColors.grey),
+    );
+  }
+
+  Widget _buildRoleSelector(
+    AuthState state,
+    AuthNotifier notifier,
+    bool isDarkMode,
+  ) {
+    final isCustomer = state.role == 'CUSTOMER';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Register As',
+          style: AppTextStyles.bodyMedium.copyWith(
+            fontWeight: FontWeight.w600,
+            color: isDarkMode ? AppColors.white : AppColors.black,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          height: 48,
+          decoration: BoxDecoration(
+            color: isDarkMode ? Colors.grey[900] : Colors.grey[200],
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => notifier.setRole('CUSTOMER'),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isCustomer
+                          ? AppColors.primary
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      'Customer',
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: isCustomer ? AppColors.white : AppColors.grey,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => notifier.setRole('ORGANIZER'),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: !isCustomer
+                          ? AppColors.primary
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      'Event Organizer',
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: !isCustomer ? AppColors.white : AppColors.grey,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -244,52 +319,6 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     );
   }
 
-  Widget _buildDivider() {
-    return Row(
-      children: [
-        const Expanded(child: Divider(color: AppColors.greyLight)),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Text(
-            'or continue with',
-            style: AppTextStyles.bodySmall.copyWith(color: AppColors.grey),
-          ),
-        ),
-        const Expanded(child: Divider(color: AppColors.greyLight)),
-      ],
-    );
-  }
-
-  Widget _buildGoogleButton(bool isDarkMode) {
-    return SizedBox(
-      width: double.infinity,
-      height: 52,
-      child: OutlinedButton(
-        onPressed: () {},
-        style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: AppColors.greyLight),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.g_mobiledata, size: 28, color: AppColors.primary),
-            const SizedBox(width: 8),
-            Text(
-              'Sign Up with Google',
-              style: AppTextStyles.bodyMedium.copyWith(
-                fontWeight: FontWeight.w500,
-                color: isDarkMode ? AppColors.white : AppColors.black,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildLoginLink() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -319,12 +348,13 @@ class _SignupPageState extends ConsumerState<SignupPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Registration successful!',
+              'Registration successful! Please sign in.',
               style: AppTextStyles.snackbar,
             ),
             backgroundColor: Colors.green,
           ),
         );
+        Navigator.pop(context);
       } else if (mounted) {
         final currentState = ref.read(authProvider);
         if (currentState.error != null) {

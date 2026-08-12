@@ -13,7 +13,6 @@ class LoginPage extends ConsumerStatefulWidget {
   ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-// trigger CI workflow check
 class _LoginPageState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
@@ -100,10 +99,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       _buildForgotPassword(),
                       const SizedBox(height: 24),
                       _buildSignInButton(authState, authNotifier),
-                      const SizedBox(height: 24),
-                      _buildDivider(),
-                      const SizedBox(height: 24),
-                      _buildGoogleButton(isDarkMode),
                       const SizedBox(height: 24),
                       _buildSignUpLink(),
                     ],
@@ -237,52 +232,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ),
               )
             : Text('Sign In', style: AppTextStyles.button),
-      ),
-    );
-  }
-
-  Widget _buildDivider() {
-    return Row(
-      children: [
-        const Expanded(child: Divider(color: AppColors.greyLight)),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Text(
-            'or continue with',
-            style: AppTextStyles.bodySmall.copyWith(color: AppColors.grey),
-          ),
-        ),
-        const Expanded(child: Divider(color: AppColors.greyLight)),
-      ],
-    );
-  }
-
-  Widget _buildGoogleButton(bool isDarkMode) {
-    return SizedBox(
-      width: double.infinity,
-      height: 52,
-      child: OutlinedButton(
-        onPressed: () {},
-        style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: AppColors.greyLight),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.g_mobiledata, size: 28, color: AppColors.primary),
-            const SizedBox(width: 8),
-            Text(
-              'Sign in with Google',
-              style: AppTextStyles.bodyMedium.copyWith(
-                fontWeight: FontWeight.w500,
-                color: isDarkMode ? AppColors.white : AppColors.black,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

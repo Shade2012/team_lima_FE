@@ -2,17 +2,28 @@ class RegisterRequest {
   final String username;
   final String email;
   final String password;
-  final String confirmPassword;
+  final String role;
+  final String? eventId;
 
   RegisterRequest({
     required this.username,
     required this.email,
     required this.password,
-    required this.confirmPassword,
+    this.role = 'CUSTOMER',
+    this.eventId,
   });
 
   Map<String, dynamic> toJson() {
-    return {'username': username, 'email': email, 'password': password};
+    final map = <String, dynamic>{
+      'username': username,
+      'email': email,
+      'password': password,
+      'role': role,
+    };
+    if (eventId != null && eventId!.isNotEmpty) {
+      map['eventId'] = eventId;
+    }
+    return map;
   }
 
   factory RegisterRequest.fromJson(Map<String, dynamic> json) {
@@ -20,7 +31,8 @@ class RegisterRequest {
       username: json['username'] ?? '',
       email: json['email'] ?? '',
       password: json['password'] ?? '',
-      confirmPassword: json['confirmPassword'] ?? '',
+      role: json['role'] ?? 'CUSTOMER',
+      eventId: json['eventId'],
     );
   }
 }
