@@ -24,7 +24,7 @@ class MockInterceptor extends Interceptor {
           statusCode: 200,
           data: {
             "message": "Success",
-            "data": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock_token_flutter"
+            "data": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock_token_flutter",
           },
         ),
       );
@@ -48,12 +48,13 @@ class MockInterceptor extends Interceptor {
                 "salesEndTime": "2026-09-15T23:59:59.000Z",
                 "eventDate": "2026-10-01T19:00:00.000Z",
                 "refundEndDate": "2026-09-25T23:59:59.000Z",
-                "refundPolicy": "Refund dapat diajukan maksimal 7 hari sebelum event.",
+                "refundPolicy":
+                    "Refund dapat diajukan maksimal 7 hari sebelum event.",
                 "refundPercentage": 80,
                 "createdAt": "2026-08-12T10:00:00.000Z",
-                "updatedAt": "2026-08-12T10:00:00.000Z"
-              }
-            ]
+                "updatedAt": "2026-08-12T10:00:00.000Z",
+              },
+            ],
           },
         ),
       );

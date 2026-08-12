@@ -26,12 +26,14 @@ class ApiConstants {
 
   // Feature: Ticket Category (/ticket-categories)
   static const String ticketCategories = '/ticket-categories';
-  static String categoriesByEvent(String eventId) => '/ticket-categories/event/$eventId';
+  static String categoriesByEvent(String eventId) =>
+      '/ticket-categories/event/$eventId';
   static String categoryDetail(String id) => '/ticket-categories/$id';
 
   // Feature: Seat Management (/seats)
   static const String bulkSeats = '/seats/bulk';
-  static String seatsByCategory(String categoryId) => '/seats/category/$categoryId';
+  static String seatsByCategory(String categoryId) =>
+      '/seats/category/$categoryId';
 
   // Feature: Gate Management (/gates)
   static const String gates = '/gates';
