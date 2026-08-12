@@ -159,7 +159,11 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     );
   }
 
-  Widget _buildRoleSelector(AuthState state, AuthNotifier notifier, bool isDarkMode) {
+  Widget _buildRoleSelector(
+    AuthState state,
+    AuthNotifier notifier,
+    bool isDarkMode,
+  ) {
     final isCustomer = state.role == 'CUSTOMER';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -186,7 +190,9 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   onTap: () => notifier.setRole('CUSTOMER'),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: isCustomer ? AppColors.primary : Colors.transparent,
+                      color: isCustomer
+                          ? AppColors.primary
+                          : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     alignment: Alignment.center,
@@ -205,7 +211,9 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   onTap: () => notifier.setRole('ORGANIZER'),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: !isCustomer ? AppColors.primary : Colors.transparent,
+                      color: !isCustomer
+                          ? AppColors.primary
+                          : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     alignment: Alignment.center,

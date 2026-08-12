@@ -128,10 +128,7 @@ class AuthNotifier extends Notifier<AuthState> {
   void reset() {
     final currentToken = state.isAuthenticated;
     final currentUser = state.currentUser;
-    state = AuthState(
-      isAuthenticated: currentToken,
-      currentUser: currentUser,
-    );
+    state = AuthState(isAuthenticated: currentToken, currentUser: currentUser);
   }
 
   /// Auto-login check on app initialization
@@ -141,10 +138,7 @@ class AuthNotifier extends Notifier<AuthState> {
       final token = await authRepository.initToken();
       if (token != null && token.isNotEmpty) {
         final profile = await authRepository.getProfile();
-        state = state.copyWith(
-          isAuthenticated: true,
-          currentUser: profile,
-        );
+        state = state.copyWith(isAuthenticated: true, currentUser: profile);
       }
     } catch (_) {
       // Token expired or invalid, reset
@@ -167,7 +161,7 @@ class AuthNotifier extends Notifier<AuthState> {
         password: state.password,
       );
       final response = await authRepository.login(request);
-      
+
       // Fetch user profile after successful login
       UserModel? profile;
       try {
@@ -214,10 +208,7 @@ class AuthNotifier extends Notifier<AuthState> {
         eventId: state.eventId,
       );
       final response = await authRepository.register(request);
-      state = state.copyWith(
-        isLoading: false,
-        registerResponse: response,
-      );
+      state = state.copyWith(isLoading: false, registerResponse: response);
       return true;
     } catch (e) {
       final cleanMessage = e.toString().replaceAll('Exception: ', '');

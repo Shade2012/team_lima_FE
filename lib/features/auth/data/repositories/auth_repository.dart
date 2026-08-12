@@ -77,7 +77,9 @@ class AuthRepository {
       final data = response.data['data'];
       return UserModel.fromJson(data);
     } on DioException catch (e) {
-      throw Exception(_extractErrorMessage(e, fallback: 'Failed to fetch user profile'));
+      throw Exception(
+        _extractErrorMessage(e, fallback: 'Failed to fetch user profile'),
+      );
     }
   }
 
@@ -107,7 +109,9 @@ class AuthRepository {
       );
       return UserModel.fromJson(response.data['data']);
     } on DioException catch (e) {
-      throw Exception(_extractErrorMessage(e, fallback: 'Update profile failed'));
+      throw Exception(
+        _extractErrorMessage(e, fallback: 'Update profile failed'),
+      );
     }
   }
 
@@ -118,7 +122,9 @@ class AuthRepository {
       await clearToken();
       return response.data['data'] == true;
     } on DioException catch (e) {
-      throw Exception(_extractErrorMessage(e, fallback: 'Delete account failed'));
+      throw Exception(
+        _extractErrorMessage(e, fallback: 'Delete account failed'),
+      );
     }
   }
 
