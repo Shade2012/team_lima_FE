@@ -36,9 +36,9 @@ function getUserFromToken(req, db) {
 }
 
 module.exports = function (db) {
-  // 1. POST /users/register
+  // 1. POST /users/register (Public: CUSTOMER & ORGANIZER)
   router.post('/register', (req, res) => {
-    const { username, email, password, role, eventId } = req.body;
+    const { username, email, password, role } = req.body;
 
     if (!username || !email || !password || !role) {
       return res.status(400).json({
@@ -47,10 +47,17 @@ module.exports = function (db) {
       });
     }
 
-    if (role === 'GATE_OPERATOR' && !eventId) {
+    if (role === 'GATE_OPERATOR') {
       return res.status(400).json({
         status_code: 400,
-        message: 'eventId is required for GATE_OPERATOR role'
+        message: 'GATE_OPERATOR role is not allowed via public register. Use POST /users/register/gate-operator'
+      });
+    }
+
+    if (role !== 'CUSTOMER' && role !== 'ORGANIZER') {
+      return res.status(400).json({
+        status_code: 400,
+        message: 'Role must be either CUSTOMER or ORGANIZER'
       });
     }
 
@@ -68,7 +75,6 @@ module.exports = function (db) {
       email,
       password,
       role,
-      eventId: role === 'GATE_OPERATOR' ? eventId : undefined,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -79,6 +85,87 @@ module.exports = function (db) {
     return res.status(201).json({
       message: 'Success',
       data: userResponse
+    });
+  });
+
+  // 2. POST /users/register/gate-operator (Organizer Only)
+  router.post('/register/gate-operator', (req, res) => {
+    const user = getUserFromToken(req, db);
+    if (!user || user.role !== 'ORGANIZER') {
+      return res.status(403).json({
+        status_code: 403,
+        message: 'Forbidden: Only ORGANIZER role can register gate operators'
+      });
+    }
+
+    const inputData = req.body;
+    const isArray = Array.isArray(inputData);
+    const items = isArray ? inputData : [inputData];
+
+    if (items.length === 0) {
+      return res.status(400).json({
+        status_code: 400,
+        message: 'Request body must contain at least one Gate Operator object'
+      });
+    }
+
+    // Validate all items first
+    for (const item of items) {
+      const { username, email, password, eventId } = item || {};
+      if (!username || !email || !password || !eventId) {
+        return res.status(400).json({
+          status_code: 400,
+          message: 'username, email, password, and eventId are required for each gate operator'
+        });
+      }
+
+      const event = db.events.find(e => e.id === eventId);
+      if (!event) {
+        return res.status(404).json({
+          status_code: 404,
+          message: `Event with ID ${eventId} not found`
+        });
+      }
+
+      if (event.organizerId !== user.id) {
+        return res.status(403).json({
+          status_code: 403,
+          message: `Event with ID ${eventId} does not belong to logged-in organizer`
+        });
+      }
+
+      const existing = db.users.find(u => u.email === email || u.username === username);
+      if (existing) {
+        return res.status(409).json({
+          status_code: 409,
+          message: `User with email ${email} or username ${username} already registered`
+        });
+      }
+    }
+
+    // Create operators
+    const createdResponses = [];
+    for (const item of items) {
+      const { username, email, password, eventId } = item;
+      const newOperator = {
+        id: generateUuid(),
+        username,
+        email,
+        password,
+        role: 'GATE_OPERATOR',
+        eventId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      db.users.push(newOperator);
+      const { password: _, ...opResponse } = newOperator;
+      createdResponses.push(opResponse);
+    }
+
+    return res.status(201).json({
+      message: 'Success',
+      data: isArray ? createdResponses : createdResponses[0]
     });
   });
 
