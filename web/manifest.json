@@ -1,0 +1,11 @@
+{
+    "name": "Deep Sound",
+    "short_name": "Deep Sound",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#000000",
+    "theme_color": "#AF06FF",
+    "description": "Deep Sound Event App",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false
+}

@@ -7,8 +7,13 @@ import 'package:team_five_fe/features/auth/presentation/pages/login_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Inisialisasi Firebase dari branch develop
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Inisialisasi Firebase (dengan try-catch agar aman untuk platform desktop/web)
+  try {
+    await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform);
+  } catch (e) {
+    debugPrint('Firebase initializeApp bypassed: $e');
+  }
 
   runApp(const ProviderScope(child: MainApp()));
 }
