@@ -10,7 +10,8 @@ void main() async {
   // Inisialisasi Firebase (dengan try-catch agar aman untuk platform desktop/web)
   try {
     await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform);
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
   } catch (e) {
     debugPrint('Firebase initializeApp bypassed: $e');
   }
