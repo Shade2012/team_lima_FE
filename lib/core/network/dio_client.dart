@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../constants/api_constants.dart';
+import 'mock_interceptor.dart';
 
 class DioClient {
   static final DioClient _instance = DioClient._();
@@ -22,11 +23,16 @@ class DioClient {
       ),
     );
 
+    // Optional mock interceptor (disabled by default, uses Node.js mock server at baseUrl)
+    _dio.interceptors.add(MockInterceptor(enabled: false));
+
     _dio.interceptors.add(
       LogInterceptor(
         request: true,
+        requestHeader: true,
         requestBody: true,
         responseBody: true,
+        responseHeader: false,
         error: true,
       ),
     );
