@@ -5,6 +5,11 @@ on:
     branches:
       - master
       - develop
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+      - 'docs/**'
+      - 'mock_server/**'
 
 jobs:
   quality_check:

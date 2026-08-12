@@ -1,0 +1,92 @@
+{
+  "users": [
+    {
+      "id": "019146a0-7d1e-7abc-9a12-abcdef123456",
+      "username": "john_doe",
+      "email": "john@example.com",
+      "password": "Password123!",
+      "role": "CUSTOMER",
+      "createdAt": "2026-08-12T10:00:00.000Z",
+      "updatedAt": "2026-08-12T10:00:00.000Z"
+    },
+    {
+      "id": "019146a0-0000-7abc-0000-abcdef000001",
+      "username": "organizer_one",
+      "email": "organizer@example.com",
+      "password": "Password123!",
+      "role": "ORGANIZER",
+      "createdAt": "2026-08-12T10:00:00.000Z",
+      "updatedAt": "2026-08-12T10:00:00.000Z"
+    },
+    {
+      "id": "019146a0-0000-7abc-0000-abcdef000002",
+      "username": "gate_operator_north",
+      "email": "gateop@example.com",
+      "password": "Password123!",
+      "role": "GATE_OPERATOR",
+      "eventId": "019146a0-7d1e-7abc-9a12-abcdef123456",
+      "createdAt": "2026-08-12T10:00:00.000Z",
+      "updatedAt": "2026-08-12T10:00:00.000Z"
+    }
+  ],
+  "events": [
+    {
+      "id": "019146a0-7d1e-7abc-9a12-abcdef123456",
+      "organizerId": "019146a0-0000-7abc-0000-abcdef000001",
+      "name": "Konser Sheila On 7 Jakarta 2026",
+      "isSeated": true,
+      "salesStartTime": "2026-09-01T10:00:00.000Z",
+      "salesEndTime": "2026-09-15T23:59:59.000Z",
+      "eventDate": "2026-10-01T19:00:00.000Z",
+      "refundEndDate": "2026-09-25T23:59:59.000Z",
+      "refundPolicy": "Refund dapat diajukan maksimal 7 hari sebelum event.",
+      "refundPercentage": 80,
+      "createdAt": "2026-08-12T10:00:00.000Z",
+      "updatedAt": "2026-08-12T10:00:00.000Z"
+    }
+  ],
+  "categories": [
+    {
+      "id": "019146a0-7d1e-7abc-9a12-category0001",
+      "eventId": "019146a0-7d1e-7abc-9a12-abcdef123456",
+      "name": "VIP Front Row",
+      "price": 1500000,
+      "totalQuota": 100,
+      "createdAt": "2026-08-12T10:00:00.000Z",
+      "updatedAt": "2026-08-12T10:00:00.000Z"
+    },
+    {
+      "id": "019146a0-7d1e-7abc-9a12-category0002",
+      "eventId": "019146a0-7d1e-7abc-9a12-abcdef123456",
+      "name": "Festival General Standing",
+      "price": 750000,
+      "totalQuota": 500,
+      "createdAt": "2026-08-12T10:00:00.000Z",
+      "updatedAt": "2026-08-12T10:00:00.000Z"
+    }
+  ],
+  "seats": [
+    {
+      "id": "019146a0-7d1e-7abc-9a12-seat00000001",
+      "categoryId": "019146a0-7d1e-7abc-9a12-category0001",
+      "seatCode": "VIP-001",
+      "createdAt": "2026-08-12T10:00:00.000Z"
+    },
+    {
+      "id": "019146a0-7d1e-7abc-9a12-seat00000002",
+      "categoryId": "019146a0-7d1e-7abc-9a12-category0001",
+      "seatCode": "VIP-002",
+      "createdAt": "2026-08-12T10:00:00.000Z"
+    }
+  ],
+  "gates": [
+    {
+      "id": "019146a0-7d1e-7abc-9a12-gate00000001",
+      "eventId": "019146a0-7d1e-7abc-9a12-abcdef123456",
+      "name": "Gate Utama Utara",
+      "createdAt": "2026-08-12T10:00:00.000Z",
+      "updatedAt": "2026-08-12T10:00:00.000Z"
+    }
+  ],
+  "blacklistedTokens": []
+}
