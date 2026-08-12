@@ -3,6 +3,7 @@ class UserModel {
   final String email;
   final String username;
   final String? role;
+  final String? eventId;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -11,21 +12,23 @@ class UserModel {
     required this.email,
     required this.username,
     this.role,
+    this.eventId,
     this.createdAt,
     this.updatedAt,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'] ?? '',
-      email: json['email'] ?? '',
-      username: json['username'] ?? '',
-      role: json['role'],
+      id: json['id']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
+      username: json['username']?.toString() ?? '',
+      role: json['role']?.toString(),
+      eventId: json['eventId']?.toString(),
       createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'])
+          ? DateTime.tryParse(json['createdAt'].toString())
           : null,
       updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'])
+          ? DateTime.tryParse(json['updatedAt'].toString())
           : null,
     );
   }
@@ -36,6 +39,7 @@ class UserModel {
       'email': email,
       'username': username,
       'role': role,
+      if (eventId != null) 'eventId': eventId,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
     };
