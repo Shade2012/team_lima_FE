@@ -26,8 +26,10 @@ class CreateEventRequest {
       'salesStartTime': salesStartTime.toIso8601String(),
       'salesEndTime': salesEndTime.toIso8601String(),
       'eventDate': eventDate.toIso8601String(),
-      if (refundEndDate != null) 'refundEndDate': refundEndDate!.toIso8601String(),
-      if (refundPolicy != null && refundPolicy!.isNotEmpty) 'refundPolicy': refundPolicy,
+      if (refundEndDate != null)
+        'refundEndDate': refundEndDate!.toIso8601String(),
+      if (refundPolicy != null && refundPolicy!.isNotEmpty)
+        'refundPolicy': refundPolicy,
       if (refundPercentage != null) 'refundPercentage': refundPercentage,
     };
   }

@@ -15,7 +15,9 @@ class EventRepository {
       final data = response.data['data'] as List;
       return data.map((e) => Event.fromJson(e)).toList();
     } on DioException catch (e) {
-      throw Exception(_extractErrorMessage(e, fallback: 'Failed to fetch events'));
+      throw Exception(
+        _extractErrorMessage(e, fallback: 'Failed to fetch events'),
+      );
     }
   }
 
@@ -25,7 +27,9 @@ class EventRepository {
       final response = await _dioClient.dio.get(ApiConstants.eventDetail(id));
       return Event.fromJson(response.data['data']);
     } on DioException catch (e) {
-      throw Exception(_extractErrorMessage(e, fallback: 'Failed to fetch event detail'));
+      throw Exception(
+        _extractErrorMessage(e, fallback: 'Failed to fetch event detail'),
+      );
     }
   }
 
@@ -38,7 +42,9 @@ class EventRepository {
       );
       return Event.fromJson(response.data['data']);
     } on DioException catch (e) {
-      throw Exception(_extractErrorMessage(e, fallback: 'Failed to create event'));
+      throw Exception(
+        _extractErrorMessage(e, fallback: 'Failed to create event'),
+      );
     }
   }
 
@@ -51,7 +57,9 @@ class EventRepository {
       );
       return Event.fromJson(response.data['data']);
     } on DioException catch (e) {
-      throw Exception(_extractErrorMessage(e, fallback: 'Failed to update event'));
+      throw Exception(
+        _extractErrorMessage(e, fallback: 'Failed to update event'),
+      );
     }
   }
 
@@ -60,7 +68,9 @@ class EventRepository {
     try {
       await _dioClient.dio.delete(ApiConstants.eventDetail(id));
     } on DioException catch (e) {
-      throw Exception(_extractErrorMessage(e, fallback: 'Failed to delete event'));
+      throw Exception(
+        _extractErrorMessage(e, fallback: 'Failed to delete event'),
+      );
     }
   }
 
