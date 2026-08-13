@@ -83,7 +83,7 @@ module.exports = function (db) {
     });
   });
 
-  // 3. PATCH /gates/:id (Role: ORGANIZER)
+  // 3. PATCH /gates/:id (Role: ORGANIZER - Only event owner)
   router.patch('/:id', (req, res) => {
     const user = getUserFromToken(req, db);
     if (!user || user.role !== 'ORGANIZER') {
@@ -101,6 +101,14 @@ module.exports = function (db) {
       });
     }
 
+    const event = db.events.find(e => e.id === gate.eventId);
+    if (!event || event.organizerId !== user.id) {
+      return res.status(403).json({
+        status_code: 403,
+        message: 'Forbidden: You do not own the event associated with this gate'
+      });
+    }
+
     if (req.body.name) gate.name = req.body.name;
     gate.updatedAt = new Date().toISOString();
 
@@ -110,7 +118,7 @@ module.exports = function (db) {
     });
   });
 
-  // 4. DELETE /gates/:id (Role: ORGANIZER)
+  // 4. DELETE /gates/:id (Role: ORGANIZER - Only event owner)
   router.delete('/:id', (req, res) => {
     const user = getUserFromToken(req, db);
     if (!user || user.role !== 'ORGANIZER') {
@@ -125,6 +133,23 @@ module.exports = function (db) {
       return res.status(404).json({
         status_code: 404,
         message: 'Gate not found'
+      });
+    }
+
+    const gate = db.gates[index];
+    const event = db.events.find(e => e.id === gate.eventId);
+    if (!event || event.organizerId !== user.id) {
+      return res.status(403).json({
+        status_code: 403,
+        message: 'Forbidden: You do not own the event associated with this gate'
+      });
+    }
+
+    const hasAdmissionScans = (db.admissionScans || []).some(scan => scan.gateId === gate.id);
+    if (hasAdmissionScans) {
+      return res.status(400).json({
+        status_code: 400,
+        message: 'Cannot delete Gate with existing admission scan history'
       });
     }
 

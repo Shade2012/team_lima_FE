@@ -18,6 +18,7 @@ let db = {
   categories: [],
   seats: [],
   gates: [],
+  admissionScans: [],
   blacklistedTokens: []
 };
 
