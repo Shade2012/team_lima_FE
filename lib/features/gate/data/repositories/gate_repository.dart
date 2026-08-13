@@ -82,10 +82,7 @@ class GateRepository {
       return [UserModel.fromJson(data)];
     } on DioException catch (e) {
       throw Exception(
-        _extractErrorMessage(
-          e,
-          fallback: 'Failed to register gate operator',
-        ),
+        _extractErrorMessage(e, fallback: 'Failed to register gate operator'),
       );
     }
   }

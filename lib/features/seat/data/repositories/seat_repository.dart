@@ -42,38 +42,52 @@ class SeatRepository {
       );
       return BulkSeatsResponse.fromJson(response.data['data']);
     } on DioException catch (e) {
-      throw Exception(_extractErrorMessage(e, fallback: 'Failed to generate seats'));
+      throw Exception(
+        _extractErrorMessage(e, fallback: 'Failed to generate seats'),
+      );
     }
   }
 
   /// GET /seats/category/:categoryId
   Future<int> getSeatsCountByCategory(String categoryId) async {
     try {
-      final response = await _dioClient.dio.get(ApiConstants.seatsByCategory(categoryId));
+      final response = await _dioClient.dio.get(
+        ApiConstants.seatsByCategory(categoryId),
+      );
       final data = response.data['data'] as List;
       return data.length;
     } on DioException catch (e) {
-      throw Exception(_extractErrorMessage(e, fallback: 'Failed to fetch seats'));
+      throw Exception(
+        _extractErrorMessage(e, fallback: 'Failed to fetch seats'),
+      );
     }
   }
 
   /// GET /seats/category/:categoryId (returns full seat list)
   Future<List<Seat>> getSeatsByCategory(String categoryId) async {
     try {
-      final response = await _dioClient.dio.get(ApiConstants.seatsByCategory(categoryId));
+      final response = await _dioClient.dio.get(
+        ApiConstants.seatsByCategory(categoryId),
+      );
       final data = response.data['data'] as List;
       return data.map((e) => Seat.fromJson(e)).toList();
     } on DioException catch (e) {
-      throw Exception(_extractErrorMessage(e, fallback: 'Failed to fetch seats'));
+      throw Exception(
+        _extractErrorMessage(e, fallback: 'Failed to fetch seats'),
+      );
     }
   }
 
   /// DELETE /seats/category/:categoryId
   Future<void> deleteSeatsByCategory(String categoryId) async {
     try {
-      await _dioClient.dio.delete(ApiConstants.deleteSeatsByCategory(categoryId));
+      await _dioClient.dio.delete(
+        ApiConstants.deleteSeatsByCategory(categoryId),
+      );
     } on DioException catch (e) {
-      throw Exception(_extractErrorMessage(e, fallback: 'Failed to delete seats'));
+      throw Exception(
+        _extractErrorMessage(e, fallback: 'Failed to delete seats'),
+      );
     }
   }
 

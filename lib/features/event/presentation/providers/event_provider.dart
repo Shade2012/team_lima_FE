@@ -159,7 +159,11 @@ class CreateEventNotifier extends Notifier<CreateEventState> {
     try {
       final repository = ref.read(eventRepositoryProvider);
       final event = await repository.createEvent(request);
-      state = state.copyWith(isLoading: false, isSuccess: true, createdEvent: event);
+      state = state.copyWith(
+        isLoading: false,
+        isSuccess: true,
+        createdEvent: event,
+      );
       ref.read(myEventsProvider.notifier).loadMyEvents();
       return true;
     } catch (e) {

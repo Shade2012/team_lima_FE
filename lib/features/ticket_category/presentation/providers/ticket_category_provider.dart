@@ -5,7 +5,9 @@ import '../../data/repositories/ticket_category_repository.dart';
 import '../../../seat/data/models/bulk_seats_request.dart';
 import '../../../seat/presentation/providers/seat_provider.dart';
 
-final ticketCategoryRepositoryProvider = Provider<TicketCategoryRepository>((ref) {
+final ticketCategoryRepositoryProvider = Provider<TicketCategoryRepository>((
+  ref,
+) {
   return TicketCategoryRepository();
 });
 
@@ -16,7 +18,11 @@ class CategoriesState {
   final bool isLoading;
   final String? error;
 
-  CategoriesState({this.categories = const [], this.isLoading = false, this.error});
+  CategoriesState({
+    this.categories = const [],
+    this.isLoading = false,
+    this.error,
+  });
 
   CategoriesState copyWith({
     List<TicketCategory>? categories,
@@ -59,7 +65,10 @@ class CategoriesNotifier extends Notifier<CategoriesState> {
     }
   }
 
-  Future<bool> createCategory(CreateTicketCategoryRequest request, {required bool isSeated}) async {
+  Future<bool> createCategory(
+    CreateTicketCategoryRequest request, {
+    required bool isSeated,
+  }) async {
     state = state.copyWith(error: null);
     try {
       final repository = ref.read(ticketCategoryRepositoryProvider);
@@ -69,18 +78,15 @@ class CategoriesNotifier extends Notifier<CategoriesState> {
       if (isSeated) {
         final prefix = request.name.split(' ').first.toUpperCase();
         final seatRepo = ref.read(seatRepositoryProvider);
-        await seatRepo.bulkGenerateSeats(BulkSeatsRequest(
-          categoryId: category.id,
-          prefix: prefix,
-        ));
+        await seatRepo.bulkGenerateSeats(
+          BulkSeatsRequest(categoryId: category.id, prefix: prefix),
+        );
         ref.read(seatsCountProvider.notifier).loadSeatsCount(category.id);
       }
 
       return true;
     } catch (e) {
-      state = state.copyWith(
-        error: e.toString().replaceAll('Exception: ', ''),
-      );
+      state = state.copyWith(error: e.toString().replaceAll('Exception: ', ''));
       return false;
     }
   }
@@ -95,14 +101,13 @@ class CategoriesNotifier extends Notifier<CategoriesState> {
       );
       return true;
     } catch (e) {
-      state = state.copyWith(
-        error: e.toString().replaceAll('Exception: ', ''),
-      );
+      state = state.copyWith(error: e.toString().replaceAll('Exception: ', ''));
       return false;
     }
   }
 }
 
-final categoriesProvider = NotifierProvider<CategoriesNotifier, CategoriesState>(() {
-  return CategoriesNotifier();
-});
+final categoriesProvider =
+    NotifierProvider<CategoriesNotifier, CategoriesState>(() {
+      return CategoriesNotifier();
+    });

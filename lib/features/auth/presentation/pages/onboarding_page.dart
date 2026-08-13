@@ -280,5 +280,9 @@ class _OnboardingData {
   final String title;
   final String description;
 
-  const _OnboardingData({required this.gif, required this.title, required this.description});
+  const _OnboardingData({
+    required this.gif,
+    required this.title,
+    required this.description,
+  });
 }

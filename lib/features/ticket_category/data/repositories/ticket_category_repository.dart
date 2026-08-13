@@ -10,16 +10,22 @@ class TicketCategoryRepository {
   /// GET /ticket-categories/event/:eventId
   Future<List<TicketCategory>> getCategoriesByEvent(String eventId) async {
     try {
-      final response = await _dioClient.dio.get(ApiConstants.categoriesByEvent(eventId));
+      final response = await _dioClient.dio.get(
+        ApiConstants.categoriesByEvent(eventId),
+      );
       final data = response.data['data'] as List;
       return data.map((e) => TicketCategory.fromJson(e)).toList();
     } on DioException catch (e) {
-      throw Exception(_extractErrorMessage(e, fallback: 'Failed to fetch categories'));
+      throw Exception(
+        _extractErrorMessage(e, fallback: 'Failed to fetch categories'),
+      );
     }
   }
 
   /// POST /ticket-categories
-  Future<TicketCategory> createCategory(CreateTicketCategoryRequest request) async {
+  Future<TicketCategory> createCategory(
+    CreateTicketCategoryRequest request,
+  ) async {
     try {
       final response = await _dioClient.dio.post(
         ApiConstants.ticketCategories,
@@ -27,7 +33,9 @@ class TicketCategoryRepository {
       );
       return TicketCategory.fromJson(response.data['data']);
     } on DioException catch (e) {
-      throw Exception(_extractErrorMessage(e, fallback: 'Failed to create category'));
+      throw Exception(
+        _extractErrorMessage(e, fallback: 'Failed to create category'),
+      );
     }
   }
 
@@ -36,7 +44,9 @@ class TicketCategoryRepository {
     try {
       await _dioClient.dio.delete(ApiConstants.categoryDetail(id));
     } on DioException catch (e) {
-      throw Exception(_extractErrorMessage(e, fallback: 'Failed to delete category'));
+      throw Exception(
+        _extractErrorMessage(e, fallback: 'Failed to delete category'),
+      );
     }
   }
 

@@ -604,10 +604,7 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage>
     );
   }
 
-  Widget _buildGatesContent({
-    required Event event,
-    required List gates,
-  }) {
+  Widget _buildGatesContent({required Event event, required List gates}) {
     return Column(
       children: [
         // Gates List

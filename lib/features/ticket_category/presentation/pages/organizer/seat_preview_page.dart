@@ -257,10 +257,7 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
                     isVip: i == reversed.length - 1,
                   ),
                   if (i < reversed.length - 1)
-                    Container(
-                      height: 1,
-                      color: AppColors.greyLight,
-                    ),
+                    Container(height: 1, color: AppColors.greyLight),
                 ],
               ],
             ),

@@ -3,11 +3,7 @@ class Seat {
   final String categoryId;
   final String seatCode;
 
-  Seat({
-    required this.id,
-    required this.categoryId,
-    required this.seatCode,
-  });
+  Seat({required this.id, required this.categoryId, required this.seatCode});
 
   factory Seat.fromJson(Map<String, dynamic> json) {
     return Seat(

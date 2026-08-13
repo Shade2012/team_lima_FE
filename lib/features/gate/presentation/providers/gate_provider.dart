@@ -19,11 +19,7 @@ class GatesState {
 
   GatesState({this.gates = const [], this.isLoading = false, this.error});
 
-  GatesState copyWith({
-    List<Gate>? gates,
-    bool? isLoading,
-    String? error,
-  }) {
+  GatesState copyWith({List<Gate>? gates, bool? isLoading, String? error}) {
     return GatesState(
       gates: gates ?? this.gates,
       isLoading: isLoading ?? this.isLoading,
@@ -182,5 +178,5 @@ class GateOperatorNotifier extends Notifier<GateOperatorState> {
 
 final gateOperatorProvider =
     NotifierProvider<GateOperatorNotifier, GateOperatorState>(() {
-  return GateOperatorNotifier();
-});
+      return GateOperatorNotifier();
+    });

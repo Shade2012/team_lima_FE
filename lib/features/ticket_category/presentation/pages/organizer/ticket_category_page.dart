@@ -528,8 +528,9 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                 hintText: 'Category Name (e.g. VIP Front Row)',
                 prefixIcon: Icons.label_outline,
                 validator: (value) {
-                  if (value == null || value.isEmpty)
+                  if (value == null || value.isEmpty) {
                     return 'Category name is required';
+                  }
                   return null;
                 },
               ),
@@ -541,8 +542,9 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                 prefixIcon: Icons.payments_outlined,
                 keyboardType: TextInputType.number,
                 validator: (value) {
-                  if (value == null || value.isEmpty)
+                  if (value == null || value.isEmpty) {
                     return 'Price is required';
+                  }
                   if (int.tryParse(value) == null) return 'Must be a number';
                   if (int.parse(value) < 0) return 'Price cannot be negative';
                   return null;
@@ -556,8 +558,9 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                 prefixIcon: Icons.inventory_2_outlined,
                 keyboardType: TextInputType.number,
                 validator: (value) {
-                  if (value == null || value.isEmpty)
+                  if (value == null || value.isEmpty) {
                     return 'Quota is required';
+                  }
                   if (int.tryParse(value) == null) return 'Must be a number';
                   if (int.parse(value) <= 0) return 'Quota must be at least 1';
                   return null;

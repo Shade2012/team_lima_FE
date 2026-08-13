@@ -48,24 +48,27 @@ class _MyEventsPageState extends ConsumerState<MyEventsPage>
 
   List<Event> _filterEvents(List<Event> events) {
     final now = DateTime.now();
-    return events.where((e) {
-      final isOnSale =
-          now.isAfter(e.salesStartTime) && now.isBefore(e.salesEndTime);
-      final isUpcoming = now.isBefore(e.salesStartTime);
-      final isEnded = now.isAfter(e.salesEndTime);
+    return events
+        .where((e) {
+          final isOnSale =
+              now.isAfter(e.salesStartTime) && now.isBefore(e.salesEndTime);
+          final isUpcoming = now.isBefore(e.salesStartTime);
+          final isEnded = now.isAfter(e.salesEndTime);
 
-      switch (_selectedFilter) {
-        case EventFilter.active:
-          return isOnSale;
-        case EventFilter.upcoming:
-          return isUpcoming;
-        case EventFilter.ended:
-          return isEnded;
-      }
-    }).where((e) {
-      if (_searchQuery.isEmpty) return true;
-      return e.name.toLowerCase().contains(_searchQuery);
-    }).toList();
+          switch (_selectedFilter) {
+            case EventFilter.active:
+              return isOnSale;
+            case EventFilter.upcoming:
+              return isUpcoming;
+            case EventFilter.ended:
+              return isEnded;
+          }
+        })
+        .where((e) {
+          if (_searchQuery.isEmpty) return true;
+          return e.name.toLowerCase().contains(_searchQuery);
+        })
+        .toList();
   }
 
   @override
@@ -367,12 +370,7 @@ class _MyEventsPageState extends ConsumerState<MyEventsPage>
                   _buildEventIcon(event, index, isOnSale, isDraft, isSoldOut),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: _buildEventInfo(
-                      event,
-                      isOnSale,
-                      isDraft,
-                      isSoldOut,
-                    ),
+                    child: _buildEventInfo(event, isOnSale, isDraft, isSoldOut),
                   ),
                 ],
               ),
@@ -412,10 +410,7 @@ class _MyEventsPageState extends ConsumerState<MyEventsPage>
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            AppColors.primary,
-            AppColors.primary.withValues(alpha: 0.8),
-          ],
+          colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.8)],
         ),
         borderRadius: BorderRadius.circular(14),
         boxShadow: [

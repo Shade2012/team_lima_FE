@@ -148,9 +148,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           const SizedBox(height: 4),
           Text(
             user?.email ?? 'No email',
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.grey,
-            ),
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey),
           ),
           const SizedBox(height: 12),
           Container(
@@ -302,7 +300,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
+                const Icon(
+                  Icons.edit_outlined,
+                  size: 18,
+                  color: AppColors.primary,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Edit Profile',
@@ -332,17 +334,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.logout_outlined,
-                  size: 18,
-                  color: AppColors.grey,
-                ),
+                Icon(Icons.logout_outlined, size: 18, color: AppColors.grey),
                 const SizedBox(width: 8),
                 Text(
                   'Logout',
-                  style: AppTextStyles.button.copyWith(
-                    color: AppColors.grey,
-                  ),
+                  style: AppTextStyles.button.copyWith(color: AppColors.grey),
                 ),
               ],
             ),
@@ -363,13 +359,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.delete_outline, size: 18, color: AppColors.danger),
+                const Icon(
+                  Icons.delete_outline,
+                  size: 18,
+                  color: AppColors.danger,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Delete Account',
-                  style: AppTextStyles.button.copyWith(
-                    color: AppColors.danger,
-                  ),
+                  style: AppTextStyles.button.copyWith(color: AppColors.danger),
                 ),
               ],
             ),
@@ -498,7 +496,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ),
                   child: Text(
                     'Save Changes',
-                    style: AppTextStyles.button.copyWith(color: AppColors.white),
+                    style: AppTextStyles.button.copyWith(
+                      color: AppColors.white,
+                    ),
                   ),
                 ),
               ),
@@ -538,7 +538,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            success ? 'Profile updated successfully' : 'Failed to update profile',
+            success
+                ? 'Profile updated successfully'
+                : 'Failed to update profile',
             style: AppTextStyles.snackbar,
           ),
           backgroundColor: success ? AppColors.success : AppColors.danger,
@@ -554,7 +556,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Logout', style: AppTextStyles.title.copyWith(fontSize: 18)),
+        title: Text(
+          'Logout',
+          style: AppTextStyles.title.copyWith(fontSize: 18),
+        ),
         content: Text(
           'Are you sure you want to logout?',
           style: AppTextStyles.bodyMedium,

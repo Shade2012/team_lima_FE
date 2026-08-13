@@ -18,8 +18,12 @@ class TicketCategory {
       id: json['id']?.toString() ?? '',
       eventId: json['eventId']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
-      price: json['price'] is int ? json['price'] : int.tryParse(json['price']?.toString() ?? '') ?? 0,
-      totalQuota: json['totalQuota'] is int ? json['totalQuota'] : int.tryParse(json['totalQuota']?.toString() ?? '') ?? 0,
+      price: json['price'] is int
+          ? json['price']
+          : int.tryParse(json['price']?.toString() ?? '') ?? 0,
+      totalQuota: json['totalQuota'] is int
+          ? json['totalQuota']
+          : int.tryParse(json['totalQuota']?.toString() ?? '') ?? 0,
     );
   }
 

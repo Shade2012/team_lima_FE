@@ -43,7 +43,9 @@ class _EditGatePageState extends ConsumerState<EditGatePage> {
     final gatesState = ref.watch(gatesProvider);
 
     ref.listen<GatesState>(gatesProvider, (prev, next) {
-      if (prev?.isLoading == true && next.isLoading == false && next.error == null) {
+      if (prev?.isLoading == true &&
+          next.isLoading == false &&
+          next.error == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -164,12 +166,8 @@ class _EditGatePageState extends ConsumerState<EditGatePage> {
 
   Future<void> _handleUpdate() async {
     if (_formKey.currentState!.validate()) {
-      final request = UpdateGateRequest(
-        name: _nameController.text.trim(),
-      );
-      await ref
-          .read(gatesProvider.notifier)
-          .updateGate(widget.gateId, request);
+      final request = UpdateGateRequest(name: _nameController.text.trim());
+      await ref.read(gatesProvider.notifier).updateGate(widget.gateId, request);
     }
   }
 }

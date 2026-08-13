@@ -258,8 +258,7 @@ class _EditEventPageState extends ConsumerState<EditEventPage> {
                       _buildDateTimeField(
                         label: 'Event Date',
                         value: _eventDate,
-                        onSelect: (date) =>
-                            setState(() => _eventDate = date),
+                        onSelect: (date) => setState(() => _eventDate = date),
                       ),
                       const SizedBox(height: 12),
                       _buildDateTimeField(
@@ -485,18 +484,14 @@ class _EditEventPageState extends ConsumerState<EditEventPage> {
                 value != null
                     ? _dateFormat.format(value)
                     : (isOptional
-                        ? 'Select date & time'
-                        : 'Select date & time *'),
+                          ? 'Select date & time'
+                          : 'Select date & time *'),
                 style: AppTextStyles.bodyMedium.copyWith(
                   color: value != null ? null : AppColors.grey,
                 ),
               ),
             ),
-            Icon(
-              Icons.chevron_right,
-              size: 20,
-              color: AppColors.grey,
-            ),
+            Icon(Icons.chevron_right, size: 20, color: AppColors.grey),
           ],
         ),
       ),

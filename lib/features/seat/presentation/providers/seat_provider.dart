@@ -66,9 +66,11 @@ class BulkSeatsNotifier extends Notifier<BulkSeatsState> {
   }
 }
 
-final bulkSeatsProvider = NotifierProvider<BulkSeatsNotifier, BulkSeatsState>(() {
-  return BulkSeatsNotifier();
-});
+final bulkSeatsProvider = NotifierProvider<BulkSeatsNotifier, BulkSeatsState>(
+  () {
+    return BulkSeatsNotifier();
+  },
+);
 
 // ==================== Seats Count State ====================
 
@@ -101,9 +103,10 @@ class SeatsCountNotifier extends Notifier<SeatsCountState> {
   }
 }
 
-final seatsCountProvider = NotifierProvider<SeatsCountNotifier, SeatsCountState>(() {
-  return SeatsCountNotifier();
-});
+final seatsCountProvider =
+    NotifierProvider<SeatsCountNotifier, SeatsCountState>(() {
+      return SeatsCountNotifier();
+    });
 
 // ==================== Seats List State (for preview) ====================
 
@@ -112,7 +115,11 @@ class SeatsListState {
   final bool isLoading;
   final String? error;
 
-  SeatsListState({this.seatsByCategory = const {}, this.isLoading = false, this.error});
+  SeatsListState({
+    this.seatsByCategory = const {},
+    this.isLoading = false,
+    this.error,
+  });
 
   SeatsListState copyWith({
     Map<String, List<Seat>>? seatsByCategory,
@@ -151,6 +158,8 @@ class SeatsListNotifier extends Notifier<SeatsListState> {
   }
 }
 
-final seatsListProvider = NotifierProvider<SeatsListNotifier, SeatsListState>(() {
-  return SeatsListNotifier();
-});
+final seatsListProvider = NotifierProvider<SeatsListNotifier, SeatsListState>(
+  () {
+    return SeatsListNotifier();
+  },
+);

@@ -35,7 +35,10 @@ class _CreateGatePageState extends ConsumerState<CreateGatePage> {
     final gatesState = ref.watch(gatesProvider);
 
     ref.listen<GatesState>(gatesProvider, (prev, next) {
-      if (prev?.isLoading == true && next.isLoading == false && next.error == null && mounted) {
+      if (prev?.isLoading == true &&
+          next.isLoading == false &&
+          next.error == null &&
+          mounted) {
         _showSuccessDialog();
       }
     });
@@ -73,11 +76,7 @@ class _CreateGatePageState extends ConsumerState<CreateGatePage> {
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.event,
-                      color: AppColors.primary,
-                      size: 20,
-                    ),
+                    Icon(Icons.event, color: AppColors.primary, size: 20),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -211,11 +210,7 @@ class _CreateGatePageState extends ConsumerState<CreateGatePage> {
                 color: AppColors.success.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.check,
-                color: AppColors.success,
-                size: 24,
-              ),
+              child: Icon(Icons.check, color: AppColors.success, size: 24),
             ),
             const SizedBox(width: 12),
             Text('Success!', style: AppTextStyles.title),
