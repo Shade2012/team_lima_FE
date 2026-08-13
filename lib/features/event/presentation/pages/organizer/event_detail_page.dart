@@ -11,6 +11,8 @@ import 'package:team_five_fe/features/ticket_category/presentation/providers/tic
 import 'package:team_five_fe/features/ticket_category/presentation/pages/organizer/ticket_category_page.dart';
 import 'package:team_five_fe/features/ticket_category/presentation/pages/organizer/seat_preview_page.dart';
 import 'package:team_five_fe/features/seat/presentation/providers/seat_provider.dart';
+import 'package:team_five_fe/features/gate/presentation/providers/gate_provider.dart';
+import 'package:team_five_fe/features/gate/presentation/pages/organizer/gate_management_page.dart';
 
 class EventDetailPage extends ConsumerStatefulWidget {
   final String eventId;
@@ -35,11 +37,12 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         ref.read(eventDetailProvider.notifier).loadEvent(widget.eventId);
         ref.read(categoriesProvider.notifier).setEventId(widget.eventId);
+        ref.read(gatesProvider.notifier).setEventId(widget.eventId);
       }
     });
   }
@@ -276,6 +279,7 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage>
               tabs: const [
                 Tab(text: 'Event'),
                 Tab(text: 'Ticket Category'),
+                Tab(text: 'Gate'),
               ],
             ),
           ),
@@ -283,7 +287,11 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage>
       ],
       body: TabBarView(
         controller: _tabController,
-        children: [_buildDataEventTab(event), _buildTicketCategoryTab(event)],
+        children: [
+          _buildDataEventTab(event),
+          _buildTicketCategoryTab(event),
+          _buildGateTab(event),
+        ],
       ),
     );
   }
@@ -510,6 +518,185 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage>
               categories: categoriesState.categories,
               seatsCountState: seatsCountState,
             ),
+    );
+  }
+
+  // ==================== Tab 3: Gate ====================
+
+  Widget _buildGateTab(Event event) {
+    final gatesState = ref.watch(gatesProvider);
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: gatesState.isLoading
+          ? const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: CircularProgressIndicator(),
+              ),
+            )
+          : gatesState.gates.isEmpty
+          ? _buildEmptyGates(event)
+          : _buildGatesContent(event: event, gates: gatesState.gates),
+    );
+  }
+
+  Widget _buildEmptyGates(Event event) {
+    return Column(
+      children: [
+        const SizedBox(height: 40),
+        Container(
+          width: 64,
+          height: 64,
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.08),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            Icons.door_front_door_outlined,
+            size: 32,
+            color: AppColors.primary.withValues(alpha: 0.5),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'No Gates Yet',
+          style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Add gates to manage entry points for your event.',
+          style: AppTextStyles.bodySmall.copyWith(color: AppColors.grey),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => GateManagementPage(
+                    eventId: event.id,
+                    eventName: event.name,
+                  ),
+                ),
+              );
+            },
+            icon: const Icon(Icons.add, size: 18),
+            label: Text(
+              'Add Your First Gate',
+              style: AppTextStyles.button.copyWith(fontSize: 13),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGatesContent({
+    required Event event,
+    required List gates,
+  }) {
+    return Column(
+      children: [
+        // Gates List
+        ...List.generate(gates.length, (index) {
+          final gate = gates[index];
+          return _buildGateItem(gate: gate);
+        }),
+        const SizedBox(height: 16),
+
+        // Manage gates button
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => GateManagementPage(
+                    eventId: widget.eventId,
+                    eventName: event.name,
+                  ),
+                ),
+              );
+            },
+            icon: const Icon(Icons.settings_outlined, size: 18),
+            label: Text(
+              'Manage Gates',
+              style: AppTextStyles.button.copyWith(fontSize: 13),
+            ),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.primary,
+              side: const BorderSide(color: AppColors.primary),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGateItem({required dynamic gate}) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              Icons.door_front_door,
+              size: 18,
+              color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  gate.name,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'ID: ${gate.id.substring(0, 8)}...',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

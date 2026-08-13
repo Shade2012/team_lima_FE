@@ -39,7 +39,11 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
   }
 
   String _formatPrice(int price) {
-    final formatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp',
+      decimalDigits: 0,
+    );
     return formatter.format(price);
   }
 
@@ -131,13 +135,18 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: AppColors.white.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
-                              widget.isSeated ? 'Seated Event' : 'Standing Event',
+                              widget.isSeated
+                                  ? 'Seated Event'
+                                  : 'Standing Event',
                               style: AppTextStyles.bodySmall.copyWith(
                                 color: AppColors.white,
                                 fontWeight: FontWeight.w600,
@@ -199,12 +208,20 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                         );
                       },
                       icon: const Icon(Icons.preview, size: 18),
-                      label: Text('Preview All Seats', style: AppTextStyles.button.copyWith(fontSize: 13)),
+                      label: Text(
+                        'Preview All Seats',
+                        style: AppTextStyles.button.copyWith(fontSize: 13),
+                      ),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.primary,
-                        side: const BorderSide(color: AppColors.primary, width: 1.5),
+                        side: const BorderSide(
+                          color: AppColors.primary,
+                          width: 1.5,
+                        ),
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     ),
                   ),
@@ -215,7 +232,8 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
               sliver: SliverList.separated(
                 itemCount: categoriesState.categories.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 12),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final category = categoriesState.categories[index];
                   final seatsCount = seatsCountState.counts[category.id];
@@ -232,7 +250,10 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
         foregroundColor: AppColors.white,
         elevation: 4,
         icon: const Icon(Icons.add, size: 22),
-        label: Text('Add Category', style: AppTextStyles.button.copyWith(fontSize: 14)),
+        label: Text(
+          'Add Category',
+          style: AppTextStyles.button.copyWith(fontSize: 14),
+        ),
       ),
     );
   }
@@ -276,8 +297,13 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 14,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 elevation: 0,
               ),
             ),
@@ -313,7 +339,9 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                   AppColors.pink.withValues(alpha: 0.04),
                 ],
               ),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
             ),
             child: Row(
               children: [
@@ -323,7 +351,11 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                     color: AppColors.primary.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.confirmation_number, size: 18, color: AppColors.primary),
+                  child: const Icon(
+                    Icons.confirmation_number,
+                    size: 18,
+                    color: AppColors.primary,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -332,7 +364,9 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                     children: [
                       Text(
                         category.name,
-                        style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w700),
+                        style: AppTextStyles.bodyLarge.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -347,7 +381,11 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                 ),
                 IconButton(
                   onPressed: () => _showDeleteConfirmation(category),
-                  icon: Icon(Icons.delete_outline, size: 20, color: AppColors.danger.withValues(alpha: 0.7)),
+                  icon: Icon(
+                    Icons.delete_outline,
+                    size: 20,
+                    color: AppColors.danger.withValues(alpha: 0.7),
+                  ),
                   tooltip: 'Delete category',
                 ),
               ],
@@ -371,7 +409,9 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                     icon: Icons.event_seat,
                     label: 'Seats',
                     value: seatsCount != null ? '$seatsCount' : '-',
-                    color: seatsCount != null ? AppColors.success : AppColors.grey,
+                    color: seatsCount != null
+                        ? AppColors.success
+                        : AppColors.grey,
                   ),
                 ],
               ],
@@ -401,7 +441,10 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
             const SizedBox(width: 6),
             Text(
               '$label: ',
-              style: AppTextStyles.bodySmall.copyWith(color: AppColors.grey, fontSize: 11),
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.grey,
+                fontSize: 11,
+              ),
             ),
             Text(
               value,
@@ -465,10 +508,17 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                       color: AppColors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.add_circle_outline, size: 20, color: AppColors.primary),
+                    child: const Icon(
+                      Icons.add_circle_outline,
+                      size: 20,
+                      color: AppColors.primary,
+                    ),
                   ),
                   const SizedBox(width: 12),
-                  Text('Add Category', style: AppTextStyles.title.copyWith(fontSize: 18)),
+                  Text(
+                    'Add Category',
+                    style: AppTextStyles.title.copyWith(fontSize: 18),
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
@@ -478,7 +528,8 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                 hintText: 'Category Name (e.g. VIP Front Row)',
                 prefixIcon: Icons.label_outline,
                 validator: (value) {
-                  if (value == null || value.isEmpty) return 'Category name is required';
+                  if (value == null || value.isEmpty)
+                    return 'Category name is required';
                   return null;
                 },
               ),
@@ -490,7 +541,8 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                 prefixIcon: Icons.payments_outlined,
                 keyboardType: TextInputType.number,
                 validator: (value) {
-                  if (value == null || value.isEmpty) return 'Price is required';
+                  if (value == null || value.isEmpty)
+                    return 'Price is required';
                   if (int.tryParse(value) == null) return 'Must be a number';
                   if (int.parse(value) < 0) return 'Price cannot be negative';
                   return null;
@@ -504,7 +556,8 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                 prefixIcon: Icons.inventory_2_outlined,
                 keyboardType: TextInputType.number,
                 validator: (value) {
-                  if (value == null || value.isEmpty) return 'Quota is required';
+                  if (value == null || value.isEmpty)
+                    return 'Quota is required';
                   if (int.tryParse(value) == null) return 'Must be a number';
                   if (int.parse(value) <= 0) return 'Quota must be at least 1';
                   return null;
@@ -519,9 +572,14 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                       onPressed: () => Navigator.pop(context),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      child: Text('Cancel', style: AppTextStyles.button.copyWith(fontSize: 14)),
+                      child: Text(
+                        'Cancel',
+                        style: AppTextStyles.button.copyWith(fontSize: 14),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -535,13 +593,18 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                           price: int.parse(priceController.text.trim()),
                           totalQuota: int.parse(quotaController.text.trim()),
                         );
-                        final success = await ref.read(categoriesProvider.notifier).createCategory(request, isSeated: widget.isSeated);
+                        final success = await ref
+                            .read(categoriesProvider.notifier)
+                            .createCategory(request, isSeated: widget.isSeated);
                         if (!context.mounted) return;
                         if (success) {
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Category added!', style: AppTextStyles.snackbar),
+                              content: Text(
+                                'Category added!',
+                                style: AppTextStyles.snackbar,
+                              ),
                               backgroundColor: AppColors.success,
                             ),
                           );
@@ -551,7 +614,9 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                         backgroundColor: AppColors.primary,
                         foregroundColor: AppColors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         elevation: 0,
                       ),
                       child: Text('Add', style: AppTextStyles.button),
@@ -573,9 +638,16 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: AppColors.danger, size: 24),
+            Icon(
+              Icons.warning_amber_rounded,
+              color: AppColors.danger,
+              size: 24,
+            ),
             const SizedBox(width: 8),
-            Text('Delete Category', style: AppTextStyles.title.copyWith(fontSize: 18)),
+            Text(
+              'Delete Category',
+              style: AppTextStyles.title.copyWith(fontSize: 18),
+            ),
           ],
         ),
         content: Text(
@@ -585,23 +657,34 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey)),
+            child: Text(
+              'Cancel',
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey),
+            ),
           ),
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
-              final success = await ref.read(categoriesProvider.notifier).deleteCategory(category.id);
+              final success = await ref
+                  .read(categoriesProvider.notifier)
+                  .deleteCategory(category.id);
               if (!context.mounted) return;
               if (success) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Category deleted', style: AppTextStyles.snackbar),
+                    content: Text(
+                      'Category deleted',
+                      style: AppTextStyles.snackbar,
+                    ),
                     backgroundColor: AppColors.success,
                   ),
                 );
               }
             },
-            child: Text('Delete', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.danger)),
+            child: Text(
+              'Delete',
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.danger),
+            ),
           ),
         ],
       ),

@@ -60,7 +60,12 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 60),
-                    _buildLogo(isDarkMode),
+                    Text(
+                      'VELOCE',
+                      style: AppTextStyles.logo.copyWith(
+                        color: AppColors.primary,
+                      ),
+                    ),
                     const SizedBox(height: 24),
                     _buildTitle(isDarkMode),
                     const SizedBox(height: 8),
@@ -87,59 +92,6 @@ class _SignupPageState extends ConsumerState<SignupPage> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildLogo(bool isDarkMode) {
-    return Row(
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 6,
-              height: 24,
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(3),
-              ),
-            ),
-            const SizedBox(width: 3),
-            Container(
-              width: 6,
-              height: 36,
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(3),
-              ),
-            ),
-            const SizedBox(width: 3),
-            Container(
-              width: 6,
-              height: 24,
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(3),
-              ),
-            ),
-            const SizedBox(width: 3),
-            Container(
-              width: 6,
-              height: 16,
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(3),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(width: 8),
-        Text(
-          'DEEP SOUND',
-          style: AppTextStyles.logo.copyWith(
-            color: isDarkMode ? AppColors.white : AppColors.black,
-          ),
-        ),
-      ],
     );
   }
 

@@ -126,12 +126,11 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
           Expanded(
             child: categoriesState.isLoading
                 ? const Center(
-                    child:
-                        CircularProgressIndicator(color: AppColors.primary))
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  )
                 : categoriesState.categories.isEmpty
-                    ? _buildEmptyState()
-                    : _buildSeatArea(
-                        categoriesState.categories, seatsListState),
+                ? _buildEmptyState()
+                : _buildSeatArea(categoriesState.categories, seatsListState),
           ),
           _buildLegendBar(),
         ],
@@ -144,7 +143,11 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
   Widget _buildAppBar() {
     return Container(
       padding: EdgeInsets.fromLTRB(
-          4, MediaQuery.of(context).padding.top + 4, 16, 12),
+        4,
+        MediaQuery.of(context).padding.top + 4,
+        16,
+        12,
+      ),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -163,8 +166,11 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
                 color: AppColors.white.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.arrow_back,
-                  color: AppColors.white, size: 20),
+              child: const Icon(
+                Icons.arrow_back,
+                color: AppColors.white,
+                size: 20,
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -202,11 +208,13 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.timer_outlined,
-                      size: 14,
-                      color: _countdown.inSeconds > 0
-                          ? AppColors.white
-                          : AppColors.white.withValues(alpha: 0.6)),
+                  Icon(
+                    Icons.timer_outlined,
+                    size: 14,
+                    color: _countdown.inSeconds > 0
+                        ? AppColors.white
+                        : AppColors.white.withValues(alpha: 0.6),
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     _countdown.inSeconds > 0 ? _countdownText() : 'ENDED',
@@ -232,13 +240,31 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       child: Column(
         children: [
-          for (var i = 0; i < reversed.length; i++)
-            _buildCategorySection(
-              category: reversed[i],
-              seats: seatsListState.seatsByCategory[reversed[i].id] ?? [],
-              color: _getCategoryColor(categories.length - 1 - i),
-              isVip: i == reversed.length - 1,
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.greyLight),
             ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (var i = 0; i < reversed.length; i++) ...[
+                  _buildCategorySection(
+                    category: reversed[i],
+                    seats: seatsListState.seatsByCategory[reversed[i].id] ?? [],
+                    color: _getCategoryColor(categories.length - 1 - i),
+                    isVip: i == reversed.length - 1,
+                  ),
+                  if (i < reversed.length - 1)
+                    Container(
+                      height: 1,
+                      color: AppColors.greyLight,
+                    ),
+                ],
+              ],
+            ),
+          ),
           const SizedBox(height: 30),
           _buildStageVisual(),
         ],
@@ -258,9 +284,7 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
           end: Alignment.bottomCenter,
           colors: [AppColors.greyLight, AppColors.background],
         ),
-        borderRadius: const BorderRadius.vertical(
-          bottom: Radius.circular(40),
-        ),
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(40)),
         border: Border.all(color: AppColors.greyLight),
       ),
       child: const Center(
@@ -285,75 +309,64 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
     required Color color,
     required bool isVip,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 24),
-      child: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: color.withValues(alpha: 0.15),
-                width: 1,
+    return Column(
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          color: color.withValues(alpha: 0.05),
+          child: Row(
+            children: [
+              Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(4),
+                ),
               ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 12,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    category.name,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.black,
-                      fontSize: 13,
-                    ),
-                  ),
-                ),
-                Text(
-                  '${_formatPrice(category.price)}  •  ${seats.length} seats',
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  category.name,
                   style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.grey,
-                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.black,
+                    fontSize: 13,
                   ),
                 ),
-              ],
-            ),
-          ),
-          if (seats.isEmpty)
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Text(
-                'No seats generated',
-                style:
-                    AppTextStyles.bodyMedium.copyWith(color: AppColors.grey),
               ),
-            )
-          else if (isVip)
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              child: _buildArcSeats(seats, color),
-            )
-          else
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              child: _buildStraightSeats(seats, color),
+              Text(
+                '${_formatPrice(category.price)}  •  ${seats.length} seats',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.grey,
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (seats.isEmpty)
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Text(
+              'No seats generated',
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey),
             ),
-        ],
-      ),
+          )
+        else if (isVip)
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            child: _buildArcSeats(seats, color),
+          )
+        else
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            child: _buildStraightSeats(seats, color),
+          ),
+      ],
     );
   }
 
@@ -363,8 +376,8 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
     final seatsPerRow = seats.length <= 10
         ? seats.length
         : seats.length <= 20
-            ? 10
-            : 15;
+        ? 10
+        : 15;
     final totalRows = (seats.length / seatsPerRow).ceil();
     final seatSize = 28.0;
     final rowSpacing = 32.0;
@@ -396,8 +409,8 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
     final seatsPerRow = seats.length <= 10
         ? seats.length
         : seats.length <= 20
-            ? 10
-            : 15;
+        ? 10
+        : 15;
     final totalRows = (seats.length / seatsPerRow).ceil();
     final seatSize = 28.0;
     final rowSpacing = 32.0;
@@ -438,13 +451,22 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _buildLegendItem(
-                color: AppColors.success, label: 'Available', filled: true),
+              color: AppColors.success,
+              label: 'Available',
+              filled: true,
+            ),
             const SizedBox(width: 20),
             _buildLegendItem(
-                color: AppColors.warning, label: 'Held', filled: true),
+              color: AppColors.warning,
+              label: 'Held',
+              filled: true,
+            ),
             const SizedBox(width: 20),
             _buildLegendItem(
-                color: AppColors.danger, label: 'Sold', filled: true),
+              color: AppColors.danger,
+              label: 'Sold',
+              filled: true,
+            ),
           ],
         ),
       ),
@@ -489,8 +511,11 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.event_seat,
-                size: 48, color: AppColors.grey.withValues(alpha: 0.4)),
+            Icon(
+              Icons.event_seat,
+              size: 48,
+              color: AppColors.grey.withValues(alpha: 0.4),
+            ),
             const SizedBox(height: 24),
             Text(
               'No Seats Available',
@@ -558,9 +583,7 @@ class _SeatsPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
 
-    final textPainter = TextPainter(
-      textDirection: ui.TextDirection.ltr,
-    );
+    final textPainter = TextPainter(textDirection: ui.TextDirection.ltr);
 
     for (var rowIdx = 0; rowIdx < totalRows; rowIdx++) {
       final startIdx = rowIdx * seatsPerRow;
@@ -572,11 +595,8 @@ class _SeatsPainter extends CustomPainter {
       final arcStrength = 8.0 + rowIdx * 3.0;
 
       for (var i = 0; i < rowCount; i++) {
-        final x =
-            centerX + (i - (rowCount - 1) / 2) * spacing;
-        final seatY = isArc
-            ? y + _arcY(i, rowCount, arcStrength)
-            : y;
+        final x = centerX + (i - (rowCount - 1) / 2) * spacing;
+        final seatY = isArc ? y + _arcY(i, rowCount, arcStrength) : y;
 
         final rect = RRect.fromRectAndRadius(
           Rect.fromLTWH(x, seatY, seatSize, seatSize),
@@ -599,8 +619,10 @@ class _SeatsPainter extends CustomPainter {
         textPainter.layout();
         textPainter.paint(
           canvas,
-          Offset(x + (seatSize - textPainter.width) / 2,
-              seatY + (seatSize - textPainter.height) / 2),
+          Offset(
+            x + (seatSize - textPainter.width) / 2,
+            seatY + (seatSize - textPainter.height) / 2,
+          ),
         );
       }
     }
