@@ -5,6 +5,7 @@ Dokumen ini berisi panduan lengkap cara menjalankan, menguji, dan mengintegrasik
 ---
 
 ## Daftar Isi
+
 1. [Fitur & Kemampuan Mock Server](#1-fitur--kemampuan-mock-server)
 2. [Cara Menjalankan Server](#2-cara-menjalankan-server)
 3. [Akun & Seed Data Bawaan](#3-akun--seed-data-bawaan)
@@ -22,7 +23,7 @@ Dokumen ini berisi panduan lengkap cara menjalankan, menguji, dan mengintegrasik
 ## 1. Fitur & Kemampuan Mock Server
 
 - **Stateful In-Memory Store**: Perubahan data (Register User baru, Tambah Event, Generate Seats) akan tersimpan secara dinamis selama server berjalan.
-- **JWT Auth Simulation**: Mensimulasikan pembuat token JWT Bearer, validasi role (`CUSTOMER`, `ORGANIZER`, `GATE_OPERATOR`), serta *blacklist token* saat Logout.
+- **JWT Auth Simulation**: Mensimulasikan pembuat token JWT Bearer, validasi role (`CUSTOMER`, `ORGANIZER`, `GATE_OPERATOR`), serta _blacklist token_ saat Logout.
 - **Auto Bulk Seats Generation**: Secara otomatis membuat kode tempat duduk (contoh: `VIP-001` s.d `VIP-100`) sesuai kuota kategori tiket.
 - **Strict Business Validation**: Memvalidasi aturan bisnis seperti:
   - Tanggal event (`salesEndTime > salesStartTime`, `eventDate > salesEndTime`).
@@ -37,25 +38,31 @@ Dokumen ini berisi panduan lengkap cara menjalankan, menguji, dan mengintegrasik
 ## 2. Cara Menjalankan Server
 
 ### Prasyarat
+
 - **Node.js** (Versi v16 atau lebih baru) & **npm**.
 
 ### Langkah-Langkah Running:
 
 1. Buka Terminal / PowerShell dan masuk ke folder `mock_server`:
+
    ```bash
    cd mock_server
    ```
 
 2. Install dependensi (hanya perlu dilakukan sekali):
+
    ```bash
    npm install
    ```
 
 3. Jalankan Server:
+
    ```bash
    npm start
    ```
-   *Untuk pengembangan (otomatis reload saat file diubah):*
+
+   _Untuk pengembangan (otomatis reload saat file diubah):_
+
    ```bash
    npm run dev
    ```
@@ -68,18 +75,17 @@ Dokumen ini berisi panduan lengkap cara menjalankan, menguji, dan mengintegrasik
    =================================================
    ```
 
----
-
 ## 3. Akun & Seed Data Bawaan
 
-Server sudah dilengkapi data awal (*seed data*) dari file `mock_server/data/initial_mock_data.json`:
+Server sudah dilengkapi data awal (_seed data_) dari file `mock_server/data/initial_mock_data.json`:
 
 ### Data Pengguna (Users)
-| Role | Email | Password | User ID | Keterangan |
-| :--- | :--- | :--- | :--- | :--- |
-| `CUSTOMER` | `john@example.com` | `Password123!` | `019146a0-7d1e-7abc-9a12-abcdef123456` | Pengunjung/Pembeli Tiket |
-| `ORGANIZER` | `organizer@example.com` | `Password123!` | `019146a0-0000-7abc-0000-abcdef000001` | Pemilik Event |
-| `GATE_OPERATOR` | `gateop@example.com` | `Password123!` | `019146a0-0000-7abc-0000-abcdef000002` | Petugas Gerbang (`eventId` terhubung) |
+
+| Role            | Email                   | Password       | User ID                                | Keterangan                            |
+| :-------------- | :---------------------- | :------------- | :------------------------------------- | :------------------------------------ |
+| `CUSTOMER`      | `john@example.com`      | `Password123!` | `019146a0-7d1e-7abc-9a12-abcdef123456` | Pengunjung/Pembeli Tiket              |
+| `ORGANIZER`     | `organizer@example.com` | `Password123!` | `019146a0-0000-7abc-0000-abcdef000001` | Pemilik Event                         |
+| `GATE_OPERATOR` | `gateop@example.com`    | `Password123!` | `019146a0-0000-7abc-0000-abcdef000002` | Petugas Gerbang (`eventId` terhubung) |
 
 ---
 
@@ -90,6 +96,7 @@ Server sudah dilengkapi data awal (*seed data*) dari file `mock_server/data/init
 ### A. User Auth & Profile (`/users`)
 
 #### 1. Register User (`POST /users/register`)
+
 - **Headers**: `Content-Type: application/json`
 - **Body Request**:
   ```json
@@ -100,7 +107,7 @@ Server sudah dilengkapi data awal (*seed data*) dari file `mock_server/data/init
     "role": "CUSTOMER"
   }
   ```
-  *(Catatan: Jika `role == "GATE_OPERATOR"`, wajib menyertakan `"eventId": "<uuid_event>"`)*
+  _(Catatan: Jika `role == "GATE_OPERATOR"`, wajib menyertakan `"eventId": "<uuid_event>"`)_
 - **Response 201 Created**:
   ```json
   {
@@ -117,6 +124,7 @@ Server sudah dilengkapi data awal (*seed data*) dari file `mock_server/data/init
   ```
 
 #### 2. Login User (`POST /users/login`)
+
 - **Body Request**:
   ```json
   {
@@ -133,6 +141,7 @@ Server sudah dilengkapi data awal (*seed data*) dari file `mock_server/data/init
   ```
 
 #### 3. Get User Profile (`GET /users/profile`)
+
 - **Headers**: `Authorization: Bearer <jwt_access_token>`
 - **Response 200 OK**:
   ```json
@@ -154,6 +163,7 @@ Server sudah dilengkapi data awal (*seed data*) dari file `mock_server/data/init
 ### B. Event Management (`/events`)
 
 #### 1. Get All Events (`GET /events`)
+
 - **Auth**: Public
 - **Response 200 OK**: Array event diurutkan berdasarkan `eventDate` ASC.
   ```json
@@ -179,6 +189,7 @@ Server sudah dilengkapi data awal (*seed data*) dari file `mock_server/data/init
   ```
 
 #### 2. Create Event (`POST /events`)
+
 - **Headers**: `Authorization: Bearer <organizer_token>` (Role must be `ORGANIZER`)
 - **Body Request**:
   ```json
@@ -200,6 +211,7 @@ Server sudah dilengkapi data awal (*seed data*) dari file `mock_server/data/init
 ### C. Ticket Categories (`/ticket-categories`)
 
 #### 1. Get Categories by Event (`GET /ticket-categories/event/:eventId`)
+
 - **Auth**: Public
 - **Response 200 OK**: Array kategori tiket diurutkan dari `price` tertinggi (DESC).
   ```json
@@ -218,6 +230,7 @@ Server sudah dilengkapi data awal (*seed data*) dari file `mock_server/data/init
   ```
 
 #### 2. Create Ticket Category (`POST /ticket-categories`)
+
 - **Headers**: `Authorization: Bearer <organizer_token>`
 - **Body Request**:
   ```json
@@ -234,6 +247,7 @@ Server sudah dilengkapi data awal (*seed data*) dari file `mock_server/data/init
 ### D. Seat Management (`/seats`)
 
 #### 1. Bulk Generate Seats (`POST /seats/bulk`)
+
 - **Headers**: `Authorization: Bearer <organizer_token>`
 - **Body Request**:
   ```json
@@ -257,6 +271,7 @@ Server sudah dilengkapi data awal (*seed data*) dari file `mock_server/data/init
   ```
 
 #### 2. Get Seats by Category (`GET /seats/category/:categoryId`)
+
 - **Auth**: Public
 - **Response 200 OK**: Array tempat duduk diurutkan berdasarkan `seatCode` ASC.
 
@@ -265,9 +280,11 @@ Server sudah dilengkapi data awal (*seed data*) dari file `mock_server/data/init
 ### E. Gate Management (`/gates`)
 
 #### 1. Get Gates by Event (`GET /gates/event/:eventId`)
+
 - **Response 200 OK**: Array daftar gerbang pintu masuk.
 
 #### 2. Create Gate (`POST /gates`)
+
 - **Headers**: `Authorization: Bearer <organizer_token>`
 - **Body Request**:
   ```json
@@ -284,11 +301,14 @@ Server sudah dilengkapi data awal (*seed data*) dari file `mock_server/data/init
 Aplikasi Flutter sudah terhubung dengan Mock Server ini melalui layer `lib/core/`.
 
 ### Konfigurasi Base URL (`ApiConstants`)
+
 Secara otomatis menyesuaikan platform saat app dijalankan:
+
 - **Web / Desktop / Physical Device**: `http://localhost:3000`
 - **Android Emulator**: `http://10.0.2.2:3000`
 
 ### Contoh Pemanggilan di Repository / State Management Flutter:
+
 ```dart
 import 'package:team_five_fe/core/network/dio_client.dart';
 import 'package:team_five_fe/core/constants/api_constants.dart';

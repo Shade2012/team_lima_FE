@@ -5,6 +5,7 @@ import 'package:team_five_fe/core/theme/app_text_styles.dart';
 import 'package:team_five_fe/core/widgets/custom_text_field.dart';
 import 'package:team_five_fe/features/auth/presentation/providers/auth_provider.dart';
 import 'package:team_five_fe/features/auth/presentation/pages/signup_page.dart';
+import 'package:team_five_fe/features/event/presentation/pages/organizer/my_events_page.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -16,12 +17,11 @@ class LoginPage extends ConsumerStatefulWidget {
 class _LoginPageState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+  bool _hasNavigated = false;
 
   @override
   void dispose() {
     _emailController.dispose();
-    _passwordController.dispose();
     super.dispose();
   }
 
@@ -30,6 +30,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final authState = ref.watch(authProvider);
     final authNotifier = ref.read(authProvider.notifier);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    ref.listen<AuthState>(authProvider, (prev, next) {
+      if (next.isAuthenticated && !_hasNavigated && mounted) {
+        _hasNavigated = true;
+        _navigateByRole(next.currentUser?.role);
+      }
+    });
 
     return Scaffold(
       body: Stack(
@@ -178,7 +185,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   Widget _buildPasswordField(AuthState state, AuthNotifier notifier) {
     return CustomTextField(
-      controller: _passwordController,
+      controller: TextEditingController(text: state.password),
       hintText: 'Password',
       prefixIcon: Icons.lock_outline,
       obscureText: !state.isPasswordVisible,
@@ -263,15 +270,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   Future<void> _handleLogin(AuthNotifier notifier) async {
     if (_formKey.currentState!.validate()) {
+      _hasNavigated = false;
       final success = await notifier.login();
-      if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Login successful!', style: AppTextStyles.snackbar),
-            backgroundColor: Colors.green,
-          ),
-        );
-      } else if (mounted) {
+      if (!success && mounted) {
         final currentState = ref.read(authProvider);
         if (currentState.error != null) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -282,6 +283,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           );
         }
       }
+    }
+  }
+
+  void _navigateByRole(String? role) {
+    if (!mounted) return;
+    if (role == 'ORGANIZER' || role == 'EVENT_ORGANIZER') {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MyEventsPage()),
+      );
     }
   }
 }
