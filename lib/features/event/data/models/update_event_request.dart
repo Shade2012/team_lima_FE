@@ -21,17 +21,30 @@ class UpdateEventRequest {
 
   Map<String, dynamic> toJson() {
     final data = <String, dynamic>{};
-    if (name != null && name!.isNotEmpty) data['name'] = name;
-    if (isSeated != null) data['isSeated'] = isSeated;
-    if (salesStartTime != null)
+    if (name != null && name!.isNotEmpty) {
+      data['name'] = name;
+    }
+    if (isSeated != null) {
+      data['isSeated'] = isSeated;
+    }
+    if (salesStartTime != null) {
       data['salesStartTime'] = salesStartTime!.toIso8601String();
-    if (salesEndTime != null)
+    }
+    if (salesEndTime != null) {
       data['salesEndTime'] = salesEndTime!.toIso8601String();
-    if (eventDate != null) data['eventDate'] = eventDate!.toIso8601String();
-    if (refundEndDate != null)
+    }
+    if (eventDate != null) {
+      data['eventDate'] = eventDate!.toIso8601String();
+    }
+    if (refundEndDate != null) {
       data['refundEndDate'] = refundEndDate!.toIso8601String();
-    if (refundPolicy != null) data['refundPolicy'] = refundPolicy;
-    if (refundPercentage != null) data['refundPercentage'] = refundPercentage;
+    }
+    if (refundPolicy != null) {
+      data['refundPolicy'] = refundPolicy;
+    }
+    if (refundPercentage != null) {
+      data['refundPercentage'] = refundPercentage;
+    }
     return data;
   }
 }
