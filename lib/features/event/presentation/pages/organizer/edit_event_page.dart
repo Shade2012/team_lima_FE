@@ -88,7 +88,7 @@ class _EditEventPageState extends ConsumerState<EditEventPage> {
               'Event updated successfully!',
               style: AppTextStyles.snackbar,
             ),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
           ),
         );
         ref.read(updateEventProvider.notifier).reset();
@@ -97,61 +97,270 @@ class _EditEventPageState extends ConsumerState<EditEventPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.error!, style: AppTextStyles.snackbar),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.danger,
           ),
         );
       }
     });
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Edit Event', style: AppTextStyles.title),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildNameField(),
-              const SizedBox(height: 16),
-              _buildIsSeatedSwitch(),
-              const SizedBox(height: 16),
-              _buildDateTimeField(
-                label: 'Sales Start Time',
-                value: _salesStartTime,
-                onSelect: (date) => setState(() => _salesStartTime = date),
+      backgroundColor: AppColors.background,
+      body: Form(
+        key: _formKey,
+        child: CustomScrollView(
+          slivers: [
+            // Header
+            SliverAppBar(
+              expandedHeight: 160,
+              pinned: true,
+              backgroundColor: AppColors.primary,
+              leading: GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  margin: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.white.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.arrow_back, color: AppColors.white),
+                ),
               ),
-              const SizedBox(height: 16),
-              _buildDateTimeField(
-                label: 'Sales End Time',
-                value: _salesEndTime,
-                onSelect: (date) => setState(() => _salesEndTime = date),
+              flexibleSpace: FlexibleSpaceBar(
+                background: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [AppColors.primary, AppColors.pink],
+                    ),
+                  ),
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        top: -20,
+                        right: -20,
+                        child: Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppColors.white.withValues(alpha: 0.08),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: -30,
+                        left: -15,
+                        child: Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppColors.white.withValues(alpha: 0.06),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 50,
+                        right: 20,
+                        child: Icon(
+                          Icons.edit_calendar,
+                          size: 40,
+                          color: AppColors.white.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 20,
+                        left: 20,
+                        right: 20,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                'Edit Event',
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  color: AppColors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Update Event',
+                              style: AppTextStyles.title.copyWith(
+                                color: AppColors.white,
+                                fontSize: 20,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              widget.eventName,
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: AppColors.white.withValues(alpha: 0.8),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              const SizedBox(height: 16),
-              _buildDateTimeField(
-                label: 'Event Date',
-                value: _eventDate,
-                onSelect: (date) => setState(() => _eventDate = date),
+            ),
+
+            // Content
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  // Event Info Section
+                  _buildSectionCard(
+                    title: 'Event Info',
+                    icon: Icons.info_outline,
+                    children: [
+                      _buildNameField(),
+                      const SizedBox(height: 12),
+                      _buildIsSeatedSwitch(),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Schedule Section
+                  _buildSectionCard(
+                    title: 'Schedule',
+                    icon: Icons.schedule,
+                    children: [
+                      _buildDateTimeField(
+                        label: 'Sales Start Time',
+                        value: _salesStartTime,
+                        onSelect: (date) =>
+                            setState(() => _salesStartTime = date),
+                      ),
+                      const SizedBox(height: 12),
+                      _buildDateTimeField(
+                        label: 'Sales End Time',
+                        value: _salesEndTime,
+                        onSelect: (date) =>
+                            setState(() => _salesEndTime = date),
+                      ),
+                      const SizedBox(height: 12),
+                      _buildDateTimeField(
+                        label: 'Event Date',
+                        value: _eventDate,
+                        onSelect: (date) =>
+                            setState(() => _eventDate = date),
+                      ),
+                      const SizedBox(height: 12),
+                      _buildDateTimeField(
+                        label: 'Refund End Date (Optional)',
+                        value: _refundEndDate,
+                        onSelect: (date) =>
+                            setState(() => _refundEndDate = date),
+                        isOptional: true,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Refund Settings Section
+                  _buildSectionCard(
+                    title: 'Refund Settings',
+                    icon: Icons.replay,
+                    children: [
+                      _buildRefundPolicyField(),
+                      const SizedBox(height: 12),
+                      _buildRefundPercentageField(),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Submit Button
+                  _buildSubmitButton(updateState),
+                ]),
               ),
-              const SizedBox(height: 16),
-              _buildDateTimeField(
-                label: 'Refund End Date (Optional)',
-                value: _refundEndDate,
-                onSelect: (date) => setState(() => _refundEndDate = date),
-                isOptional: true,
-              ),
-              const SizedBox(height: 16),
-              _buildRefundPolicyField(),
-              const SizedBox(height: 16),
-              _buildRefundPercentageField(),
-              const SizedBox(height: 24),
-              _buildSubmitButton(updateState),
-            ],
-          ),
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionCard({
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.black.withValues(alpha: 0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section header with gradient accent
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.primary.withValues(alpha: 0.06),
+                  AppColors.pink.withValues(alpha: 0.04),
+                ],
+              ),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, size: 18, color: AppColors.primary),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  title,
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Section content
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: children,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -171,16 +380,68 @@ class _EditEventPageState extends ConsumerState<EditEventPage> {
   }
 
   Widget _buildIsSeatedSwitch() {
-    return SwitchListTile(
-      title: Text('Seated Event', style: AppTextStyles.bodyLarge),
-      subtitle: Text(
-        _isSeated ? 'Seats will be generated' : 'Standing / general admission',
-        style: AppTextStyles.bodySmall.copyWith(color: AppColors.grey),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: _isSeated
+            ? AppColors.primary.withValues(alpha: 0.06)
+            : AppColors.background,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: _isSeated
+              ? AppColors.primary.withValues(alpha: 0.3)
+              : AppColors.greyLight,
+        ),
       ),
-      value: _isSeated,
-      onChanged: (value) => setState(() => _isSeated = value),
-      activeThumbColor: AppColors.primary,
-      contentPadding: EdgeInsets.zero,
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: _isSeated
+                  ? AppColors.primary.withValues(alpha: 0.12)
+                  : AppColors.grey.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              _isSeated ? Icons.event_seat : Icons.stadium,
+              size: 18,
+              color: _isSeated ? AppColors.primary : AppColors.grey,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Seated Event',
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  _isSeated
+                      ? 'Seats will be generated'
+                      : 'Standing / general admission',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: _isSeated,
+            onChanged: (value) => setState(() => _isSeated = value),
+            activeThumbColor: AppColors.white,
+            activeTrackColor: AppColors.primary,
+            inactiveThumbColor: AppColors.white,
+            inactiveTrackColor: AppColors.greyLight,
+          ),
+        ],
+      ),
     );
   }
 
@@ -192,11 +453,16 @@ class _EditEventPageState extends ConsumerState<EditEventPage> {
   }) {
     return InkWell(
       onTap: () => _pickDateTime(onSelect),
+      borderRadius: BorderRadius.circular(12),
       child: InputDecorator(
         decoration: InputDecoration(
           labelText: label,
           labelStyle: AppTextStyles.hint,
-          prefixIcon: const Icon(Icons.calendar_today, color: AppColors.grey),
+          prefixIcon: const Icon(
+            Icons.calendar_today,
+            color: AppColors.primary,
+            size: 20,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: AppColors.greyLight),
@@ -205,18 +471,33 @@ class _EditEventPageState extends ConsumerState<EditEventPage> {
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: AppColors.greyLight),
           ),
+          filled: true,
+          fillColor: AppColors.background,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
             vertical: 16,
           ),
         ),
-        child: Text(
-          value != null
-              ? _dateFormat.format(value)
-              : (isOptional ? 'Select date & time' : 'Select date & time *'),
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: value != null ? null : AppColors.grey,
-          ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                value != null
+                    ? _dateFormat.format(value)
+                    : (isOptional
+                        ? 'Select date & time'
+                        : 'Select date & time *'),
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: value != null ? null : AppColors.grey,
+                ),
+              ),
+            ),
+            Icon(
+              Icons.chevron_right,
+              size: 20,
+              color: AppColors.grey,
+            ),
+          ],
         ),
       ),
     );
@@ -252,7 +533,8 @@ class _EditEventPageState extends ConsumerState<EditEventPage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          elevation: 0,
+          elevation: 4,
+          shadowColor: AppColors.primary.withValues(alpha: 0.4),
         ),
         child: state.isLoading
             ? const SizedBox(
@@ -263,7 +545,14 @@ class _EditEventPageState extends ConsumerState<EditEventPage> {
                   strokeWidth: 2,
                 ),
               )
-            : Text('Update Event', style: AppTextStyles.button),
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.save_outlined, size: 20),
+                  const SizedBox(width: 8),
+                  Text('Update Event', style: AppTextStyles.button),
+                ],
+              ),
       ),
     );
   }
@@ -307,7 +596,7 @@ class _EditEventPageState extends ConsumerState<EditEventPage> {
             'Please fill in all required date fields',
             style: AppTextStyles.snackbar,
           ),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.danger,
         ),
       );
       return;
@@ -320,7 +609,7 @@ class _EditEventPageState extends ConsumerState<EditEventPage> {
             'Sales end time must be after sales start time',
             style: AppTextStyles.snackbar,
           ),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.danger,
         ),
       );
       return;
@@ -333,7 +622,7 @@ class _EditEventPageState extends ConsumerState<EditEventPage> {
             'Event date must be after sales end time',
             style: AppTextStyles.snackbar,
           ),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.danger,
         ),
       );
       return;
@@ -346,7 +635,7 @@ class _EditEventPageState extends ConsumerState<EditEventPage> {
             'Refund end date must be after sales start time',
             style: AppTextStyles.snackbar,
           ),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.danger,
         ),
       );
       return;

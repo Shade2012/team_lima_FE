@@ -34,6 +34,8 @@ class ApiConstants {
   static const String bulkSeats = '/seats/bulk';
   static String seatsByCategory(String categoryId) =>
       '/seats/category/$categoryId';
+  static String deleteSeatsByCategory(String categoryId) =>
+      '/seats/category/$categoryId';
 
   // Feature: Gate Management (/gates)
   static const String gates = '/gates';

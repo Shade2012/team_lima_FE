@@ -9,7 +9,7 @@ import 'package:team_five_fe/features/event/presentation/providers/event_provide
 import 'package:team_five_fe/features/event/presentation/pages/organizer/create_event_page.dart';
 import 'package:team_five_fe/features/event/presentation/pages/organizer/event_detail_page.dart';
 
-enum EventFilter { all }
+enum EventFilter { active, upcoming, ended }
 
 class MyEventsPage extends ConsumerStatefulWidget {
   const MyEventsPage({super.key});
@@ -18,14 +18,53 @@ class MyEventsPage extends ConsumerStatefulWidget {
   ConsumerState<MyEventsPage> createState() => _MyEventsPageState();
 }
 
-class _MyEventsPageState extends ConsumerState<MyEventsPage> {
+class _MyEventsPageState extends ConsumerState<MyEventsPage>
+    with SingleTickerProviderStateMixin {
   final _searchController = TextEditingController();
   String _searchQuery = '';
+  EventFilter _selectedFilter = EventFilter.active;
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        setState(() {
+          _selectedFilter = EventFilter.values[_tabController.index];
+        });
+      }
+    });
+  }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _tabController.dispose();
     super.dispose();
+  }
+
+  List<Event> _filterEvents(List<Event> events) {
+    final now = DateTime.now();
+    return events.where((e) {
+      final isOnSale =
+          now.isAfter(e.salesStartTime) && now.isBefore(e.salesEndTime);
+      final isUpcoming = now.isBefore(e.salesStartTime);
+      final isEnded = now.isAfter(e.salesEndTime);
+
+      switch (_selectedFilter) {
+        case EventFilter.active:
+          return isOnSale;
+        case EventFilter.upcoming:
+          return isUpcoming;
+        case EventFilter.ended:
+          return isEnded;
+      }
+    }).where((e) {
+      if (_searchQuery.isEmpty) return true;
+      return e.name.toLowerCase().contains(_searchQuery);
+    }).toList();
   }
 
   @override
@@ -40,6 +79,7 @@ class _MyEventsPageState extends ConsumerState<MyEventsPage> {
           children: [
             _buildHeader(),
             _buildSearchBar(),
+            _buildTabBar(),
             Expanded(child: _buildEventList(eventsState)),
           ],
         ),
@@ -66,7 +106,7 @@ class _MyEventsPageState extends ConsumerState<MyEventsPage> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Manage your upcoming events',
+                  'Manage your events',
                   style: AppTextStyles.bodySmall.copyWith(
                     color: AppColors.grey,
                   ),
@@ -141,6 +181,32 @@ class _MyEventsPageState extends ConsumerState<MyEventsPage> {
     );
   }
 
+  // ==================== Tab Bar ====================
+
+  Widget _buildTabBar() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+      child: TabBar(
+        controller: _tabController,
+        labelColor: AppColors.primary,
+        unselectedLabelColor: AppColors.grey,
+        labelStyle: AppTextStyles.bodyMedium.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
+        unselectedLabelStyle: AppTextStyles.bodyMedium,
+        indicatorColor: AppColors.primary,
+        indicatorWeight: 3,
+        dividerColor: AppColors.greyLight,
+        dividerHeight: 1,
+        tabs: const [
+          Tab(text: 'Active'),
+          Tab(text: 'Upcoming'),
+          Tab(text: 'Ended'),
+        ],
+      ),
+    );
+  }
+
   // ==================== Event List ====================
 
   Widget _buildEventList(MyEventsState state) {
@@ -178,43 +244,10 @@ class _MyEventsPageState extends ConsumerState<MyEventsPage> {
       );
     }
 
-    final filteredEvents = _searchQuery.isEmpty
-        ? state.events
-        : state.events
-              .where((e) => e.name.toLowerCase().contains(_searchQuery))
-              .toList();
+    final filteredEvents = _filterEvents(state.events);
 
     if (filteredEvents.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.event_note,
-                size: 40,
-                color: AppColors.primary.withValues(alpha: 0.5),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'No events yet',
-              style: AppTextStyles.bodyLarge.copyWith(color: AppColors.grey),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Create your first event!',
-              style: AppTextStyles.bodySmall.copyWith(color: AppColors.grey),
-            ),
-          ],
-        ),
-      );
+      return _buildEmptyState();
     }
 
     return RefreshIndicator(
@@ -226,6 +259,61 @@ class _MyEventsPageState extends ConsumerState<MyEventsPage> {
           final event = filteredEvents[index];
           return _buildEventCard(event, index);
         },
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    String title;
+    String subtitle;
+    IconData icon;
+
+    switch (_selectedFilter) {
+      case EventFilter.active:
+        title = 'No active events';
+        subtitle = 'Events on sale will appear here.';
+        icon = Icons.event_available;
+        break;
+      case EventFilter.upcoming:
+        title = 'No upcoming events';
+        subtitle = 'Events that haven\'t started yet.';
+        icon = Icons.upcoming;
+        break;
+      case EventFilter.ended:
+        title = 'No ended events';
+        subtitle = 'Past events will appear here.';
+        icon = Icons.event_busy;
+        break;
+    }
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              size: 40,
+              color: AppColors.primary.withValues(alpha: 0.5),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            style: AppTextStyles.bodyLarge.copyWith(color: AppColors.grey),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            subtitle,
+            style: AppTextStyles.bodySmall.copyWith(color: AppColors.grey),
+          ),
+        ],
       ),
     );
   }
