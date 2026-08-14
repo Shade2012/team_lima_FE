@@ -15,7 +15,7 @@ void main() {
         await tester.pumpWidget(createWidgetUnderTest());
         await tester.pumpAndSettle();
 
-        expect(find.text('DEEP SOUND'), findsOneWidget);
+        expect(find.text('VELOCE'), findsOneWidget);
         expect(find.text('Sign in to feel the pulse.'), findsOneWidget);
         expect(
           find.byType(TextField),
