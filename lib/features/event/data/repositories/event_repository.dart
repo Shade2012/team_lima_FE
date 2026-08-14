@@ -8,6 +8,19 @@ import '../../../../core/constants/api_constants.dart';
 class EventRepository {
   final DioClient _dioClient = DioClient();
 
+  /// GET /events (Public)
+  Future<List<Event>> getAllEvents() async {
+    try {
+      final response = await _dioClient.dio.get(ApiConstants.events);
+      final data = response.data['data'] as List;
+      return data.map((e) => Event.fromJson(e)).toList();
+    } on DioException catch (e) {
+      throw Exception(
+        _extractErrorMessage(e, fallback: 'Failed to fetch public events'),
+      );
+    }
+  }
+
   /// GET /events/organizer/me
   Future<List<Event>> getMyEvents() async {
     try {

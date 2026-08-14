@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:team_five_fe/features/auth/presentation/providers/auth_provider.dart';
 import 'package:team_five_fe/features/auth/presentation/pages/login_page.dart';
 import 'package:team_five_fe/features/event/presentation/pages/organizer/my_events_page.dart';
+import 'package:team_five_fe/features/customer/presentation/pages/customer_main_screen.dart';
 
 class AuthWrapper extends ConsumerWidget {
   const AuthWrapper({super.key});
@@ -24,6 +25,6 @@ class AuthWrapper extends ConsumerWidget {
       return const MyEventsPage();
     }
 
-    return const LoginPage();
+    return const CustomerMainScreen();
   }
 }
