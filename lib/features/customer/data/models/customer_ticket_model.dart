@@ -47,7 +47,7 @@ class CustomerTicket {
       attendeeName: json['attendeeName']?.toString() ?? 'Alex Chen',
       ticketType: json['ticketType']?.toString() ?? 'All Access',
       qrData: json['qrData']?.toString() ??
-          'DIGITAL TICKET | Deep Sound\nNeon Jungle Festival\nNJF-2491',
+          'DIGITAL TICKET | VELOCE\nNeon Jungle Festival\nNJF-2491',
       status: json['status']?.toString() ?? 'UPCOMING',
       imageUrl: json['imageUrl']?.toString(),
       price: (json['price'] as num?)?.toDouble() ?? 150.0,
