@@ -4,6 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../providers/customer_provider.dart';
 import 'checkout_page.dart';
+import 'customer_event_detail_page.dart';
 
 class CustomerExplorePage extends ConsumerWidget {
   const CustomerExplorePage({super.key});
@@ -148,11 +149,12 @@ class CustomerExplorePage extends ConsumerWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => const CheckoutPage(
+              builder: (_) => const CustomerEventDetailPage(
                 eventName: 'Sonic Resonance Festival 2024',
-                eventCategory: 'FEATURED EVENT',
+                categoryName: 'FEATURED EVENT',
                 price: 150.0,
                 location: 'Main Stage Pavilion • Oct 15-17',
+                isSeated: true,
               ),
             ),
           );
@@ -601,11 +603,12 @@ class CustomerExplorePage extends ConsumerWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => CheckoutPage(
+                            builder: (_) => CustomerEventDetailPage(
                               eventName: fullTitle,
-                              eventCategory: category,
+                              categoryName: category,
                               price: price,
                               location: venue,
+                              isSeated: true,
                             ),
                           ),
                         );

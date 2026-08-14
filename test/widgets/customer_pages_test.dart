@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:team_five_fe/features/customer/presentation/pages/customer_main_screen.dart';
 import 'package:team_five_fe/features/customer/presentation/pages/checkout_page.dart';
+import 'package:team_five_fe/features/customer/presentation/pages/customer_event_detail_page.dart';
+import 'package:team_five_fe/features/customer/presentation/pages/seat_selection_page.dart';
 import 'package:team_five_fe/features/customer/presentation/providers/customer_provider.dart';
 
 class MockCustomerExploreNotifier extends CustomerExploreNotifier {
@@ -38,6 +40,47 @@ void main() {
       expect(find.text('Tickets'), findsOneWidget);
       expect(find.text('Saved'), findsOneWidget);
       expect(find.text('Profile'), findsOneWidget);
+    });
+
+    testWidgets('CustomerEventDetailPage renders details and category selection', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: CustomerEventDetailPage(
+              eventName: 'Sonic Resonance Festival 2024',
+              categoryName: 'ELECTRONIC',
+              price: 150.0,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('Event Details'), findsOneWidget);
+      expect(find.text('Sonic Resonance Festival 2024'), findsOneWidget);
+      expect(find.text('Select Ticket Category'), findsOneWidget);
+    });
+
+    testWidgets('SeatSelectionPage renders stage indicator and seat grid', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: SeatSelectionPage(
+              eventName: 'Sonic Resonance Festival 2024',
+              categoryName: 'VIP PASS',
+              categoryId: 'cat_vip',
+              price: 150.0,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('Select Seat'), findsOneWidget);
+      expect(find.text('STAGE / MAIN PAVILION'), findsOneWidget);
+      expect(find.text('Confirm & Checkout'), findsOneWidget);
     });
 
     testWidgets('CheckoutPage renders order summary and payment methods', (tester) async {
