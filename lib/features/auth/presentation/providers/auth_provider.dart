@@ -247,6 +247,20 @@ class AuthNotifier extends Notifier<AuthState> {
       return false;
     }
   }
+
+  Future<bool> deleteAccount() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final authRepository = ref.read(authRepositoryProvider);
+      await authRepository.deleteAccount();
+      state = AuthState();
+      return true;
+    } catch (e) {
+      final cleanMessage = e.toString().replaceAll('Exception: ', '');
+      state = AuthState(error: cleanMessage);
+      return false;
+    }
+  }
 }
 
 final authProvider = NotifierProvider<AuthNotifier, AuthState>(() {

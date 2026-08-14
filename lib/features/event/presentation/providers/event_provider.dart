@@ -124,18 +124,26 @@ class CreateEventState {
   final bool isLoading;
   final String? error;
   final bool isSuccess;
+  final Event? createdEvent;
 
   CreateEventState({
     this.isLoading = false,
     this.error,
     this.isSuccess = false,
+    this.createdEvent,
   });
 
-  CreateEventState copyWith({bool? isLoading, String? error, bool? isSuccess}) {
+  CreateEventState copyWith({
+    bool? isLoading,
+    String? error,
+    bool? isSuccess,
+    Event? createdEvent,
+  }) {
     return CreateEventState(
       isLoading: isLoading ?? this.isLoading,
       error: error,
       isSuccess: isSuccess ?? this.isSuccess,
+      createdEvent: createdEvent ?? this.createdEvent,
     );
   }
 }
@@ -150,8 +158,12 @@ class CreateEventNotifier extends Notifier<CreateEventState> {
     state = state.copyWith(isLoading: true, error: null, isSuccess: false);
     try {
       final repository = ref.read(eventRepositoryProvider);
-      await repository.createEvent(request);
-      state = state.copyWith(isLoading: false, isSuccess: true);
+      final event = await repository.createEvent(request);
+      state = state.copyWith(
+        isLoading: false,
+        isSuccess: true,
+        createdEvent: event,
+      );
       ref.read(myEventsProvider.notifier).loadMyEvents();
       return true;
     } catch (e) {
