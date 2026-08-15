@@ -34,7 +34,7 @@ Seluruh **Unit Test** dan **Widget Test** di dalam proyek ini memanfaatkan **Dar
 | **Unit Test** | `UserModel` | Parser JSON lengkap dari backend DTO menghasilkan objek `UserModel` yang valid. | Mengolah Map JSON kosong/null tanpa terjadi *crash* (menghasilkan default fallback value). |
 | **Unit Test** | `LoginRequest` & `RegisterRequest` | Serialisasi `.toJson()` menghasilkan payload yang sesuai dengan DTO backend (`CUSTOMER`, `ORGANIZER`, `GATE_OPERATOR`). | `eventId` otomatis diabaikan dari Map JSON jika nilainya null/kosong. |
 | **Unit Test** | `AuthNotifier` (Riverpod) | Update state `setEmail`, `setPassword`, `setRole`, dan `togglePasswordVisibility` merubah state secara konsisten. | Form submit dengan email/password kosong memicu error *"Email and password are required"*. Password mismatch memicu error *"Passwords do not match"*. |
-| **Widget Test** | `LoginPage` | Merender logo `DEEP SOUND`, email field, password field, tombol `Sign In`, dan link `Sign Up`. | Menekan tombol `Sign In` saat field kosong menampilkan SnackBar error validasi. |
+| **Widget Test** | `LoginPage` | Merender logo `VELOCE`, email field, password field, tombol `Sign In`, dan link `Sign Up`. | Menekan tombol `Sign In` saat field kosong menampilkan SnackBar error validasi. |
 | **Widget Test** | `SignupPage` | Merender Form Sign Up, Toggle Role Picker (Customer vs Event Organizer) dapat dipindah dengan lancar. | Menekan tombol `Create Account` saat field kosong menampilkan SnackBar error validasi. |
 
 ---

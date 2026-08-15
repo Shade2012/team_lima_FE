@@ -18,11 +18,13 @@ class LoginPage extends ConsumerStatefulWidget {
 class _LoginPageState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _hasNavigated = false;
 
   @override
   void dispose() {
     _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -138,7 +140,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   Widget _buildPasswordField(AuthState state, AuthNotifier notifier) {
     return CustomTextField(
-      controller: TextEditingController(text: state.password),
+      controller: _passwordController,
       hintText: 'Password',
       prefixIcon: Icons.lock_outline,
       obscureText: !state.isPasswordVisible,

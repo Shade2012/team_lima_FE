@@ -1,0 +1,332 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/models/customer_ticket_model.dart';
+import '../../../event/data/models/event_model.dart';
+import '../../../event/presentation/providers/event_provider.dart';
+
+// ==================== Customer Explore State ====================
+
+class CustomerExploreState {
+  final List<Event> events;
+  final String selectedCategory;
+  final String searchQuery;
+  final Set<String> savedEventIds;
+  final bool isLoading;
+  final String? error;
+
+  CustomerExploreState({
+    this.events = const [],
+    this.selectedCategory = 'All Events',
+    this.searchQuery = '',
+    this.savedEventIds = const {},
+    this.isLoading = false,
+    this.error,
+  });
+
+  CustomerExploreState copyWith({
+    List<Event>? events,
+    String? selectedCategory,
+    String? searchQuery,
+    Set<String>? savedEventIds,
+    bool? isLoading,
+    String? error,
+  }) {
+    return CustomerExploreState(
+      events: events ?? this.events,
+      selectedCategory: selectedCategory ?? this.selectedCategory,
+      searchQuery: searchQuery ?? this.searchQuery,
+      savedEventIds: savedEventIds ?? this.savedEventIds,
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
+    );
+  }
+
+  List<Event> get filteredEvents {
+    return events.where((event) {
+      final matchesSearch = searchQuery.isEmpty ||
+          event.name.toLowerCase().contains(searchQuery.toLowerCase());
+      return matchesSearch;
+    }).toList();
+  }
+}
+
+class CustomerExploreNotifier extends Notifier<CustomerExploreState> {
+  @override
+  CustomerExploreState build() {
+    Future.microtask(() => loadPublicEvents());
+    return CustomerExploreState();
+  }
+
+  Future<void> loadPublicEvents() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final repository = ref.read(eventRepositoryProvider);
+      final events = await repository.getAllEvents();
+      state = state.copyWith(events: events, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: e.toString().replaceAll('Exception: ', ''),
+      );
+    }
+  }
+
+  void setSelectedCategory(String category) {
+    state = state.copyWith(selectedCategory: category);
+  }
+
+  void setSearchQuery(String query) {
+    state = state.copyWith(searchQuery: query);
+  }
+
+  void toggleSaveEvent(String eventId) {
+    final updated = Set<String>.from(state.savedEventIds);
+    if (updated.contains(eventId)) {
+      updated.remove(eventId);
+    } else {
+      updated.add(eventId);
+    }
+    state = state.copyWith(savedEventIds: updated);
+  }
+}
+
+final customerExploreProvider =
+    NotifierProvider<CustomerExploreNotifier, CustomerExploreState>(() {
+      return CustomerExploreNotifier();
+    });
+
+// ==================== Customer Tickets State ====================
+
+class CustomerTicketsState {
+  final List<CustomerTicket> tickets;
+  final bool isLoading;
+  final String? error;
+
+  CustomerTicketsState({
+    this.tickets = const [],
+    this.isLoading = false,
+    this.error,
+  });
+
+  CustomerTicketsState copyWith({
+    List<CustomerTicket>? tickets,
+    bool? isLoading,
+    String? error,
+  }) {
+    return CustomerTicketsState(
+      tickets: tickets ?? this.tickets,
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
+    );
+  }
+}
+
+class CustomerTicketsNotifier extends Notifier<CustomerTicketsState> {
+  @override
+  CustomerTicketsState build() {
+    // Initial mock ticket matching Image 2 & 4/5 ("Neon Waves Festival" / "Neon Jungle Festival")
+    final initialTicket = CustomerTicket(
+      id: '019146a0-7d1e-7abc-9a12-ticket0001',
+      ticketCode: '#NJF-2491',
+      eventName: 'Neon Jungle Festival',
+      categoryName: 'VIP PASS',
+      eventDate: DateTime(2024, 8, 24),
+      eventTimeRange: '8:00 PM - 4:00 AM',
+      venueName: 'The Grand Warehouse',
+      venueAddress: '124 Industrial Ave, Metro City',
+      attendeeName: 'Alex Chen',
+      ticketType: 'All Access',
+      qrData: 'DIGITAL TICKET | VELOCE\nNeon Jungle Festival\nNJF-2491',
+      status: 'UPCOMING',
+      price: 150.0,
+    );
+
+    return CustomerTicketsState(tickets: [initialTicket]);
+  }
+
+  void addTicket(CustomerTicket ticket) {
+    state = state.copyWith(tickets: [ticket, ...state.tickets]);
+  }
+
+  void requestRefund(String ticketId) {
+    final updated = state.tickets.map((t) {
+      if (t.id == ticketId) {
+        return CustomerTicket(
+          id: t.id,
+          ticketCode: t.ticketCode,
+          eventName: t.eventName,
+          categoryName: t.categoryName,
+          eventDate: t.eventDate,
+          eventTimeRange: t.eventTimeRange,
+          venueName: t.venueName,
+          venueAddress: t.venueAddress,
+          attendeeName: t.attendeeName,
+          ticketType: t.ticketType,
+          qrData: t.qrData,
+          status: 'REFUNDED',
+          imageUrl: t.imageUrl,
+          price: t.price,
+        );
+      }
+      return t;
+    }).toList();
+    state = state.copyWith(tickets: updated);
+  }
+}
+
+final customerTicketsProvider =
+    NotifierProvider<CustomerTicketsNotifier, CustomerTicketsState>(() {
+      return CustomerTicketsNotifier();
+    });
+
+// ==================== Checkout State ====================
+
+class CheckoutState {
+  final String paymentMethod; // 'card', 'wallet', 'bank'
+  final String cardNumber;
+  final String expiryDate;
+  final String cvc;
+  final String cardHolderName;
+  final bool sameAsProfileAddress;
+  final String promoCode;
+  final bool isPromoApplied;
+  final double admissionPrice;
+  final double serviceFee;
+  final double taxesAndProcessing;
+  final double discount;
+  final bool isProcessing;
+  final String? error;
+
+  CheckoutState({
+    this.paymentMethod = 'card',
+    this.cardNumber = '',
+    this.expiryDate = '',
+    this.cvc = '',
+    this.cardHolderName = '',
+    this.sameAsProfileAddress = true,
+    this.promoCode = '',
+    this.isPromoApplied = false,
+    this.admissionPrice = 150.0,
+    this.serviceFee = 15.0,
+    this.taxesAndProcessing = 12.50,
+    this.discount = 0.0,
+    this.isProcessing = false,
+    this.error,
+  });
+
+  double get total => admissionPrice + serviceFee + taxesAndProcessing - discount;
+
+  CheckoutState copyWith({
+    String? paymentMethod,
+    String? cardNumber,
+    String? expiryDate,
+    String? cvc,
+    String? cardHolderName,
+    bool? sameAsProfileAddress,
+    String? promoCode,
+    bool? isPromoApplied,
+    double? admissionPrice,
+    double? serviceFee,
+    double? taxesAndProcessing,
+    double? discount,
+    bool? isProcessing,
+    String? error,
+  }) {
+    return CheckoutState(
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      cardNumber: cardNumber ?? this.cardNumber,
+      expiryDate: expiryDate ?? this.expiryDate,
+      cvc: cvc ?? this.cvc,
+      cardHolderName: cardHolderName ?? this.cardHolderName,
+      sameAsProfileAddress:
+          sameAsProfileAddress ?? this.sameAsProfileAddress,
+      promoCode: promoCode ?? this.promoCode,
+      isPromoApplied: isPromoApplied ?? this.isPromoApplied,
+      admissionPrice: admissionPrice ?? this.admissionPrice,
+      serviceFee: serviceFee ?? this.serviceFee,
+      taxesAndProcessing: taxesAndProcessing ?? this.taxesAndProcessing,
+      discount: discount ?? this.discount,
+      isProcessing: isProcessing ?? this.isProcessing,
+      error: error,
+    );
+  }
+}
+
+class CheckoutNotifier extends Notifier<CheckoutState> {
+  @override
+  CheckoutState build() {
+    return CheckoutState();
+  }
+
+  void setPaymentMethod(String method) {
+    state = state.copyWith(paymentMethod: method);
+  }
+
+  void setCardNumber(String value) {
+    state = state.copyWith(cardNumber: value);
+  }
+
+  void setExpiryDate(String value) {
+    state = state.copyWith(expiryDate: value);
+  }
+
+  void setCvc(String value) {
+    state = state.copyWith(cvc: value);
+  }
+
+  void setCardHolderName(String value) {
+    state = state.copyWith(cardHolderName: value);
+  }
+
+  void toggleSameAsProfileAddress(bool? value) {
+    state = state.copyWith(sameAsProfileAddress: value ?? true);
+  }
+
+  void setPromoCode(String code) {
+    state = state.copyWith(promoCode: code);
+  }
+
+  bool applyPromoCode() {
+    if (state.promoCode.trim().toUpperCase() == 'VELOCE10' ||
+        state.promoCode.trim().toUpperCase() == 'DISCOUNT') {
+      state = state.copyWith(isPromoApplied: true, discount: 15.0, error: null);
+      return true;
+    } else {
+      state = state.copyWith(error: 'Invalid promo code');
+      return false;
+    }
+  }
+
+  Future<CustomerTicket?> completePayment({
+    required String eventName,
+    required String attendeeName,
+  }) async {
+    state = state.copyWith(isProcessing: true, error: null);
+    await Future.delayed(const Duration(milliseconds: 1000));
+
+    final newTicket = CustomerTicket(
+      id: '019146a0-${DateTime.now().millisecondsSinceEpoch}',
+      ticketCode: '#NJF-${(1000 + DateTime.now().millisecond % 9000)}',
+      eventName: eventName,
+      categoryName: 'VIP PASS',
+      eventDate: DateTime(2024, 10, 24),
+      eventTimeRange: '8:00 PM - 4:00 AM',
+      venueName: 'Main Stage, Sector 4',
+      venueAddress: '124 Industrial Ave, Metro City',
+      attendeeName: attendeeName.isNotEmpty ? attendeeName : 'Alex Chen',
+      ticketType: 'All Access',
+      qrData:
+          'DIGITAL TICKET | VELOCE\n$eventName\n#NJF-${(1000 + DateTime.now().millisecond % 9000)}',
+      status: 'UPCOMING',
+      price: state.total,
+    );
+
+    ref.read(customerTicketsProvider.notifier).addTicket(newTicket);
+    state = state.copyWith(isProcessing: false);
+    return newTicket;
+  }
+}
+
+final checkoutProvider =
+    NotifierProvider<CheckoutNotifier, CheckoutState>(() {
+      return CheckoutNotifier();
+    });
