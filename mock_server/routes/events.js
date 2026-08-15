@@ -49,7 +49,88 @@ module.exports = function (db) {
     });
   });
 
-  // 3. GET /events/:id (Public)
+  // 3. GET /events/:id/statistics (Role: ORGANIZER - Only owner)
+  router.get('/:id/statistics', (req, res) => {
+    const user = getUserFromToken(req, db);
+    if (!user || user.role !== 'ORGANIZER') {
+      return res.status(403).json({
+        status_code: 403,
+        message: 'Forbidden: Only ORGANIZER role can access event statistics'
+      });
+    }
+
+    const event = db.events.find(e => e.id === req.params.id);
+    if (!event) {
+      return res.status(404).json({
+        status_code: 404,
+        message: 'Event not found'
+      });
+    }
+
+    if (event.organizerId !== user.id) {
+      return res.status(403).json({
+        status_code: 403,
+        message: 'Forbidden: You do not own this event'
+      });
+    }
+
+    const categories = db.categories.filter(c => c.eventId === event.id);
+    let totalQuotaSum = 0;
+    let totalTicketsSoldSum = 0;
+    let grossRevenueSum = 0;
+    let totalRefundCountSum = 0;
+    let totalRefundAmountSum = 0;
+
+    const categoryStats = categories.map(cat => {
+      const seats = db.seats.filter(s => s.categoryId === cat.id);
+      const ticketsSold = seats.length;
+      const grossRevenue = ticketsSold * cat.price;
+      const refundCount = 0;
+      const totalRefundAmount = 0;
+      const refundPercentage = ticketsSold > 0 ? Number(((refundCount / ticketsSold) * 100).toFixed(2)) : 0;
+
+      totalQuotaSum += cat.totalQuota;
+      totalTicketsSoldSum += ticketsSold;
+      grossRevenueSum += grossRevenue;
+      totalRefundCountSum += refundCount;
+      totalRefundAmountSum += totalRefundAmount;
+
+      return {
+        categoryId: cat.id,
+        categoryName: cat.name,
+        price: cat.price,
+        totalQuota: cat.totalQuota,
+        ticketsSold,
+        grossRevenue,
+        refundCount,
+        totalRefundAmount,
+        refundPercentage
+      };
+    });
+
+    const netRevenue = grossRevenueSum - totalRefundAmountSum;
+    const percentageSold = totalQuotaSum > 0 ? Number(((totalTicketsSoldSum / totalQuotaSum) * 100).toFixed(2)) : 0;
+    const refundPercentage = totalTicketsSoldSum > 0 ? Number(((totalRefundCountSum / totalTicketsSoldSum) * 100).toFixed(2)) : 0;
+
+    return res.status(200).json({
+      message: 'Success',
+      data: {
+        eventId: event.id,
+        eventName: event.name,
+        totalQuota: totalQuotaSum,
+        totalTicketsSold: totalTicketsSoldSum,
+        grossRevenue: grossRevenueSum,
+        totalRefundCount: totalRefundCountSum,
+        totalRefundAmount: totalRefundAmountSum,
+        netRevenue,
+        percentageSold,
+        refundPercentage,
+        categories: categoryStats
+      }
+    });
+  });
+
+  // 4. GET /events/:id (Public)
   router.get('/:id', (req, res) => {
     const event = db.events.find(e => e.id === req.params.id);
     if (!event) {

@@ -35,7 +35,23 @@ module.exports = function (db) {
     });
   });
 
-  // 2. POST /seats/bulk (Role: ORGANIZER - Only event owner)
+  // 2. GET /seats/:id (Public)
+  router.get('/:id', (req, res) => {
+    const seat = db.seats.find(s => s.id === req.params.id);
+    if (!seat) {
+      return res.status(404).json({
+        status_code: 404,
+        message: 'Seat not found'
+      });
+    }
+
+    return res.status(200).json({
+      message: 'Success',
+      data: seat
+    });
+  });
+
+  // 3. POST /seats/bulk (Role: ORGANIZER - Only event owner)
   router.post('/bulk', (req, res) => {
     const user = getUserFromToken(req, db);
     if (!user || user.role !== 'ORGANIZER') {
