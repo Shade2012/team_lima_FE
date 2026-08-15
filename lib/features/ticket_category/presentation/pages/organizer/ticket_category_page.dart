@@ -89,7 +89,7 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [AppColors.primary, AppColors.pink],
+                    colors: [AppColors.primary, AppColors.primaryDark],
                   ),
                 ),
                 child: Stack(

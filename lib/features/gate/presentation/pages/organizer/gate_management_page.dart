@@ -39,19 +39,138 @@ class _GateManagementPageState extends ConsumerState<GateManagementPage> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.white,
-        title: Text(
-          'Manage Gates',
-          style: AppTextStyles.bodyLarge.copyWith(
-            color: AppColors.white,
-            fontWeight: FontWeight.w600,
+      body: CustomScrollView(
+        slivers: [
+          // Header
+          SliverAppBar(
+            expandedHeight: 160,
+            pinned: true,
+            backgroundColor: AppColors.primary,
+            leading: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                margin: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.white.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.arrow_back, color: AppColors.white),
+              ),
+            ),
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [AppColors.primary, AppColors.primaryDark],
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      top: -20,
+                      right: -20,
+                      child: Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.white.withValues(alpha: 0.08),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: -30,
+                      left: -15,
+                      child: Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.white.withValues(alpha: 0.06),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 50,
+                      right: 20,
+                      child: Icon(
+                        Icons.door_front_door,
+                        size: 40,
+                        color: AppColors.white.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 20,
+                      left: 20,
+                      right: 20,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.white.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              'Gate Management',
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: AppColors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            widget.eventName,
+                            style: AppTextStyles.title.copyWith(
+                              color: AppColors.white,
+                              fontSize: 18,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
-        elevation: 0,
+          // Body
+          if (gatesState.isLoading)
+            const SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (gatesState.error != null)
+            SliverFillRemaining(
+              child: _buildErrorState(gatesState),
+            )
+          else if (gatesState.gates.isEmpty)
+            SliverFillRemaining(
+              child: _buildEmptyState(),
+            )
+          else
+            SliverPadding(
+              padding: const EdgeInsets.all(16),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    return _buildGateCard(gatesState.gates[index]);
+                  },
+                  childCount: gatesState.gates.length,
+                ),
+              ),
+            ),
+        ],
       ),
-      body: _buildBody(gatesState),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _navigateToCreateGate(),
         backgroundColor: AppColors.primary,
@@ -62,45 +181,33 @@ class _GateManagementPageState extends ConsumerState<GateManagementPage> {
     );
   }
 
-  Widget _buildBody(GatesState state) {
-    if (state.isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (state.error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 48, color: AppColors.grey),
-            const SizedBox(height: 16),
-            Text(
-              state.error!,
-              style: AppTextStyles.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => ref.read(gatesProvider.notifier).loadGates(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+  Widget _buildErrorState(GatesState state) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, size: 48, color: AppColors.grey),
+          const SizedBox(height: 16),
+          Text(
+            state.error!,
+            style: AppTextStyles.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () => ref.read(gatesProvider.notifier).loadGates(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Text('Retry', style: AppTextStyles.button),
             ),
-          ],
-        ),
-      );
-    }
-
-    if (state.gates.isEmpty) {
-      return _buildEmptyState();
-    }
-
-    return _buildGatesList(state);
+            child: Text('Retry', style: AppTextStyles.button),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildEmptyState() {
@@ -158,17 +265,6 @@ class _GateManagementPageState extends ConsumerState<GateManagementPage> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildGatesList(GatesState state) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: state.gates.length,
-      itemBuilder: (context, index) {
-        final gate = state.gates[index];
-        return _buildGateCard(gate);
-      },
     );
   }
 
