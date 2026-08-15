@@ -1,34 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../../../seat/data/models/seat_model.dart';
-import '../../../seat/data/repositories/seat_repository.dart';
+import 'package:intl/intl.dart';
+import 'package:team_five_fe/core/theme/app_colors.dart';
+import 'package:team_five_fe/core/theme/app_text_styles.dart';
+import 'package:team_five_fe/features/seat/data/models/seat_model.dart';
+import 'package:team_five_fe/features/seat/presentation/providers/seat_provider.dart';
+import 'package:team_five_fe/features/ticket_category/data/models/ticket_category_model.dart';
+import 'package:team_five_fe/features/ticket_category/presentation/providers/ticket_category_provider.dart';
 import 'checkout_page.dart';
 
-final customerSeatRepositoryProvider = Provider<SeatRepository>((ref) {
-  return SeatRepository();
-});
-
-final customerSeatsByCategoryProvider =
-    FutureProvider.family<List<Seat>, String>((ref, categoryId) async {
-  final repo = ref.watch(customerSeatRepositoryProvider);
-  try {
-    return await repo.getSeatsByCategory(categoryId);
-  } catch (_) {
-    // Generate fallback interactive seats if mock server returns empty
-    return List.generate(20, (index) {
-      final code = 'VIP-${(index + 1).toString().padLeft(3, '0')}';
-      return Seat(
-        id: 'seat_$index',
-        categoryId: categoryId,
-        seatCode: code,
-      );
-    });
-  }
-});
-
 class SeatSelectionPage extends ConsumerStatefulWidget {
+  final String? eventId;
   final String eventName;
   final String categoryName;
   final String categoryId;
@@ -36,6 +18,7 @@ class SeatSelectionPage extends ConsumerStatefulWidget {
 
   const SeatSelectionPage({
     super.key,
+    this.eventId,
     this.eventName = 'Sonic Resonance Festival 2024',
     this.categoryName = 'VIP PASS',
     this.categoryId = 'cat_vip',
@@ -47,334 +30,502 @@ class SeatSelectionPage extends ConsumerStatefulWidget {
 }
 
 class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
+  bool _seatsLoaded = false;
+  String? _selectedCategoryName;
   String? _selectedSeatCode;
+  String? _selectedSeatDisplayNum;
+  double? _selectedPrice;
+
+  static const _categoryColors = [
+    Color(0xFF6C63FF),
+    Color(0xFFFF6B9D),
+    Color(0xFF00D68F),
+    Color(0xFFFFB800),
+    Color(0xFF00B4D8),
+    Color(0xFFFF6347),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final targetEventId = widget.eventId ?? '019146a0-event';
+        ref.read(categoriesProvider.notifier).setEventId(targetEventId);
+      }
+    });
+  }
+
+  void _loadAllSeatsIfReady() {
+    if (_seatsLoaded) return;
+    final cats = ref.read(categoriesProvider).categories;
+    if (cats.isEmpty) return;
+    _seatsLoaded = true;
+    for (final cat in cats) {
+      ref.read(seatsListProvider.notifier).loadSeats(cat.id);
+    }
+  }
+
+  String _formatPrice(int price) {
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp',
+      decimalDigits: 0,
+    );
+    return formatter.format(price);
+  }
+
+  Color _getCategoryColor(int index) {
+    return _categoryColors[index % _categoryColors.length];
+  }
+
+  String _cleanSeatNumber(String seatCode, int index) {
+    final parts = seatCode.split('-');
+    if (parts.length > 1) {
+      return parts.last;
+    }
+    return (index + 1).toString().padLeft(3, '0');
+  }
 
   @override
   Widget build(BuildContext context) {
-    final seatsAsync = ref.watch(customerSeatsByCategoryProvider(widget.categoryId));
+    final categoriesState = ref.watch(categoriesProvider);
+    final seatsListState = ref.watch(seatsListProvider);
+
+    _loadAllSeatsIfReady();
+
+    final categories = categoriesState.categories.isNotEmpty
+        ? categoriesState.categories
+        : _buildFallbackCategories();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFC),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [
-            // App Bar
-            _buildAppBar(context),
-            // Stage Indicator
-            _buildStageBanner(),
-            const SizedBox(height: 16),
-
-            // Seat Status Legend Row
-            _buildLegendRow(),
-            const SizedBox(height: 20),
-
-            // Scrollable Seat Grid Container
+            _buildAppBar(),
             Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  children: [
-                    seatsAsync.when(
-                      data: (seats) => _buildSeatGrid(seats),
-                      loading: () => const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(40),
-                          child: CircularProgressIndicator(
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ),
-                      error: (_, __) => _buildFallbackSeatGrid(),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-                ),
-              ),
+              child: categoriesState.isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(color: AppColors.primary),
+                    )
+                  : _buildSeatArea(categories, seatsListState),
             ),
-
-            // Bottom Action Bar
-            _buildBottomBar(context),
+            _buildLegendBar(),
+            _buildBottomActionBar(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildAppBar(BuildContext context) {
-    return Padding(
+  List<TicketCategory> _buildFallbackCategories() {
+    return [
+      TicketCategory(
+        id: 'cat_vip1',
+        eventId: widget.eventId ?? '019146a0-event',
+        name: 'VIP-1',
+        price: 200000,
+        totalQuota: 30,
+      ),
+      TicketCategory(
+        id: 'cat_vip2',
+        eventId: widget.eventId ?? '019146a0-event',
+        name: 'VIP-2',
+        price: 180000,
+        totalQuota: 40,
+      ),
+    ];
+  }
+
+  // ==================== App Bar ====================
+
+  Widget _buildAppBar() {
+    return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: const BoxDecoration(
+        color: AppColors.white,
+        border: Border(
+          bottom: BorderSide(color: AppColors.greyLight, width: 1),
+        ),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Container(
-              padding: const EdgeInsets.all(10),
+              width: 36,
+              height: 36,
               decoration: const BoxDecoration(
-                color: Colors.white,
+                color: AppColors.background,
                 shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 6,
-                    offset: Offset(0, 2),
-                  ),
-                ],
               ),
               child: const Icon(
                 Icons.arrow_back,
                 color: AppColors.black,
-                size: 20,
+                size: 18,
               ),
             ),
           ),
-          Text(
-            'Select Seat',
-            style: AppTextStyles.title.copyWith(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: AppColors.black,
+          Column(
+            children: [
+              Text(
+                'Select Seat',
+                style: AppTextStyles.title.copyWith(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.black,
+                ),
+              ),
+              Text(
+                widget.eventName,
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.grey,
+                  fontSize: 11,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+          const SizedBox(width: 36),
+        ],
+      ),
+    );
+  }
+
+  // ==================== Seat Area ====================
+
+  Widget _buildSeatArea(
+    List<TicketCategory> categories,
+    SeatsListState seatsListState,
+  ) {
+    // Reverse categories so Index 0 (closest to stage) is rendered at bottom near STAGE banner
+    final reversed = categories.reversed.toList();
+
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.greyLight),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (var i = 0; i < reversed.length; i++) ...[
+                  _buildCategorySection(
+                    category: reversed[i],
+                    seats: seatsListState.seatsByCategory[reversed[i].id] ??
+                        _generateFallbackSeats(reversed[i]),
+                    color: _getCategoryColor(categories.length - 1 - i),
+                  ),
+                  if (i < reversed.length - 1)
+                    Container(height: 1, color: AppColors.greyLight),
+                ],
+              ],
             ),
           ),
-          const SizedBox(width: 40),
+          const SizedBox(height: 30),
+          _buildStageVisual(),
         ],
       ),
     );
   }
 
-  Widget _buildStageBanner() {
+  List<Seat> _generateFallbackSeats(TicketCategory category) {
+    final count = category.totalQuota > 0 ? category.totalQuota : 30;
+    final prefix = category.name.replaceAll(' ', '');
+    return List.generate(count, (index) {
+      final numStr = (index + 1).toString().padLeft(3, '0');
+      return Seat(
+        id: '${category.id}_$index',
+        categoryId: category.id,
+        seatCode: '$prefix-$numStr',
+      );
+    });
+  }
+
+  // ==================== Stage Visual ====================
+
+  Widget _buildStageVisual() {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 24),
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      height: 70,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF8A00CC), Color(0xFFAF06FF)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [AppColors.greyLight, AppColors.background],
         ),
-        borderRadius: const BorderRadius.vertical(
-          bottom: Radius.circular(30),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(40)),
+        border: Border.all(color: AppColors.greyLight),
       ),
-      child: Center(
+      child: const Center(
         child: Text(
-          'STAGE / MAIN PAVILION',
-          style: AppTextStyles.bodySmall.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.5,
-            fontSize: 11,
+          'S  T  A  G  E',
+          style: TextStyle(
+            color: AppColors.grey,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 4,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildLegendRow() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+  // ==================== Category Section ====================
+
+  Widget _buildCategorySection({
+    required TicketCategory category,
+    required List<Seat> seats,
+    required Color color,
+  }) {
+    return Column(
       children: [
-        _buildLegendItem(
-          color: Colors.white,
-          borderColor: const Color(0xFFD1D1D6),
-          label: 'Available',
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          color: color.withValues(alpha: 0.05),
+          child: Row(
+            children: [
+              Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  category.name,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.black,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+              Text(
+                '${_formatPrice(category.price)}  •  ${seats.length} seats',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.grey,
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
         ),
-        const SizedBox(width: 20),
-        _buildLegendItem(
-          color: AppColors.primary,
-          borderColor: AppColors.primary,
-          label: 'Selected',
-          textColor: Colors.white,
-        ),
-        const SizedBox(width: 20),
-        _buildLegendItem(
-          color: const Color(0xFFE5E5EA),
-          borderColor: const Color(0xFFE5E5EA),
-          label: 'Booked',
-        ),
+        if (seats.isEmpty)
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Text(
+              'No seats available',
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey),
+            ),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+            child: _buildInteractiveSeatsWrap(seats, category, color),
+          ),
       ],
+    );
+  }
+
+  // ==================== Interactive Seats Wrap ====================
+
+  Widget _buildInteractiveSeatsWrap(
+    List<Seat> seats,
+    TicketCategory category,
+    Color color,
+  ) {
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 6,
+      runSpacing: 8,
+      children: List.generate(seats.length, (index) {
+        final seat = seats[index];
+        final numStr = _cleanSeatNumber(seat.seatCode, index);
+
+        // Status Determination (Available, Held, Sold)
+        final isHeld = (index == 2 || index == 11);
+        final isSold = (index == 5 || index == 18);
+        final isAvailable = !isHeld && !isSold;
+
+        final isSelected = _selectedSeatCode == seat.seatCode ||
+            (_selectedCategoryName == category.name &&
+                _selectedSeatDisplayNum == numStr);
+
+        return GestureDetector(
+          onTap: !isAvailable
+              ? null
+              : () {
+                  setState(() {
+                    if (isSelected) {
+                      _selectedSeatCode = null;
+                      _selectedCategoryName = null;
+                      _selectedSeatDisplayNum = null;
+                      _selectedPrice = null;
+                    } else {
+                      _selectedSeatCode = seat.seatCode;
+                      _selectedCategoryName = category.name;
+                      _selectedSeatDisplayNum = numStr;
+                      _selectedPrice = category.price.toDouble();
+                    }
+                  });
+                },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            width: 44,
+            height: 30,
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? color
+                  : isHeld
+                      ? AppColors.warning.withValues(alpha: 0.15)
+                      : isSold
+                          ? AppColors.danger.withValues(alpha: 0.15)
+                          : color.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(
+                color: isSelected
+                    ? color
+                    : isHeld
+                        ? AppColors.warning
+                        : isSold
+                            ? AppColors.danger
+                            : color.withValues(alpha: 0.4),
+                width: isSelected ? 2 : 1,
+              ),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: color.withValues(alpha: 0.4),
+                        blurRadius: 6,
+                        offset: const Offset(0, 3),
+                      ),
+                    ]
+                  : [],
+            ),
+            child: Center(
+              child: Text(
+                numStr,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: isSelected
+                      ? AppColors.white
+                      : isHeld
+                          ? AppColors.warning
+                          : isSold
+                              ? AppColors.danger
+                              : color,
+                  height: 1,
+                ),
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  // ==================== Legend Bar ====================
+
+  Widget _buildLegendBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      decoration: const BoxDecoration(
+        color: AppColors.white,
+        border: Border(top: BorderSide(color: AppColors.greyLight, width: 1)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildLegendItem(
+              color: AppColors.success,
+              label: 'Available',
+              filled: true,
+            ),
+            const SizedBox(width: 20),
+            _buildLegendItem(
+              color: AppColors.warning,
+              label: 'Held',
+              filled: true,
+            ),
+            const SizedBox(width: 20),
+            _buildLegendItem(
+              color: AppColors.danger,
+              label: 'Sold',
+              filled: true,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildLegendItem({
     required Color color,
-    required Color borderColor,
     required String label,
-    Color? textColor,
+    required bool filled,
   }) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 18,
-          height: 18,
+          width: 12,
+          height: 12,
           decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: borderColor),
+            color: filled ? color.withValues(alpha: 0.6) : Colors.transparent,
+            borderRadius: BorderRadius.circular(3),
+            border: Border.all(color: color, width: 1.5),
           ),
         ),
         const SizedBox(width: 6),
         Text(
           label,
           style: AppTextStyles.bodySmall.copyWith(
-            color: Colors.black54,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
+            color: AppColors.grey,
+            fontSize: 11,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildSeatGrid(List<Seat> seats) {
-    final effectiveSeats = seats.isNotEmpty
-        ? seats
-        : List.generate(
-            20,
-            (index) => Seat(
-              id: 's_$index',
-              categoryId: widget.categoryId,
-              seatCode: 'VIP-${(index + 1).toString().padLeft(3, '0')}',
-            ),
-          );
+  // ==================== Bottom Action Bar ====================
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 1.3,
-      ),
-      itemCount: effectiveSeats.length,
-      itemBuilder: (context, index) {
-        final seat = effectiveSeats[index];
-        final isSelected = seat.seatCode == _selectedSeatCode;
-        final isBooked = index == 2 || index == 7; // Sample booked seats
+  Widget _buildBottomActionBar(BuildContext context) {
+    final hasSelection =
+        _selectedSeatCode != null || _selectedSeatDisplayNum != null;
+    final priceToDisplay = _selectedPrice ?? widget.price;
 
-        return GestureDetector(
-          onTap: isBooked
-              ? null
-              : () {
-                  setState(() {
-                    if (isSelected) {
-                      _selectedSeatCode = null;
-                    } else {
-                      _selectedSeatCode = seat.seatCode;
-                    }
-                  });
-                },
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            decoration: BoxDecoration(
-              color: isBooked
-                  ? const Color(0xFFE5E5EA)
-                  : (isSelected ? AppColors.primary : Colors.white),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isBooked
-                    ? const Color(0xFFD1D1D6)
-                    : (isSelected ? AppColors.primary : const Color(0xFFD1D1D6)),
-                width: isSelected ? 2 : 1,
-              ),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ]
-                  : [],
-            ),
-            child: Center(
-              child: isBooked
-                  ? const Icon(Icons.lock_outline, size: 16, color: Colors.black38)
-                  : Text(
-                      seat.seatCode,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: isSelected ? Colors.white : AppColors.black,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 11,
-                      ),
-                    ),
-            ),
-          ),
-        );
-      },
-    );
-  }
+    final formattedPrice = priceToDisplay > 10000
+        ? _formatPrice(priceToDisplay.toInt())
+        : '\$${priceToDisplay.toInt()}';
 
-  Widget _buildFallbackSeatGrid() {
-    final fallbackSeats = List.generate(
-      20,
-      (i) => 'VIP-${(i + 1).toString().padLeft(3, '0')}',
-    );
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 1.3,
-      ),
-      itemCount: fallbackSeats.length,
-      itemBuilder: (context, index) {
-        final seatCode = fallbackSeats[index];
-        final isSelected = seatCode == _selectedSeatCode;
-
-        return GestureDetector(
-          onTap: () {
-            setState(() {
-              _selectedSeatCode = isSelected ? null : seatCode;
-            });
-          },
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            decoration: BoxDecoration(
-              color: isSelected ? AppColors.primary : Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isSelected ? AppColors.primary : const Color(0xFFD1D1D6),
-                width: isSelected ? 2 : 1,
-              ),
-            ),
-            child: Center(
-              child: Text(
-                seatCode,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: isSelected ? Colors.white : AppColors.black,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 11,
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildBottomBar(BuildContext context) {
-    final hasSelection = _selectedSeatCode != null;
+    final categoryLabel = _selectedCategoryName ?? widget.categoryName;
+    final seatNumLabel = _selectedSeatDisplayNum ?? '001';
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 10,
             offset: const Offset(0, -4),
           ),
@@ -389,17 +540,18 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
               children: [
                 Text(
                   hasSelection
-                      ? 'Seat: $_selectedSeatCode'
+                      ? '$categoryLabel ($seatNumLabel)'
                       : 'No seat selected',
                   style: AppTextStyles.bodySmall.copyWith(
-                    color: Colors.black54,
+                    color: AppColors.grey,
                     fontSize: 12,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
-                    '\$${widget.price.toInt()}',
+                    hasSelection ? formattedPrice : 'Select a seat',
                     style: AppTextStyles.title.copyWith(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
@@ -420,9 +572,8 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
                       MaterialPageRoute(
                         builder: (_) => CheckoutPage(
                           eventName: widget.eventName,
-                          eventCategory:
-                              '${widget.categoryName} ($_selectedSeatCode)',
-                          price: widget.price,
+                          eventCategory: '$categoryLabel ($seatNumLabel)',
+                          price: priceToDisplay > 10000 ? 150.0 : priceToDisplay,
                           location: 'Main Stage Pavilion',
                         ),
                       ),
@@ -430,8 +581,8 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
                   },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              foregroundColor: AppColors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -440,7 +591,7 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
             child: Text(
               'Confirm & Checkout',
               style: AppTextStyles.button.copyWith(
-                color: Colors.white,
+                color: AppColors.white,
                 fontSize: 14,
               ),
             ),

@@ -79,7 +79,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Select Seat'), findsOneWidget);
-      expect(find.text('STAGE / MAIN PAVILION'), findsOneWidget);
+      expect(find.text('S  T  A  G  E'), findsOneWidget);
+      expect(find.text('Available'), findsOneWidget);
+      expect(find.text('Held'), findsOneWidget);
+      expect(find.text('Sold'), findsOneWidget);
       expect(find.text('Confirm & Checkout'), findsOneWidget);
     });
 

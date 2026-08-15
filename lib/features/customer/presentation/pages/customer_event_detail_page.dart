@@ -688,6 +688,7 @@ class _CustomerEventDetailPageState
                   context,
                   MaterialPageRoute(
                     builder: (_) => SeatSelectionPage(
+                      eventId: widget.event?.id ?? widget.eventId ?? '019146a0-event',
                       eventName: title,
                       categoryName: categoryName,
                       categoryId: categoryId,
