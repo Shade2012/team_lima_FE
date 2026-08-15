@@ -19,6 +19,8 @@ let db = {
   seats: [],
   gates: [],
   admissionScans: [],
+  orders: [],
+  payments: [],
   blacklistedTokens: []
 };
 
@@ -42,15 +44,19 @@ app.use((req, res, next) => {
 app.get('/', (req, res) => {
   res.json({
     message: 'Tim Lima Backend - Mock API Server is Running',
-    version: '1.0.0',
+    version: '1.1.0',
     availableEndpoints: [
       '/users/register',
+      '/users/register/gate-operator',
       '/users/login',
       '/users/profile',
       '/events',
+      '/events/:id/statistics',
       '/ticket-categories',
       '/seats',
-      '/gates'
+      '/gates',
+      '/mock-pg/transaction',
+      '/mock-pg/simulate-payment'
     ]
   });
 });
@@ -61,6 +67,7 @@ app.use('/events', require('./routes/events')(db));
 app.use('/ticket-categories', require('./routes/ticket_categories')(db));
 app.use('/seats', require('./routes/seats')(db));
 app.use('/gates', require('./routes/gates')(db));
+app.use('/mock-pg', require('./routes/mock_pg')(db));
 
 // 404 Handler
 app.use((req, res) => {

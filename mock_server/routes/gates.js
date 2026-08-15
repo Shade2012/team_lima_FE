@@ -83,7 +83,23 @@ module.exports = function (db) {
     });
   });
 
-  // 3. PATCH /gates/:id (Role: ORGANIZER - Only event owner)
+  // 3. GET /gates/:id (Public)
+  router.get('/:id', (req, res) => {
+    const gate = db.gates.find(g => g.id === req.params.id);
+    if (!gate) {
+      return res.status(404).json({
+        status_code: 404,
+        message: 'Gate not found'
+      });
+    }
+
+    return res.status(200).json({
+      message: 'Success',
+      data: gate
+    });
+  });
+
+  // 4. PATCH /gates/:id (Role: ORGANIZER - Only event owner)
   router.patch('/:id', (req, res) => {
     const user = getUserFromToken(req, db);
     if (!user || user.role !== 'ORGANIZER') {
