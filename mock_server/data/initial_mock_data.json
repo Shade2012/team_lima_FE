@@ -25,6 +25,7 @@
       "password": "Password123!",
       "role": "GATE_OPERATOR",
       "eventId": "019146a0-7d1e-7abc-9a12-abcdef123456",
+      "gateId": "019146a0-7d1e-7abc-9a12-gate00000001",
       "createdAt": "2026-08-12T10:00:00.000Z",
       "updatedAt": "2026-08-12T10:00:00.000Z"
     }
@@ -89,5 +90,7 @@
     }
   ],
   "admissionScans": [],
+  "orders": [],
+  "payments": [],
   "blacklistedTokens": []
 }

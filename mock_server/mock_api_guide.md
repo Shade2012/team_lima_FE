@@ -127,7 +127,8 @@ Server sudah dilengkapi data awal (*seed data*) dari file `mock_server/data/init
       "username": "gate_operator_north",
       "email": "operator_north@example.com",
       "password": "Password123!",
-      "eventId": "019146a0-7d1e-7abc-9a12-abcdef123456"
+      "eventId": "019146a0-7d1e-7abc-9a12-abcdef123456",
+      "gateId": "019146a0-7d1e-7abc-9a12-gate00000001"
     }
   ]
   ```
@@ -228,6 +229,40 @@ Server sudah dilengkapi data awal (*seed data*) dari file `mock_server/data/init
   ```
 - **Response 201 Created**: Object Event baru.
 
+#### 3. Get Event Statistics (`GET /events/:id/statistics`)
+- **Headers**: `Authorization: Bearer <organizer_token>` (Role must be `ORGANIZER` owner of event)
+- **Response 200 OK**:
+  ```json
+  {
+    "message": "Success",
+    "data": {
+      "eventId": "019146a0-7d1e-7abc-9a12-abcdef123456",
+      "eventName": "Konser Sheila On 7 Jakarta 2026",
+      "totalQuota": 600,
+      "totalTicketsSold": 2,
+      "grossRevenue": 3000000,
+      "totalRefundCount": 0,
+      "totalRefundAmount": 0,
+      "netRevenue": 3000000,
+      "percentageSold": 0.33,
+      "refundPercentage": 0,
+      "categories": [
+        {
+          "categoryId": "019146a0-7d1e-7abc-9a12-category0001",
+          "categoryName": "VIP Front Row",
+          "price": 1500000,
+          "totalQuota": 100,
+          "ticketsSold": 2,
+          "grossRevenue": 3000000,
+          "refundCount": 0,
+          "totalRefundAmount": 0,
+          "refundPercentage": 0
+        }
+      ]
+    }
+  }
+  ```
+
 ---
 
 ### C. Ticket Categories (`/ticket-categories`)
@@ -307,6 +342,49 @@ Server sudah dilengkapi data awal (*seed data*) dari file `mock_server/data/init
   {
     "eventId": "019146a0-7d1e-7abc-9a12-abcdef123456",
     "name": "Gate Barat Pintu B"
+  }
+  ```
+
+---
+
+### F. Payment Gateway Simulation (`/mock-pg`)
+
+#### 1. Create Transaction / Generate Snap Token (`POST /mock-pg/transaction`)
+- **Auth**: Public
+- **Body Request**:
+  ```json
+  {
+    "paymentId": "019146a0-7d1e-7abc-9a12-pay000000001",
+    "orderId": "019146a0-7d1e-7abc-9a12-order0000001",
+    "amount": 1500000,
+    "paymentMethod": "QRIS"
+  }
+  ```
+- **Response 201 Created**:
+  ```json
+  {
+    "message": "Success",
+    "data": {
+      "providerTrxId": "ZXlKcGF5bWVudElkIjoiMDE5MTQ2YTAtN2QxZS03YWJjLTlhMTItcGF5MDAwMDAwMDAxIiwib3JkZXJJZCI6IjAxOTE0NmEwLTdkMWUtN2FiYy05YTEyLW9yZGVyMDAwMDAwMSJ9",
+      "checkoutUrl": "https://mock-pg.team-lima.com/checkout/ZXlKcGF5bWVudElkIjoiMDE5MTQ2YTAtN2QxZS03YWJjLTlhMTItcGF5MDAwMDAwMDAxIiwib3JkZXJJZCI6IjAxOTE0NmEwLTdkMWUtN2FiYy05YTEyLW9yZGVyMDAwMDAwMSJ9"
+    }
+  }
+  ```
+
+#### 2. Simulate Payment Completion (`POST /mock-pg/simulate-payment`)
+- **Auth**: Public
+- **Body Request**:
+  ```json
+  {
+    "providerTrxId": "ZXlKcGF5bWVudElkIjoiMDE5MTQ2YTAtN2QxZS03YWJjLTlhMTItcGF5MDAwMDAwMDAxIiwib3JkZXJJZCI6IjAxOTE0NmEwLTdkMWUtN2FiYy05YTEyLW9yZGVyMDAwMDAwMSJ9",
+    "paymentMethod": "QRIS"
+  }
+  ```
+- **Response 200 OK**:
+  ```json
+  {
+    "message": "Success",
+    "data": true
   }
   ```
 

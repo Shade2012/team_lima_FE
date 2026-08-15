@@ -111,11 +111,11 @@ module.exports = function (db) {
 
     // Validate all items first
     for (const item of items) {
-      const { username, email, password, eventId } = item || {};
-      if (!username || !email || !password || !eventId) {
+      const { username, email, password, eventId, gateId } = item || {};
+      if (!username || !email || !password || !eventId || !gateId) {
         return res.status(400).json({
           status_code: 400,
-          message: 'username, email, password, and eventId are required for each gate operator'
+          message: 'username, email, password, eventId, and gateId are required for each gate operator'
         });
       }
 
@@ -134,6 +134,21 @@ module.exports = function (db) {
         });
       }
 
+      const gate = db.gates.find(g => g.id === gateId);
+      if (!gate) {
+        return res.status(404).json({
+          status_code: 404,
+          message: `Gate with ID ${gateId} not found`
+        });
+      }
+
+      if (gate.eventId !== eventId) {
+        return res.status(400).json({
+          status_code: 400,
+          message: `Gate with ID ${gateId} does not belong to Event ${eventId}`
+        });
+      }
+
       const existing = db.users.find(u => u.email === email || u.username === username);
       if (existing) {
         return res.status(409).json({
@@ -146,7 +161,7 @@ module.exports = function (db) {
     // Create operators
     const createdResponses = [];
     for (const item of items) {
-      const { username, email, password, eventId } = item;
+      const { username, email, password, eventId, gateId } = item;
       const newOperator = {
         id: generateUuid(),
         username,
@@ -154,6 +169,7 @@ module.exports = function (db) {
         password,
         role: 'GATE_OPERATOR',
         eventId,
+        gateId,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
