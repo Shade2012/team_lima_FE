@@ -351,9 +351,30 @@ Server sudah dilengkapi data awal (_seed data_) dari file `mock_server/data/init
 
 #### 1. Get Gates by Event (`GET /gates/event/:eventId`)
 
-- **Response 200 OK**: Array daftar gerbang pintu masuk.
+- **Response 200 OK**: Array daftar gerbang pintu masuk beserta daftar `operators` (UserResponseDto[]).
 
-#### 2. Create Gate (`POST /gates`)
+#### 2. Get Assigned Gate for Operator (`GET /gates/operator/assigned`)
+
+- **Auth**: Bearer Token (Role: `GATE_OPERATOR`)
+- **Response 200 OK**:
+  ```json
+  {
+    "message": "Success",
+    "data": {
+      "id": "019146a0-7d1e-7abc-9a12-gate00000001",
+      "eventId": "019146a0-7d1e-7abc-9a12-abcdef123456",
+      "name": "Gate Utama Utara",
+      "event": {
+        "id": "019146a0-7d1e-7abc-9a12-abcdef123456",
+        "name": "Konser Sheila On 7 Jakarta 2026",
+        "eventDate": "2026-10-01T19:00:00.000Z"
+      },
+      "operators": [...]
+    }
+  }
+  ```
+
+#### 3. Create Gate (`POST /gates`)
 
 - **Headers**: `Authorization: Bearer <organizer_token>`
 - **Body Request**:
@@ -468,11 +489,19 @@ Server sudah dilengkapi data awal (_seed data_) dari file `mock_server/data/init
   ```
 - **Response 201 Created**: Object Refund dengan `status: "PENDING"`.
 
-#### 2. Approve Refund (`PATCH /refunds/:id/approve`)
+#### 2. Get My Refunds (`GET /refunds/my-refunds`)
+- **Auth**: Bearer Token (Role: `CUSTOMER`)
+- **Response 200 OK**: Array of Refund objects milik Customer login beserta perincian tiket, event, dan seat.
+
+#### 3. Get All Refunds (`GET /refunds`)
+- **Auth**: Bearer Token (Role: `ADMIN` atau `ORGANIZER`)
+- **Response 200 OK**: Array of Refund objects (`ADMIN`: seluruh pengajuan refund; `ORGANIZER`: refund khusus untuk event miliknya).
+
+#### 4. Approve Refund (`PATCH /refunds/:id/approve`)
 - **Auth**: Bearer Token (Role: `ADMIN`)
 - **Response 200 OK**: Object Refund dengan `status: "APPROVED"`.
 
-#### 3. Reject Refund (`PATCH /refunds/:id/reject`)
+#### 5. Reject Refund (`PATCH /refunds/:id/reject`)
 - **Auth**: Bearer Token (Role: `ADMIN`)
 - **Body Request**: `{ "rejectReason": "Alasan pengajuan tidak valid" }`
 - **Response 200 OK**: Object Refund dengan `status: "REJECTED"`.

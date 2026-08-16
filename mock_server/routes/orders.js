@@ -158,7 +158,18 @@ module.exports = function (db) {
     });
   });
 
-  // 3. GET /orders/customer/:id (Role: CUSTOMER)
+  // 3. GET /orders/clear (Role: CUSTOMER)
+  router.get('/clear', (req, res) => {
+    db.orders = [];
+    db.tickets = [];
+    db.payments = [];
+    return res.status(200).json({
+      message: 'Success',
+      data: true
+    });
+  });
+
+  // 4. GET /orders/customer/:id (Role: CUSTOMER)
   router.get('/customer/:id', (req, res) => {
     const user = getUserFromToken(req, db);
     if (!user) {
