@@ -23,6 +23,7 @@ class ApiConstants {
   static const String events = '/events';
   static const String myOrganizerEvents = '/events/organizer/me';
   static String eventDetail(String id) => '/events/$id';
+  static String eventStatistics(String id) => '/events/$id/statistics';
 
   // Feature: Ticket Category (/ticket-categories)
   static const String ticketCategories = '/ticket-categories';

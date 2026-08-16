@@ -76,10 +76,16 @@ class GateRepository {
         data: request.toJson(),
       );
       final data = response.data['data'];
-      if (data is List) {
-        return data.map((e) => UserModel.fromJson(e)).toList();
+      if (data == null) {
+        return [];
       }
-      return [UserModel.fromJson(data)];
+      if (data is List) {
+        return data.map((e) => UserModel.fromJson(e as Map<String, dynamic>)).toList();
+      }
+      if (data is Map<String, dynamic>) {
+        return [UserModel.fromJson(data)];
+      }
+      return [];
     } on DioException catch (e) {
       throw Exception(
         _extractErrorMessage(e, fallback: 'Failed to register gate operator'),

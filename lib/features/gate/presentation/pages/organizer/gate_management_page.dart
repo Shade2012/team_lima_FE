@@ -323,6 +323,15 @@ class _GateManagementPageState extends ConsumerState<GateManagementPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
+                onPressed: () => _navigateToRegisterOperator(gate),
+                icon: Icon(
+                  Icons.person_add_outlined,
+                  color: AppColors.success,
+                  size: 20,
+                ),
+                tooltip: 'Register Operator',
+              ),
+              IconButton(
                 onPressed: () => _navigateToEditGate(gate),
                 icon: Icon(
                   Icons.edit_outlined,
@@ -348,7 +357,7 @@ class _GateManagementPageState extends ConsumerState<GateManagementPage> {
   }
 
   void _navigateToCreateGate() async {
-    final result = await Navigator.push(
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => CreateGatePage(
@@ -357,17 +366,6 @@ class _GateManagementPageState extends ConsumerState<GateManagementPage> {
         ),
       ),
     );
-    if (result == 'register' && mounted) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => RegisterGateOperatorPage(
-            eventId: widget.eventId,
-            eventName: widget.eventName,
-          ),
-        ),
-      );
-    }
   }
 
   void _navigateToEditGate(Gate gate) {
@@ -381,6 +379,31 @@ class _GateManagementPageState extends ConsumerState<GateManagementPage> {
         ),
       ),
     );
+  }
+
+  void _navigateToRegisterOperator(Gate gate) {
+    try {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => RegisterGateOperatorPage(
+            eventId: widget.eventId,
+            eventName: widget.eventName,
+            gateId: gate.id,
+            gateName: gate.name,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: AppColors.danger,
+          ),
+        );
+      }
+    }
   }
 
   void _showDeleteConfirmation(Gate gate) {

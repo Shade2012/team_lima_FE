@@ -56,19 +56,19 @@ class GatesNotifier extends Notifier<GatesState> {
     }
   }
 
-  Future<bool> createGate(CreateGateRequest request) async {
+  Future<Gate?> createGate(CreateGateRequest request) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final repository = ref.read(gateRepositoryProvider);
       final gate = await repository.createGate(request);
       state = state.copyWith(isLoading: false, gates: [...state.gates, gate]);
-      return true;
+      return gate;
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: e.toString().replaceAll('Exception: ', ''),
       );
-      return false;
+      return null;
     }
   }
 

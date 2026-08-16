@@ -3,12 +3,14 @@ class GateOperatorData {
   final String email;
   final String password;
   final String eventId;
+  final String gateId;
 
   GateOperatorData({
     required this.username,
     required this.email,
     required this.password,
     required this.eventId,
+    required this.gateId,
   });
 
   Map<String, dynamic> toJson() {
@@ -17,6 +19,7 @@ class GateOperatorData {
       'email': email,
       'password': password,
       'eventId': eventId,
+      'gateId': gateId,
     };
   }
 }
@@ -31,6 +34,7 @@ class GateOperatorRequest {
     required String email,
     required String password,
     required String eventId,
+    required String gateId,
   }) {
     return GateOperatorRequest(
       operators: [
@@ -39,6 +43,7 @@ class GateOperatorRequest {
           email: email,
           password: password,
           eventId: eventId,
+          gateId: gateId,
         ),
       ],
     );

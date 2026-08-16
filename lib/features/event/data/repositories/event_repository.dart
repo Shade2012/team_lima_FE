@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../models/event_model.dart';
+import '../models/event_statistics_model.dart';
 import '../models/create_event_request.dart';
 import '../models/update_event_request.dart';
 import '../../../../core/network/dio_client.dart';
@@ -42,6 +43,18 @@ class EventRepository {
     } on DioException catch (e) {
       throw Exception(
         _extractErrorMessage(e, fallback: 'Failed to fetch event detail'),
+      );
+    }
+  }
+
+  /// GET /events/:id/statistics
+  Future<EventStatistics> getEventStatistics(String id) async {
+    try {
+      final response = await _dioClient.dio.get(ApiConstants.eventStatistics(id));
+      return EventStatistics.fromJson(response.data['data']);
+    } on DioException catch (e) {
+      throw Exception(
+        _extractErrorMessage(e, fallback: 'Failed to fetch event statistics'),
       );
     }
   }

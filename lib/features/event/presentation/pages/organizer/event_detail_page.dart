@@ -4,8 +4,10 @@ import 'package:intl/intl.dart';
 import 'package:team_five_fe/core/theme/app_colors.dart';
 import 'package:team_five_fe/core/theme/app_text_styles.dart';
 import 'package:team_five_fe/features/event/data/models/event_model.dart';
+import 'package:team_five_fe/features/event/data/models/event_statistics_model.dart';
 import 'package:team_five_fe/features/event/presentation/providers/event_provider.dart';
 import 'package:team_five_fe/features/event/presentation/pages/organizer/edit_event_page.dart';
+import 'package:team_five_fe/features/event/presentation/pages/organizer/ticket_category_detail_page.dart';
 import 'package:team_five_fe/features/ticket_category/presentation/providers/ticket_category_provider.dart';
 import 'package:team_five_fe/features/ticket_category/presentation/pages/organizer/ticket_category_page.dart';
 import 'package:team_five_fe/features/gate/presentation/providers/gate_provider.dart';
@@ -27,6 +29,9 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         ref.read(eventDetailProvider.notifier).loadEvent(widget.eventId);
+        ref
+            .read(eventStatisticsProvider.notifier)
+            .loadStatistics(widget.eventId);
         ref.read(categoriesProvider.notifier).setEventId(widget.eventId);
         ref.read(gatesProvider.notifier).setEventId(widget.eventId);
       }
@@ -55,15 +60,16 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
   @override
   Widget build(BuildContext context) {
     final detailState = ref.watch(eventDetailProvider);
+    final statsState = ref.watch(eventStatisticsProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
-      body: _buildBody(detailState),
+      body: _buildBody(detailState, statsState),
     );
   }
 
-  Widget _buildBody(EventDetailState state) {
-    if (state.isLoading) {
+  Widget _buildBody(EventDetailState state, EventStatisticsState statsState) {
+    if (state.isLoading || statsState.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -81,9 +87,14 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => ref
-                  .read(eventDetailProvider.notifier)
-                  .loadEvent(widget.eventId),
+              onPressed: () {
+                ref
+                    .read(eventDetailProvider.notifier)
+                    .loadEvent(widget.eventId);
+                ref
+                    .read(eventStatisticsProvider.notifier)
+                    .loadStatistics(widget.eventId);
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.white,
@@ -102,12 +113,12 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
       return const Center(child: Text('Event not found'));
     }
 
-    return _buildEventDetail(event);
+    return _buildEventDetail(event, statsState.statistics);
   }
 
   // ==================== Event Detail ====================
 
-  Widget _buildEventDetail(Event event) {
+  Widget _buildEventDetail(Event event, EventStatistics? statistics) {
     final now = DateTime.now();
     final isOnSale =
         now.isAfter(event.salesStartTime) && now.isBefore(event.salesEndTime);
@@ -128,10 +139,10 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                 _buildActionButtons(event),
                 const SizedBox(height: 16),
                 // Revenue Card
-                _buildRevenueCard(),
+                _buildRevenueCard(statistics),
                 const SizedBox(height: 16),
                 // Ticket Distribution
-                _buildTicketDistribution(),
+                _buildTicketDistribution(statistics, event),
                 const SizedBox(height: 16),
                 // Sales Timeline
                 _buildSalesTimeline(event),
@@ -153,7 +164,11 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
   // ==================== Purple Header ====================
 
   Widget _buildPurpleHeader(
-      Event event, bool isOnSale, bool isDraft, bool isEnded) {
+    Event event,
+    bool isOnSale,
+    bool isDraft,
+    bool isEnded,
+  ) {
     String statusText;
     Color statusColor;
 
@@ -234,11 +249,7 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
           // Date
           Row(
             children: [
-              const Icon(
-                Icons.calendar_today,
-                color: Colors.white70,
-                size: 14,
-              ),
+              const Icon(Icons.calendar_today, color: Colors.white70, size: 14),
               const SizedBox(width: 6),
               Text(
                 _safeDateFormat(event.eventDate),
@@ -300,9 +311,8 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
 
   // ==================== Revenue Card ====================
 
-  Widget _buildRevenueCard() {
-    // Dummy data
-    final totalRevenue = 37500000;
+  Widget _buildRevenueCard(EventStatistics? statistics) {
+    final netRevenue = statistics?.netRevenue ?? 0;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -326,7 +336,7 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Total Revenue',
+                    'Net Revenue',
                     style: AppTextStyles.bodySmall.copyWith(
                       color: AppColors.grey,
                       fontSize: 12,
@@ -334,7 +344,7 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    _formatPrice(totalRevenue),
+                    _formatPrice(netRevenue),
                     style: AppTextStyles.title.copyWith(
                       fontSize: 24,
                       fontWeight: FontWeight.w800,
@@ -346,8 +356,8 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
             ),
             Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE8F5E9),
+              decoration: const BoxDecoration(
+                color: Color(0xFFE8F5E9),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -364,18 +374,20 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
 
   // ==================== Ticket Distribution ====================
 
-  Widget _buildTicketDistribution() {
-    // Dummy data
-    final categories = [
-      {'name': 'Platinum VIP', 'sold': 450, 'total': 500, 'color': AppColors.primary},
-      {'name': 'Gold Premium', 'sold': 800, 'total': 1000, 'color': AppColors.warning},
-      {'name': 'Silver General', 'sold': 200, 'total': 2500, 'color': AppColors.grey},
-      {'name': 'Bronze Early Bird', 'sold': 100, 'total': 1000, 'color': const Color(0xFFCD7F32)},
-    ];
+  Widget _buildTicketDistribution(EventStatistics? statistics, Event event) {
+    final categories = statistics?.categories ?? [];
+    final totalSold = statistics?.totalTicketsSold ?? 0;
+    final totalQuota = statistics?.totalQuota ?? 0;
+    final soldPercentage = statistics?.percentageSold.round() ?? 0;
 
-    final totalSold = categories.fold(0, (sum, c) => sum + (c['sold'] as int));
-    final totalCapacity = categories.fold(0, (sum, c) => sum + (c['total'] as int));
-    final soldPercentage = totalCapacity > 0 ? (totalSold / totalCapacity * 100).round() : 0;
+    final List<Color> categoryColors = [
+      AppColors.primary,
+      AppColors.warning,
+      AppColors.grey,
+      const Color(0xFFCD7F32),
+      AppColors.success,
+      AppColors.danger,
+    ];
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -407,7 +419,10 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.danger.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -423,13 +438,40 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                 ),
               ],
             ),
+            const SizedBox(height: 8),
+            Text(
+              '$totalSold / $totalQuota tickets',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.grey,
+                fontSize: 12,
+              ),
+            ),
             const SizedBox(height: 20),
-            ...categories.map((cat) => _buildCategoryBar(
-                  name: cat['name'] as String,
-                  sold: cat['sold'] as int,
-                  total: cat['total'] as int,
-                  color: cat['color'] as Color,
-                )),
+            if (categories.isEmpty)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Text(
+                    'No ticket categories yet',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.grey,
+                    ),
+                  ),
+                ),
+              )
+            else
+              ...categories.asMap().entries.map((entry) {
+                final index = entry.key;
+                final cat = entry.value;
+                final color = categoryColors[index % categoryColors.length];
+                return _buildCategoryBar(
+                  category: cat,
+                  color: color,
+                  eventName: event.name,
+                  eventDate: event.eventDate,
+                  isSeated: event.isSeated,
+                );
+              }),
           ],
         ),
       ),
@@ -437,61 +479,86 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
   }
 
   Widget _buildCategoryBar({
-    required String name,
-    required int sold,
-    required int total,
+    required EventStatisticsCategory category,
     required Color color,
+    required String eventName,
+    required DateTime eventDate,
+    required bool isSeated,
   }) {
-    final progress = total > 0 ? sold / total : 0.0;
+    final progress = category.totalQuota > 0
+        ? category.ticketsSold / category.totalQuota
+        : 0.0;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    name,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                      color: AppColors.black,
-                    ),
-                  ),
-                ],
-              ),
-              Text(
-                '$sold / $total',
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.grey,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 8,
-              backgroundColor: color.withValues(alpha: 0.15),
-              valueColor: AlwaysStoppedAnimation<Color>(color),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => TicketCategoryDetailPage(
+              categoryId: category.categoryId,
+              categoryName: category.categoryName,
+              eventName: eventName,
+              eventDate: eventDate,
+              isSeated: isSeated,
             ),
           ),
-        ],
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      category.categoryName,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        color: AppColors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Text(
+                      '${category.ticketsSold} / ${category.totalQuota}',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.grey,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(Icons.chevron_right, color: AppColors.grey, size: 18),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 8,
+                backgroundColor: color.withValues(alpha: 0.15),
+                valueColor: AlwaysStoppedAnimation<Color>(color),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -502,7 +569,8 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
     final now = DateTime.now();
 
     final isBeforeSales = now.isBefore(event.salesStartTime);
-    final isDuringSales = now.isAfter(event.salesStartTime) && now.isBefore(event.salesEndTime);
+    final isDuringSales =
+        now.isAfter(event.salesStartTime) && now.isBefore(event.salesEndTime);
     final isAfterSales = now.isAfter(event.salesEndTime);
     final isBeforeEvent = now.isBefore(event.eventDate);
 
@@ -538,7 +606,10 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
               children: [
                 _buildTimelineDot(
                   label: 'Sales Start',
-                  date: _safeDateFormat(event.salesStartTime, pattern: 'MMM dd'),
+                  date: _safeDateFormat(
+                    event.salesStartTime,
+                    pattern: 'MMM dd',
+                  ),
                   isActive: !isBeforeSales,
                   isCurrent: isDuringSales,
                 ),
@@ -702,7 +773,10 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                 const Spacer(),
                 if (refundPercentage != null && refundPercentage > 0)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.warning,
                       borderRadius: BorderRadius.circular(20),
