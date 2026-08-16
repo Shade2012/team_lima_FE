@@ -100,7 +100,11 @@ Seluruh exception yang ditangkap oleh `HttpExceptionFilter` menghasilkan format:
 ### D. Feature: Gate Management (`/gates`)
 
 #### 1. Create Gate (`POST /gates`) & Get Gates by Event (`GET /gates/event/:eventId`)
-#### 2. Get Gate Details (`GET /gates/:id`)
+#### 2. Get Assigned Gate for Operator (`GET /gates/operator/assigned`)
+- **Auth**: Bearer Token (Role: `GATE_OPERATOR`)
+- **Response 200 OK**: Single `AssignedGateResponseDto` yang berisi detail `gateId`, `name`, `event` info, dan daftar `operators`.
+
+#### 3. Get Gate Details (`GET /gates/:id`)
 - **Auth**: Public
 - **Response 200 OK**: Gate object beserta daftar `operators` (UserResponseDto[]) yang ditugaskan di gate tersebut.
 
