@@ -530,46 +530,46 @@ class _CustomerEventDetailPageState
                             : null,
                       ),
                     ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          category.name,
-                          style: AppTextStyles.bodyLarge.copyWith(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15,
-                            color: AppColors.black,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            category.name,
+                            style: AppTextStyles.bodyLarge.copyWith(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                              color: AppColors.black,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${category.totalQuota} Seats Quota',
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: Colors.black45,
-                            fontSize: 12,
+                          const SizedBox(height: 2),
+                          Text(
+                            '${category.totalQuota} Seats Quota',
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: Colors.black45,
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  Text(
-                    'Rp ${NumberFormat('#,###').format(category.price)}',
-                    style: AppTextStyles.title.copyWith(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.primary,
+                    Text(
+                      'Rp ${NumberFormat('#,###').format(category.price)}',
+                      style: AppTextStyles.title.copyWith(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.primary,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      }),
-    ),
-  );
-}
+          );
+        }),
+      ),
+    );
+  }
 
   Widget _buildFallbackCategoryList() {
     final fallbackList = [
@@ -614,46 +614,46 @@ class _CustomerEventDetailPageState
                             : null,
                       ),
                     ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item['name'] as String,
-                          style: AppTextStyles.bodyLarge.copyWith(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15,
-                            color: AppColors.black,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item['name'] as String,
+                            style: AppTextStyles.bodyLarge.copyWith(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                              color: AppColors.black,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${item['quota']} Quota Left',
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: Colors.black45,
-                            fontSize: 12,
+                          const SizedBox(height: 2),
+                          Text(
+                            '${item['quota']} Quota Left',
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: Colors.black45,
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  Text(
-                    '\$${(item['price'] as double).toInt()}',
-                    style: AppTextStyles.title.copyWith(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.primary,
+                    Text(
+                      '\$${(item['price'] as double).toInt()}',
+                      style: AppTextStyles.title.copyWith(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.primary,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      }),
-    ),
-  );
-}
+          );
+        }),
+      ),
+    );
+  }
 
   Widget _buildBottomActionBar(
     BuildContext context,

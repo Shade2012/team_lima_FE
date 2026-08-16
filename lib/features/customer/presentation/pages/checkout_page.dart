@@ -181,8 +181,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     );
   }
 
-  // ==================== Payment Methods Section ====================
-
   Widget _buildPaymentMethods(CheckoutState state, CheckoutNotifier notifier) {
     return RadioGroup<String>(
       groupValue: state.paymentMethod,
@@ -221,173 +219,173 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                                 : null,
                           ),
                         ),
-                      const Icon(
-                        Icons.credit_card,
-                        color: AppColors.primary,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Credit or Debit Card',
-                          style: AppTextStyles.bodyMedium.copyWith(
+                        const Icon(
+                          Icons.credit_card,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Credit or Debit Card',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                        // Card Brands Badges
+                        _buildBrandBadge('VISA'),
+                        const SizedBox(width: 4),
+                        _buildBrandBadge('MC'),
+                      ],
+                    ),
+                  ),
+                ),
+                // Expanded Form Inputs (when card is selected)
+                if (state.paymentMethod == 'card')
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Divider(height: 1, color: Color(0xFFF0F0F5)),
+                        const SizedBox(height: 12),
+                        // Card Number Label & Field
+                        Text(
+                          'CARD NUMBER',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: Colors.black54,
                             fontWeight: FontWeight.w700,
-                            fontSize: 14,
+                            fontSize: 10,
+                            letterSpacing: 0.5,
                           ),
                         ),
-                      ),
-                      // Card Brands Badges
-                      _buildBrandBadge('VISA'),
-                      const SizedBox(width: 4),
-                      _buildBrandBadge('MC'),
-                    ],
-                  ),
-                ),
-              ),
-              // Expanded Form Inputs (when card is selected)
-              if (state.paymentMethod == 'card')
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Divider(height: 1, color: Color(0xFFF0F0F5)),
-                      const SizedBox(height: 12),
-                      // Card Number Label & Field
-                      Text(
-                        'CARD NUMBER',
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: Colors.black54,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 10,
-                          letterSpacing: 0.5,
+                        const SizedBox(height: 6),
+                        TextField(
+                          controller: _cardNumberController,
+                          keyboardType: TextInputType.number,
+                          style: AppTextStyles.bodyMedium,
+                          decoration: _buildInputDecoration(
+                            hintText: '0000 0000 0000 0000',
+                            suffixIcon: Icons.credit_card_outlined,
+                          ),
+                          onChanged: (val) => notifier.setCardNumber(val),
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      TextField(
-                        controller: _cardNumberController,
-                        keyboardType: TextInputType.number,
-                        style: AppTextStyles.bodyMedium,
-                        decoration: _buildInputDecoration(
-                          hintText: '0000 0000 0000 0000',
-                          suffixIcon: Icons.credit_card_outlined,
-                        ),
-                        onChanged: (val) => notifier.setCardNumber(val),
-                      ),
-                      const SizedBox(height: 12),
+                        const SizedBox(height: 12),
 
-                      // Expiry & CVC Row
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'EXPIRY DATE',
-                                  style: AppTextStyles.bodySmall.copyWith(
-                                    color: Colors.black54,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 10,
-                                    letterSpacing: 0.5,
+                        // Expiry & CVC Row
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'EXPIRY DATE',
+                                    style: AppTextStyles.bodySmall.copyWith(
+                                      color: Colors.black54,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 10,
+                                      letterSpacing: 0.5,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 6),
-                                TextField(
-                                  controller: _expiryController,
-                                  keyboardType: TextInputType.datetime,
-                                  style: AppTextStyles.bodyMedium,
-                                  decoration: _buildInputDecoration(
-                                    hintText: 'MM/YY',
+                                  const SizedBox(height: 6),
+                                  TextField(
+                                    controller: _expiryController,
+                                    keyboardType: TextInputType.datetime,
+                                    style: AppTextStyles.bodyMedium,
+                                    decoration: _buildInputDecoration(
+                                      hintText: 'MM/YY',
+                                    ),
+                                    onChanged: (val) =>
+                                        notifier.setExpiryDate(val),
                                   ),
-                                  onChanged: (val) =>
-                                      notifier.setExpiryDate(val),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'CVC',
-                                  style: AppTextStyles.bodySmall.copyWith(
-                                    color: Colors.black54,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 10,
-                                    letterSpacing: 0.5,
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'CVC',
+                                    style: AppTextStyles.bodySmall.copyWith(
+                                      color: Colors.black54,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 10,
+                                      letterSpacing: 0.5,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 6),
-                                TextField(
-                                  controller: _cvcController,
-                                  keyboardType: TextInputType.number,
-                                  obscureText: true,
-                                  style: AppTextStyles.bodyMedium,
-                                  decoration: _buildInputDecoration(
-                                    hintText: '123',
-                                    suffixIcon: Icons.info_outline,
+                                  const SizedBox(height: 6),
+                                  TextField(
+                                    controller: _cvcController,
+                                    keyboardType: TextInputType.number,
+                                    obscureText: true,
+                                    style: AppTextStyles.bodyMedium,
+                                    decoration: _buildInputDecoration(
+                                      hintText: '123',
+                                      suffixIcon: Icons.info_outline,
+                                    ),
+                                    onChanged: (val) => notifier.setCvc(val),
                                   ),
-                                  onChanged: (val) => notifier.setCvc(val),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
 
-                      // Cardholder Name
-                      Text(
-                        'CARDHOLDER NAME',
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: Colors.black54,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 10,
-                          letterSpacing: 0.5,
+                        // Cardholder Name
+                        Text(
+                          'CARDHOLDER NAME',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: Colors.black54,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 10,
+                            letterSpacing: 0.5,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      TextField(
-                        controller: _cardHolderController,
-                        style: AppTextStyles.bodyMedium,
-                        decoration: _buildInputDecoration(
-                          hintText: 'Name on card',
+                        const SizedBox(height: 6),
+                        TextField(
+                          controller: _cardHolderController,
+                          style: AppTextStyles.bodyMedium,
+                          decoration: _buildInputDecoration(
+                            hintText: 'Name on card',
+                          ),
+                          onChanged: (val) => notifier.setCardHolderName(val),
                         ),
-                        onChanged: (val) => notifier.setCardHolderName(val),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 10),
+          const SizedBox(height: 10),
 
-        // 2. Digital Wallet Option Box
-        _buildPaymentOptionBox(
-          title: 'Digital Wallet',
-          value: 'wallet',
-          groupValue: state.paymentMethod,
-          icon: Icons.account_balance_wallet_outlined,
-          onSelect: () => notifier.setPaymentMethod('wallet'),
-        ),
-        const SizedBox(height: 10),
+          // 2. Digital Wallet Option Box
+          _buildPaymentOptionBox(
+            title: 'Digital Wallet',
+            value: 'wallet',
+            groupValue: state.paymentMethod,
+            icon: Icons.account_balance_wallet_outlined,
+            onSelect: () => notifier.setPaymentMethod('wallet'),
+          ),
+          const SizedBox(height: 10),
 
-        // 3. Bank Transfer Option Box
-        _buildPaymentOptionBox(
-          title: 'Bank Transfer',
-          value: 'bank',
-          groupValue: state.paymentMethod,
-          icon: Icons.account_balance_outlined,
-          onSelect: () => notifier.setPaymentMethod('bank'),
-        ),
-      ],
-    ),
-  );
-}
+          // 3. Bank Transfer Option Box
+          _buildPaymentOptionBox(
+            title: 'Bank Transfer',
+            value: 'bank',
+            groupValue: state.paymentMethod,
+            icon: Icons.account_balance_outlined,
+            onSelect: () => notifier.setPaymentMethod('bank'),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildBrandBadge(String label) {
     return Container(
