@@ -184,36 +184,43 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   // ==================== Payment Methods Section ====================
 
   Widget _buildPaymentMethods(CheckoutState state, CheckoutNotifier notifier) {
-    return Column(
-      children: [
-        // 1. Credit or Debit Card Option Box
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: state.paymentMethod == 'card'
-                  ? AppColors.primary
-                  : const Color(0xFFE5E5EA),
-              width: state.paymentMethod == 'card' ? 2 : 1,
+    return RadioGroup<String>(
+      groupValue: state.paymentMethod,
+      onChanged: (val) {
+        if (val != null) notifier.setPaymentMethod(val);
+      },
+      child: Column(
+        children: [
+          // 1. Credit or Debit Card Option Box
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: state.paymentMethod == 'card'
+                    ? AppColors.primary
+                    : const Color(0xFFE5E5EA),
+                width: state.paymentMethod == 'card' ? 2 : 1,
+              ),
             ),
-          ),
-          child: Column(
-            children: [
-              // Header Radio Tile
-              InkWell(
-                onTap: () => notifier.setPaymentMethod('card'),
-                borderRadius: BorderRadius.circular(16),
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Row(
-                    children: [
-                      Radio<String>(
-                        value: 'card',
-                        groupValue: state.paymentMethod,
-                        activeColor: AppColors.primary,
-                        onChanged: (val) => notifier.setPaymentMethod(val!),
-                      ),
+            child: Column(
+              children: [
+                // Header Radio Tile
+                InkWell(
+                  onTap: () => notifier.setPaymentMethod('card'),
+                  borderRadius: BorderRadius.circular(16),
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Row(
+                      children: [
+                        Radio<String>(
+                          value: 'card',
+                          fillColor: WidgetStateProperty.resolveWith(
+                            (states) => states.contains(WidgetState.selected)
+                                ? AppColors.primary
+                                : null,
+                          ),
+                        ),
                       const Icon(
                         Icons.credit_card,
                         color: AppColors.primary,
@@ -378,8 +385,9 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
           onSelect: () => notifier.setPaymentMethod('bank'),
         ),
       ],
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildBrandBadge(String label) {
     return Container(
@@ -424,9 +432,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
           children: [
             Radio<String>(
               value: value,
-              groupValue: groupValue,
-              activeColor: AppColors.primary,
-              onChanged: (_) => onSelect(),
+              fillColor: WidgetStateProperty.resolveWith(
+                (states) => states.contains(WidgetState.selected)
+                    ? AppColors.primary
+                    : null,
+              ),
             ),
             Icon(
               icon,
@@ -489,7 +499,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         children: [
           Checkbox(
             value: state.sameAsProfileAddress,
-            activeColor: AppColors.primary,
+            fillColor: WidgetStateProperty.resolveWith(
+              (states) => states.contains(WidgetState.selected)
+                  ? AppColors.primary
+                  : null,
+            ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(4),
             ),

@@ -493,37 +493,43 @@ class _CustomerEventDetailPageState
   Widget _buildCategoryList(List<TicketCategory> categories) {
     if (categories.isEmpty) return _buildFallbackCategoryList();
 
-    return Column(
-      children: List.generate(categories.length, (index) {
-        final category = categories[index];
-        final isSelected = index == _selectedCategoryIndex;
+    return RadioGroup<int>(
+      groupValue: _selectedCategoryIndex,
+      onChanged: (val) {
+        if (val != null) setState(() => _selectedCategoryIndex = val);
+      },
+      child: Column(
+        children: List.generate(categories.length, (index) {
+          final category = categories[index];
+          final isSelected = index == _selectedCategoryIndex;
 
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: InkWell(
-            onTap: () => setState(() => _selectedCategoryIndex = index),
-            borderRadius: BorderRadius.circular(16),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: isSelected
-                      ? AppColors.primary
-                      : const Color(0xFFE5E5EA),
-                  width: isSelected ? 2 : 1,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Radio<int>(
-                    value: index,
-                    groupValue: _selectedCategoryIndex,
-                    activeColor: AppColors.primary,
-                    onChanged: (val) =>
-                        setState(() => _selectedCategoryIndex = val!),
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: InkWell(
+              onTap: () => setState(() => _selectedCategoryIndex = index),
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isSelected
+                        ? AppColors.primary
+                        : const Color(0xFFE5E5EA),
+                    width: isSelected ? 2 : 1,
                   ),
+                ),
+                child: Row(
+                  children: [
+                    Radio<int>(
+                      value: index,
+                      fillColor: WidgetStateProperty.resolveWith(
+                        (states) => states.contains(WidgetState.selected)
+                            ? AppColors.primary
+                            : null,
+                      ),
+                    ),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -561,8 +567,9 @@ class _CustomerEventDetailPageState
           ),
         );
       }),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildFallbackCategoryList() {
     final fallbackList = [
@@ -570,37 +577,43 @@ class _CustomerEventDetailPageState
       {'name': 'Regular Admission', 'price': 75.0, 'quota': 300},
     ];
 
-    return Column(
-      children: List.generate(fallbackList.length, (index) {
-        final item = fallbackList[index];
-        final isSelected = index == _selectedCategoryIndex;
+    return RadioGroup<int>(
+      groupValue: _selectedCategoryIndex,
+      onChanged: (val) {
+        if (val != null) setState(() => _selectedCategoryIndex = val);
+      },
+      child: Column(
+        children: List.generate(fallbackList.length, (index) {
+          final item = fallbackList[index];
+          final isSelected = index == _selectedCategoryIndex;
 
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: InkWell(
-            onTap: () => setState(() => _selectedCategoryIndex = index),
-            borderRadius: BorderRadius.circular(16),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: isSelected
-                      ? AppColors.primary
-                      : const Color(0xFFE5E5EA),
-                  width: isSelected ? 2 : 1,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Radio<int>(
-                    value: index,
-                    groupValue: _selectedCategoryIndex,
-                    activeColor: AppColors.primary,
-                    onChanged: (val) =>
-                        setState(() => _selectedCategoryIndex = val!),
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: InkWell(
+              onTap: () => setState(() => _selectedCategoryIndex = index),
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isSelected
+                        ? AppColors.primary
+                        : const Color(0xFFE5E5EA),
+                    width: isSelected ? 2 : 1,
                   ),
+                ),
+                child: Row(
+                  children: [
+                    Radio<int>(
+                      value: index,
+                      fillColor: WidgetStateProperty.resolveWith(
+                        (states) => states.contains(WidgetState.selected)
+                            ? AppColors.primary
+                            : null,
+                      ),
+                    ),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -638,8 +651,9 @@ class _CustomerEventDetailPageState
           ),
         );
       }),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildBottomActionBar(
     BuildContext context,
