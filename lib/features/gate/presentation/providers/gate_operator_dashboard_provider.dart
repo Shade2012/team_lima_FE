@@ -22,15 +22,15 @@ class GateOperatorEvent {
   bool get isActive {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final eventDay = DateTime(event.eventDate.year, event.eventDate.month, event.eventDate.day);
+    final eventDay = DateTime(
+      event.eventDate.year,
+      event.eventDate.month,
+      event.eventDate.day,
+    );
     return eventDay.isAtSameMomentAs(today);
   }
 
-  GateOperatorEvent copyWith({
-    Gate? gate,
-    Event? event,
-    bool? isSelected,
-  }) {
+  GateOperatorEvent copyWith({Gate? gate, Event? event, bool? isSelected}) {
     return GateOperatorEvent(
       gate: gate ?? this.gate,
       event: event ?? this.event,
@@ -63,7 +63,8 @@ class GateOperatorDashboardState {
   }
 }
 
-class GateOperatorDashboardNotifier extends Notifier<GateOperatorDashboardState> {
+class GateOperatorDashboardNotifier
+    extends Notifier<GateOperatorDashboardState> {
   @override
   GateOperatorDashboardState build() {
     final now = DateTime.now();
@@ -87,24 +88,9 @@ class GateOperatorDashboardNotifier extends Notifier<GateOperatorDashboardState>
         eventId: 'event_1',
         scans: dummyScans1,
       ),
-      Gate(
-        id: 'gate_2',
-        name: 'Gate 2',
-        eventId: 'event_2',
-        scans: [],
-      ),
-      Gate(
-        id: 'gate_3',
-        name: 'Gate 1',
-        eventId: 'event_3',
-        scans: [],
-      ),
-      Gate(
-        id: 'gate_4',
-        name: 'Gate 3',
-        eventId: 'event_4',
-        scans: [],
-      ),
+      Gate(id: 'gate_2', name: 'Gate 2', eventId: 'event_2', scans: []),
+      Gate(id: 'gate_3', name: 'Gate 1', eventId: 'event_3', scans: []),
+      Gate(id: 'gate_4', name: 'Gate 3', eventId: 'event_4', scans: []),
     ];
 
     final dummyEvents = [
@@ -152,23 +138,12 @@ class GateOperatorDashboardNotifier extends Notifier<GateOperatorDashboardState>
         event: dummyEvents[0],
         isSelected: true,
       ),
-      GateOperatorEvent(
-        gate: dummyGates[1],
-        event: dummyEvents[1],
-      ),
-      GateOperatorEvent(
-        gate: dummyGates[2],
-        event: dummyEvents[2],
-      ),
-      GateOperatorEvent(
-        gate: dummyGates[3],
-        event: dummyEvents[3],
-      ),
+      GateOperatorEvent(gate: dummyGates[1], event: dummyEvents[1]),
+      GateOperatorEvent(gate: dummyGates[2], event: dummyEvents[2]),
+      GateOperatorEvent(gate: dummyGates[3], event: dummyEvents[3]),
     ];
 
-    return GateOperatorDashboardState(
-      events: dummyOperatorEvents,
-    );
+    return GateOperatorDashboardState(events: dummyOperatorEvents);
   }
 
   void selectEvent(String eventId) {
@@ -182,5 +157,5 @@ class GateOperatorDashboardNotifier extends Notifier<GateOperatorDashboardState>
 
 final gateOperatorDashboardProvider =
     NotifierProvider<GateOperatorDashboardNotifier, GateOperatorDashboardState>(
-  () => GateOperatorDashboardNotifier(),
-);
+      () => GateOperatorDashboardNotifier(),
+    );
