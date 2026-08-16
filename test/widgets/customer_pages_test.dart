@@ -21,15 +21,17 @@ class MockCustomerExploreNotifier extends CustomerExploreNotifier {
 
 void main() {
   group('Customer Pages Widget Tests', () {
-    testWidgets('CustomerMainScreen renders VELOCE app bar and bottom tabs', (tester) async {
+    testWidgets('CustomerMainScreen renders VELOCE app bar and bottom tabs', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            customerExploreProvider.overrideWith(() => MockCustomerExploreNotifier()),
+            customerExploreProvider.overrideWith(
+              () => MockCustomerExploreNotifier(),
+            ),
           ],
-          child: const MaterialApp(
-            home: CustomerMainScreen(),
-          ),
+          child: const MaterialApp(home: CustomerMainScreen()),
         ),
       );
 
@@ -42,27 +44,32 @@ void main() {
       expect(find.text('Profile'), findsOneWidget);
     });
 
-    testWidgets('CustomerEventDetailPage renders details and category selection', (tester) async {
-      await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: CustomerEventDetailPage(
-              eventName: 'Sonic Resonance Festival 2024',
-              categoryName: 'ELECTRONIC',
-              price: 150.0,
+    testWidgets(
+      'CustomerEventDetailPage renders details and category selection',
+      (tester) async {
+        await tester.pumpWidget(
+          const ProviderScope(
+            child: MaterialApp(
+              home: CustomerEventDetailPage(
+                eventName: 'Sonic Resonance Festival 2024',
+                categoryName: 'ELECTRONIC',
+                price: 150.0,
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
 
-      expect(find.text('Event Details'), findsOneWidget);
-      expect(find.text('Sonic Resonance Festival 2024'), findsOneWidget);
-      expect(find.text('Select Ticket Category'), findsOneWidget);
-    });
+        expect(find.text('Event Details'), findsOneWidget);
+        expect(find.text('Sonic Resonance Festival 2024'), findsOneWidget);
+        expect(find.text('Select Ticket Category'), findsOneWidget);
+      },
+    );
 
-    testWidgets('SeatSelectionPage renders stage indicator and seat grid', (tester) async {
+    testWidgets('SeatSelectionPage renders stage indicator and seat grid', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         const ProviderScope(
           child: MaterialApp(
@@ -86,7 +93,9 @@ void main() {
       expect(find.text('Confirm & Checkout'), findsOneWidget);
     });
 
-    testWidgets('CheckoutPage renders order summary and payment methods', (tester) async {
+    testWidgets('CheckoutPage renders order summary and payment methods', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         const ProviderScope(
           child: MaterialApp(

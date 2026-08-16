@@ -55,12 +55,10 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         run: |
           if [ -n "$KEY_PASSWORD" ]; then
-            cat << EOF > android/key.properties
-            storePassword=$STORE_PASSWORD
-            keyPassword=$KEY_PASSWORD
-            keyAlias=$KEY_ALIAS
-            storeFile=app/upload-keystore.jks
-            EOF
+            echo "storePassword=$STORE_PASSWORD" > android/key.properties
+            echo "keyPassword=$KEY_PASSWORD" >> android/key.properties
+            echo "keyAlias=$KEY_ALIAS" >> android/key.properties
+            echo "storeFile=app/upload-keystore.jks" >> android/key.properties
           fi
 
       - name: Build APK

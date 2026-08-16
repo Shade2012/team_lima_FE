@@ -34,10 +34,7 @@ class _CustomerMainScreenState extends State<CustomerMainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -56,7 +53,12 @@ class _CustomerMainScreenState extends State<CustomerMainScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildNavItem(0, Icons.explore_outlined, Icons.explore, 'Explore'),
+                _buildNavItem(
+                  0,
+                  Icons.explore_outlined,
+                  Icons.explore,
+                  'Explore',
+                ),
                 _buildNavItem(
                   1,
                   Icons.calendar_month_outlined,
@@ -69,12 +71,7 @@ class _CustomerMainScreenState extends State<CustomerMainScreen> {
                   Icons.favorite,
                   'Saved',
                 ),
-                _buildNavItem(
-                  3,
-                  Icons.person_outline,
-                  Icons.person,
-                  'Profile',
-                ),
+                _buildNavItem(3, Icons.person_outline, Icons.person, 'Profile'),
               ],
             ),
           ),

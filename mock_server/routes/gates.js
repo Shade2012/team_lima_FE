@@ -27,6 +27,15 @@ module.exports = function (db) {
   router.get('/event/:eventId', (req, res) => {
     const gates = db.gates
       .filter(g => g.eventId === req.params.eventId)
+      .map(g => {
+        const operators = db.users
+          .filter(u => u.role === 'GATE_OPERATOR' && u.gateId === g.id)
+          .map(({ password, ...userRes }) => userRes);
+        return {
+          ...g,
+          operators
+        };
+      })
       .sort((a, b) => a.name.localeCompare(b.name));
 
     return res.status(200).json({
@@ -93,9 +102,16 @@ module.exports = function (db) {
       });
     }
 
+    const operators = db.users
+      .filter(u => u.role === 'GATE_OPERATOR' && u.gateId === gate.id)
+      .map(({ password, ...userRes }) => userRes);
+
     return res.status(200).json({
       message: 'Success',
-      data: gate
+      data: {
+        ...gate,
+        operators
+      }
     });
   });
 

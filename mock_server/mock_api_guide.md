@@ -85,7 +85,8 @@ Server sudah dilengkapi data awal (_seed data_) dari file `mock_server/data/init
 | :-------------- | :---------------------- | :------------- | :------------------------------------- | :------------------------------------ |
 | `CUSTOMER`      | `john@example.com`      | `Password123!` | `019146a0-7d1e-7abc-9a12-abcdef123456` | Pengunjung/Pembeli Tiket              |
 | `ORGANIZER`     | `organizer@example.com` | `Password123!` | `019146a0-0000-7abc-0000-abcdef000001` | Pemilik Event                         |
-| `GATE_OPERATOR` | `gateop@example.com`    | `Password123!` | `019146a0-0000-7abc-0000-abcdef000002` | Petugas Gerbang (`eventId` terhubung) |
+| `GATE_OPERATOR` | `gateop@example.com`    | `Password123!` | `019146a0-0000-7abc-0000-abcdef000002` | Petugas Gerbang (`eventId` & `gateId` terhubung) |
+| `ADMIN`         | `admin@example.com`     | `Password123!` | `019146a0-0000-7abc-0000-admin0000001` | Pengelola / Admin Sistem (Approve/Reject Refund) |
 
 ---
 
@@ -398,7 +399,7 @@ Server sudah dilengkapi data awal (_seed data_) dari file `mock_server/data/init
   ```json
   {
     "providerTrxId": "ZXlKcGF5bWVudElkIjoiMDE5MTQ2YTAtN2QxZS03YWJjLTlhMTItcGF5MDAwMDAwMDAxIiwib3JkZXJJZCI6IjAxOTE0NmEwLTdkMWUtN2FiYy05YTEyLW9yZGVyMDAwMDAwMSJ9",
-    "paymentMethod": "QRIS"
+    "paymentMethod": "GOPAY"
   }
   ```
 - **Response 200 OK**:
@@ -408,6 +409,76 @@ Server sudah dilengkapi data awal (_seed data_) dari file `mock_server/data/init
     "data": true
   }
   ```
+
+---
+
+### G. Order Management (`/orders`)
+
+#### 1. Create Order (`POST /orders/event/:eventId`)
+- **Auth**: Bearer Token (Role: `CUSTOMER`)
+- **Body Request**:
+  ```json
+  {
+    "seats": [
+      {
+        "categoryId": "019146a0-7d1e-7abc-9a12-category0001",
+        "seatId": "019146a0-7d1e-7abc-9a12-seat00000001"
+      }
+    ]
+  }
+  ```
+- **Response 201 Created**:
+  ```json
+  {
+    "message": "Success",
+    "data": {
+      "orderId": "019146a0-7d1e-7abc-9a12-order0000001",
+      "checkoutUrl": "https://mock-pg.team-lima.com/checkout/ZXlKcGF5...",
+      "providerTrxId": "ZXlKcGF5...",
+      "totalAmount": 1500000
+    }
+  }
+  ```
+
+#### 2. Get My Orders (`GET /orders/customer`)
+- **Auth**: Bearer Token (Role: `CUSTOMER`)
+- **Response 200 OK**: Array of Order objects dengan `tickets` & `payments`.
+
+---
+
+### H. Customer Tickets (`/tickets`)
+
+#### 1. Get My Active Tickets (`GET /tickets/my-tickets`)
+- **Auth**: Bearer Token (Role: `CUSTOMER`)
+- **Response 200 OK**: Array tiket aktif (`status == "AVAILABLE"` dan order `PAID`).
+
+#### 2. Get Ticket Detail (`GET /tickets/:id`)
+- **Auth**: Bearer Token (Role: `CUSTOMER`)
+- **Response 200 OK**: Detail tiket beserta event, category, seat, scan, & refund status.
+
+---
+
+### I. Refund Management (`/refunds`)
+
+#### 1. Request Refund (`POST /refunds`)
+- **Auth**: Bearer Token (Role: `CUSTOMER`)
+- **Body Request**:
+  ```json
+  {
+    "ticketId": "019146a0-0000-7abc-0000-abcdef000010",
+    "reason": "Tidak bisa hadir karena halangan mendadak"
+  }
+  ```
+- **Response 201 Created**: Object Refund dengan `status: "PENDING"`.
+
+#### 2. Approve Refund (`PATCH /refunds/:id/approve`)
+- **Auth**: Bearer Token (Role: `ADMIN`)
+- **Response 200 OK**: Object Refund dengan `status: "APPROVED"`.
+
+#### 3. Reject Refund (`PATCH /refunds/:id/reject`)
+- **Auth**: Bearer Token (Role: `ADMIN`)
+- **Body Request**: `{ "rejectReason": "Alasan pengajuan tidak valid" }`
+- **Response 200 OK**: Object Refund dengan `status: "REJECTED"`.
 
 ---
 

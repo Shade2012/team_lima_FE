@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../providers/customer_provider.dart';
-import 'checkout_page.dart';
 import 'customer_event_detail_page.dart';
 
 class CustomerExplorePage extends ConsumerWidget {
@@ -43,7 +42,12 @@ class CustomerExplorePage extends ConsumerWidget {
                     ),
                     const SizedBox(height: 24),
                     // "For You" Section
-                    _buildForYouSection(context, ref, exploreState, exploreNotifier),
+                    _buildForYouSection(
+                      context,
+                      ref,
+                      exploreState,
+                      exploreNotifier,
+                    ),
                   ],
                 ),
               ),
@@ -107,7 +111,10 @@ class CustomerExplorePage extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Search Events', style: AppTextStyles.title.copyWith(fontSize: 18)),
+        title: Text(
+          'Search Events',
+          style: AppTextStyles.title.copyWith(fontSize: 18),
+        ),
         content: TextField(
           controller: controller,
           autofocus: true,
@@ -304,7 +311,7 @@ class CustomerExplorePage extends ConsumerWidget {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: categories.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 10),
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
           final category = categories[index];
           final isSelected = category == selectedCategory;
@@ -318,7 +325,9 @@ class CustomerExplorePage extends ConsumerWidget {
                 color: isSelected ? AppColors.primary : const Color(0xFFF2F2F7),
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
-                  color: isSelected ? AppColors.primary : const Color(0xFFE5E5EA),
+                  color: isSelected
+                      ? AppColors.primary
+                      : const Color(0xFFE5E5EA),
                 ),
               ),
               child: Center(
@@ -415,7 +424,7 @@ class CustomerExplorePage extends ConsumerWidget {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: cardItems.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 16),
+            separatorBuilder: (_, _) => const SizedBox(width: 16),
             itemBuilder: (context, index) {
               final item = cardItems[index];
               final isSaved = state.savedEventIds.contains(item['id']);
@@ -431,7 +440,8 @@ class CustomerExplorePage extends ConsumerWidget {
                 price: item['price'] as double,
                 isSaved: isSaved,
                 gradientColors: item['gradient'] as List<Color>,
-                onToggleSave: () => notifier.toggleSaveEvent(item['id'] as String),
+                onToggleSave: () =>
+                    notifier.toggleSaveEvent(item['id'] as String),
               );
             },
           ),
@@ -479,7 +489,9 @@ class CustomerExplorePage extends ConsumerWidget {
                 height: 140,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(20),
+                  ),
                   gradient: LinearGradient(
                     colors: gradientColors,
                     begin: Alignment.topLeft,
@@ -488,7 +500,9 @@ class CustomerExplorePage extends ConsumerWidget {
                 ),
                 child: Center(
                   child: Icon(
-                    category == 'ELECTRONIC' ? Icons.equalizer : Icons.music_note,
+                    category == 'ELECTRONIC'
+                        ? Icons.equalizer
+                        : Icons.music_note,
                     color: Colors.white38,
                     size: 48,
                   ),

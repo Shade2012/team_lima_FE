@@ -15,7 +15,8 @@ class TicketDetailPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ticketsState = ref.watch(customerTicketsProvider);
-    final currentTicket = ticket ??
+    final currentTicket =
+        ticket ??
         (ticketsState.tickets.isNotEmpty
             ? ticketsState.tickets.first
             : CustomerTicket(
@@ -29,7 +30,8 @@ class TicketDetailPage extends ConsumerWidget {
                 venueAddress: '124 Industrial Ave, Metro City',
                 attendeeName: 'Alex Chen',
                 ticketType: 'All Access',
-                qrData: 'DIGITAL TICKET | VELOCE\nNeon Jungle Festival\nNJF-2491',
+                qrData:
+                    'DIGITAL TICKET | VELOCE\nNeon Jungle Festival\nNJF-2491',
                 status: 'UPCOMING',
               ));
 
@@ -48,7 +50,10 @@ class TicketDetailPage extends ConsumerWidget {
             Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 child: Column(
                   children: [
                     // Main Ticket Pass Stub Card
@@ -60,7 +65,12 @@ class TicketDetailPage extends ConsumerWidget {
                     ),
                     const SizedBox(height: 24),
                     // Action Buttons
-                    _buildActionButtons(context, ref, currentTicket, isRefunded),
+                    _buildActionButtons(
+                      context,
+                      ref,
+                      currentTicket,
+                      isRefunded,
+                    ),
                     const SizedBox(height: 24),
                   ],
                 ),
@@ -335,7 +345,11 @@ class TicketDetailPage extends ConsumerWidget {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.cancel, size: 40, color: AppColors.danger),
+                                Icon(
+                                  Icons.cancel,
+                                  size: 40,
+                                  color: AppColors.danger,
+                                ),
                                 SizedBox(height: 8),
                                 Text(
                                   'TICKET REFUNDED',
@@ -446,7 +460,8 @@ class TicketDetailPage extends ConsumerWidget {
             builder: (context, constraints) {
               const dashWidth = 5.0;
               const dashSpace = 4.0;
-              final count = (constraints.maxWidth / (dashWidth + dashSpace)).floor();
+              final count = (constraints.maxWidth / (dashWidth + dashSpace))
+                  .floor();
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: List.generate(count, (_) {
@@ -580,7 +595,10 @@ class TicketDetailPage extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Request Refund', style: AppTextStyles.title.copyWith(fontSize: 18)),
+        title: Text(
+          'Request Refund',
+          style: AppTextStyles.title.copyWith(fontSize: 18),
+        ),
         content: Text(
           'Are you sure you want to request a refund for ${ticket.eventName}?\n(80% refund policy applies)',
           style: AppTextStyles.bodyMedium,

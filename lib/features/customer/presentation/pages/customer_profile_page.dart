@@ -16,12 +16,16 @@ class CustomerProfilePage extends ConsumerWidget {
     final authState = ref.watch(authProvider);
     final user = authState.currentUser;
     final ticketsState = ref.watch(customerTicketsProvider);
-    final latestTicket =
-        ticketsState.tickets.isNotEmpty ? ticketsState.tickets.first : null;
+    final latestTicket = ticketsState.tickets.isNotEmpty
+        ? ticketsState.tickets.first
+        : null;
 
-    final userName = user?.username.isNotEmpty == true ? user!.username : 'Alex Chen';
-    final userEmail =
-        user?.email.isNotEmpty == true ? user!.email : 'alex.chen@example.com';
+    final userName = user?.username.isNotEmpty == true
+        ? user!.username
+        : 'Alex Chen';
+    final userEmail = user?.email.isNotEmpty == true
+        ? user!.email
+        : 'alex.chen@example.com';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FE),
@@ -34,7 +38,10 @@ class CustomerProfilePage extends ConsumerWidget {
             Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 child: Column(
                   children: [
                     // Profile Header Card
@@ -168,11 +175,7 @@ class CustomerProfilePage extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  child: const Icon(
-                    Icons.edit,
-                    size: 14,
-                    color: Colors.white,
-                  ),
+                  child: const Icon(Icons.edit, size: 14, color: Colors.white),
                 ),
               ),
             ],
@@ -203,7 +206,10 @@ class CustomerProfilePage extends ConsumerWidget {
             children: [
               // Customer Pill
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF2F2F7),
                   borderRadius: BorderRadius.circular(16),
@@ -211,7 +217,11 @@ class CustomerProfilePage extends ConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.check_circle_outline, size: 14, color: Colors.black87),
+                    const Icon(
+                      Icons.check_circle_outline,
+                      size: 14,
+                      color: Colors.black87,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       'Customer',
@@ -227,7 +237,10 @@ class CustomerProfilePage extends ConsumerWidget {
               const SizedBox(width: 8),
               // Premium Pill
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF6E8FF),
                   borderRadius: BorderRadius.circular(16),
@@ -540,7 +553,10 @@ class CustomerProfilePage extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Logout', style: AppTextStyles.title.copyWith(fontSize: 18)),
+        title: Text(
+          'Logout',
+          style: AppTextStyles.title.copyWith(fontSize: 18),
+        ),
         content: Text(
           'Are you sure you want to logout from VELOCE?',
           style: AppTextStyles.bodyMedium,

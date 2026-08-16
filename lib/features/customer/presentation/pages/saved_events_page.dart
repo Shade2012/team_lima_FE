@@ -53,7 +53,9 @@ class SavedEventsPage extends ConsumerWidget {
                           const SizedBox(height: 12),
                           Text(
                             'No saved events yet.',
-                            style: AppTextStyles.bodyMedium.copyWith(color: Colors.black54),
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: Colors.black54,
+                            ),
                           ),
                         ],
                       ),
@@ -61,7 +63,7 @@ class SavedEventsPage extends ConsumerWidget {
                   : ListView.separated(
                       padding: const EdgeInsets.all(20),
                       itemCount: allSavedItems.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 14),
+                      separatorBuilder: (_, _) => const SizedBox(height: 14),
                       itemBuilder: (context, index) {
                         final item = allSavedItems[index];
 
@@ -86,7 +88,10 @@ class SavedEventsPage extends ConsumerWidget {
                                 height: 56,
                                 decoration: BoxDecoration(
                                   gradient: const LinearGradient(
-                                    colors: [Color(0xFF2A004E), Color(0xFFAF06FF)],
+                                    colors: [
+                                      Color(0xFF2A004E),
+                                      Color(0xFFAF06FF),
+                                    ],
                                   ),
                                   borderRadius: BorderRadius.circular(14),
                                 ),
@@ -141,7 +146,8 @@ class SavedEventsPage extends ConsumerWidget {
                                     MaterialPageRoute(
                                       builder: (_) => CheckoutPage(
                                         eventName: item['title'] as String,
-                                        eventCategory: item['category'] as String,
+                                        eventCategory:
+                                            item['category'] as String,
                                         price: item['price'] as double,
                                         location: item['venue'] as String,
                                       ),
