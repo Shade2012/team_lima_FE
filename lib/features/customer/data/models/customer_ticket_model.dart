@@ -46,7 +46,8 @@ class CustomerTicket {
           json['venueAddress']?.toString() ?? '124 Industrial Ave, Metro City',
       attendeeName: json['attendeeName']?.toString() ?? 'Alex Chen',
       ticketType: json['ticketType']?.toString() ?? 'All Access',
-      qrData: json['qrData']?.toString() ??
+      qrData:
+          json['qrData']?.toString() ??
           'DIGITAL TICKET | VELOCE\nNeon Jungle Festival\nNJF-2491',
       status: json['status']?.toString() ?? 'UPCOMING',
       imageUrl: json['imageUrl']?.toString(),

@@ -56,11 +56,11 @@ jobs:
         run: |
           if [ -n "$KEY_PASSWORD" ]; then
             cat << EOF > android/key.properties
-            storePassword=$STORE_PASSWORD
-            keyPassword=$KEY_PASSWORD
-            keyAlias=$KEY_ALIAS
-            storeFile=app/upload-keystore.jks
-            EOF
+storePassword=$STORE_PASSWORD
+keyPassword=$KEY_PASSWORD
+keyAlias=$KEY_ALIAS
+storeFile=app/upload-keystore.jks
+EOF
           fi
 
       - name: Build APK

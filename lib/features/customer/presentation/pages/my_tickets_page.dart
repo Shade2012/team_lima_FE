@@ -27,24 +27,29 @@ class MyTicketsPage extends ConsumerWidget {
                   ? Center(
                       child: Text(
                         'No tickets purchased yet.',
-                        style: AppTextStyles.bodyMedium.copyWith(color: Colors.black54),
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: Colors.black54,
+                        ),
                       ),
                     )
                   : ListView.separated(
                       padding: const EdgeInsets.all(20),
                       itemCount: tickets.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 14),
+                      separatorBuilder: (_, _) => const SizedBox(height: 14),
                       itemBuilder: (context, index) {
                         final ticket = tickets[index];
                         final dateFormat = DateFormat('MMM dd, yyyy');
-                        final formattedDate = dateFormat.format(ticket.eventDate);
+                        final formattedDate = dateFormat.format(
+                          ticket.eventDate,
+                        );
 
                         return GestureDetector(
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => TicketDetailPage(ticket: ticket),
+                                builder: (_) =>
+                                    TicketDetailPage(ticket: ticket),
                               ),
                             );
                           },
@@ -53,7 +58,9 @@ class MyTicketsPage extends ConsumerWidget {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: const Color(0xFFEFEFEF)),
+                              border: Border.all(
+                                color: const Color(0xFFEFEFEF),
+                              ),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withValues(alpha: 0.03),
@@ -69,7 +76,10 @@ class MyTicketsPage extends ConsumerWidget {
                                   height: 56,
                                   decoration: BoxDecoration(
                                     gradient: const LinearGradient(
-                                      colors: [Color(0xFF8A00CC), Color(0xFFAF06FF)],
+                                      colors: [
+                                        Color(0xFF8A00CC),
+                                        Color(0xFFAF06FF),
+                                      ],
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
                                     ),
@@ -86,7 +96,8 @@ class MyTicketsPage extends ConsumerWidget {
                                 const SizedBox(width: 14),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Row(
                                         mainAxisAlignment:
@@ -94,20 +105,24 @@ class MyTicketsPage extends ConsumerWidget {
                                         children: [
                                           Text(
                                             ticket.status,
-                                            style: AppTextStyles.bodySmall.copyWith(
-                                              color: ticket.status == 'REFUNDED'
-                                                  ? AppColors.danger
-                                                  : AppColors.primary,
-                                              fontWeight: FontWeight.w800,
-                                              fontSize: 11,
-                                            ),
+                                            style: AppTextStyles.bodySmall
+                                                .copyWith(
+                                                  color:
+                                                      ticket.status ==
+                                                          'REFUNDED'
+                                                      ? AppColors.danger
+                                                      : AppColors.primary,
+                                                  fontWeight: FontWeight.w800,
+                                                  fontSize: 11,
+                                                ),
                                           ),
                                           Text(
                                             ticket.ticketCode,
-                                            style: AppTextStyles.bodySmall.copyWith(
-                                              color: Colors.black54,
-                                              fontSize: 11,
-                                            ),
+                                            style: AppTextStyles.bodySmall
+                                                .copyWith(
+                                                  color: Colors.black54,
+                                                  fontSize: 11,
+                                                ),
                                           ),
                                         ],
                                       ),
@@ -125,10 +140,11 @@ class MyTicketsPage extends ConsumerWidget {
                                       const SizedBox(height: 4),
                                       Text(
                                         '$formattedDate • ${ticket.categoryName}',
-                                        style: AppTextStyles.bodyMedium.copyWith(
-                                          color: Colors.black54,
-                                          fontSize: 12,
-                                        ),
+                                        style: AppTextStyles.bodyMedium
+                                            .copyWith(
+                                              color: Colors.black54,
+                                              fontSize: 12,
+                                            ),
                                       ),
                                     ],
                                   ),

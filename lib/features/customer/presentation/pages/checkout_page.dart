@@ -47,10 +47,9 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     final checkoutNotifier = ref.read(checkoutProvider.notifier);
     final authState = ref.watch(authProvider);
 
-    final attendeeName =
-        authState.currentUser?.username.isNotEmpty == true
-            ? authState.currentUser!.username
-            : 'Alex Chen';
+    final attendeeName = authState.currentUser?.username.isNotEmpty == true
+        ? authState.currentUser!.username
+        : 'Alex Chen';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFC),
@@ -63,7 +62,10 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -166,7 +168,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                 const SnackBar(content: Text('Sharing event details...')),
               );
             },
-            icon: const Icon(Icons.share_outlined, color: AppColors.primary, size: 22),
+            icon: const Icon(
+              Icons.share_outlined,
+              color: AppColors.primary,
+              size: 22,
+            ),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
           ),
@@ -175,205 +181,209 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     );
   }
 
-  // ==================== Payment Methods Section ====================
+  Widget _buildPaymentMethods(CheckoutState state, CheckoutNotifier notifier) {
+    return RadioGroup<String>(
+      groupValue: state.paymentMethod,
+      onChanged: (val) {
+        if (val != null) notifier.setPaymentMethod(val);
+      },
+      child: Column(
+        children: [
+          // 1. Credit or Debit Card Option Box
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: state.paymentMethod == 'card'
+                    ? AppColors.primary
+                    : const Color(0xFFE5E5EA),
+                width: state.paymentMethod == 'card' ? 2 : 1,
+              ),
+            ),
+            child: Column(
+              children: [
+                // Header Radio Tile
+                InkWell(
+                  onTap: () => notifier.setPaymentMethod('card'),
+                  borderRadius: BorderRadius.circular(16),
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Row(
+                      children: [
+                        Radio<String>(
+                          value: 'card',
+                          fillColor: WidgetStateProperty.resolveWith(
+                            (states) => states.contains(WidgetState.selected)
+                                ? AppColors.primary
+                                : null,
+                          ),
+                        ),
+                        const Icon(
+                          Icons.credit_card,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Credit or Debit Card',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                        // Card Brands Badges
+                        _buildBrandBadge('VISA'),
+                        const SizedBox(width: 4),
+                        _buildBrandBadge('MC'),
+                      ],
+                    ),
+                  ),
+                ),
+                // Expanded Form Inputs (when card is selected)
+                if (state.paymentMethod == 'card')
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Divider(height: 1, color: Color(0xFFF0F0F5)),
+                        const SizedBox(height: 12),
+                        // Card Number Label & Field
+                        Text(
+                          'CARD NUMBER',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: Colors.black54,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 10,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        TextField(
+                          controller: _cardNumberController,
+                          keyboardType: TextInputType.number,
+                          style: AppTextStyles.bodyMedium,
+                          decoration: _buildInputDecoration(
+                            hintText: '0000 0000 0000 0000',
+                            suffixIcon: Icons.credit_card_outlined,
+                          ),
+                          onChanged: (val) => notifier.setCardNumber(val),
+                        ),
+                        const SizedBox(height: 12),
 
-  Widget _buildPaymentMethods(
-    CheckoutState state,
-    CheckoutNotifier notifier,
-  ) {
-    return Column(
-      children: [
-        // 1. Credit or Debit Card Option Box
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: state.paymentMethod == 'card'
-                  ? AppColors.primary
-                  : const Color(0xFFE5E5EA),
-              width: state.paymentMethod == 'card' ? 2 : 1,
+                        // Expiry & CVC Row
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'EXPIRY DATE',
+                                    style: AppTextStyles.bodySmall.copyWith(
+                                      color: Colors.black54,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 10,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  TextField(
+                                    controller: _expiryController,
+                                    keyboardType: TextInputType.datetime,
+                                    style: AppTextStyles.bodyMedium,
+                                    decoration: _buildInputDecoration(
+                                      hintText: 'MM/YY',
+                                    ),
+                                    onChanged: (val) =>
+                                        notifier.setExpiryDate(val),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'CVC',
+                                    style: AppTextStyles.bodySmall.copyWith(
+                                      color: Colors.black54,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 10,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  TextField(
+                                    controller: _cvcController,
+                                    keyboardType: TextInputType.number,
+                                    obscureText: true,
+                                    style: AppTextStyles.bodyMedium,
+                                    decoration: _buildInputDecoration(
+                                      hintText: '123',
+                                      suffixIcon: Icons.info_outline,
+                                    ),
+                                    onChanged: (val) => notifier.setCvc(val),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Cardholder Name
+                        Text(
+                          'CARDHOLDER NAME',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: Colors.black54,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 10,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        TextField(
+                          controller: _cardHolderController,
+                          style: AppTextStyles.bodyMedium,
+                          decoration: _buildInputDecoration(
+                            hintText: 'Name on card',
+                          ),
+                          onChanged: (val) => notifier.setCardHolderName(val),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
             ),
           ),
-          child: Column(
-            children: [
-              // Header Radio Tile
-              InkWell(
-                onTap: () => notifier.setPaymentMethod('card'),
-                borderRadius: BorderRadius.circular(16),
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Row(
-                    children: [
-                      Radio<String>(
-                        value: 'card',
-                        groupValue: state.paymentMethod,
-                        activeColor: AppColors.primary,
-                        onChanged: (val) => notifier.setPaymentMethod(val!),
-                      ),
-                      const Icon(
-                        Icons.credit_card,
-                        color: AppColors.primary,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Credit or Debit Card',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                      // Card Brands Badges
-                      _buildBrandBadge('VISA'),
-                      const SizedBox(width: 4),
-                      _buildBrandBadge('MC'),
-                    ],
-                  ),
-                ),
-              ),
-              // Expanded Form Inputs (when card is selected)
-              if (state.paymentMethod == 'card')
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Divider(height: 1, color: Color(0xFFF0F0F5)),
-                      const SizedBox(height: 12),
-                      // Card Number Label & Field
-                      Text(
-                        'CARD NUMBER',
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: Colors.black54,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 10,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      TextField(
-                        controller: _cardNumberController,
-                        keyboardType: TextInputType.number,
-                        style: AppTextStyles.bodyMedium,
-                        decoration: _buildInputDecoration(
-                          hintText: '0000 0000 0000 0000',
-                          suffixIcon: Icons.credit_card_outlined,
-                        ),
-                        onChanged: (val) => notifier.setCardNumber(val),
-                      ),
-                      const SizedBox(height: 12),
+          const SizedBox(height: 10),
 
-                      // Expiry & CVC Row
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'EXPIRY DATE',
-                                  style: AppTextStyles.bodySmall.copyWith(
-                                    color: Colors.black54,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 10,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                TextField(
-                                  controller: _expiryController,
-                                  keyboardType: TextInputType.datetime,
-                                  style: AppTextStyles.bodyMedium,
-                                  decoration: _buildInputDecoration(
-                                    hintText: 'MM/YY',
-                                  ),
-                                  onChanged: (val) => notifier.setExpiryDate(val),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'CVC',
-                                  style: AppTextStyles.bodySmall.copyWith(
-                                    color: Colors.black54,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 10,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                TextField(
-                                  controller: _cvcController,
-                                  keyboardType: TextInputType.number,
-                                  obscureText: true,
-                                  style: AppTextStyles.bodyMedium,
-                                  decoration: _buildInputDecoration(
-                                    hintText: '123',
-                                    suffixIcon: Icons.info_outline,
-                                  ),
-                                  onChanged: (val) => notifier.setCvc(val),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Cardholder Name
-                      Text(
-                        'CARDHOLDER NAME',
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: Colors.black54,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 10,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      TextField(
-                        controller: _cardHolderController,
-                        style: AppTextStyles.bodyMedium,
-                        decoration: _buildInputDecoration(
-                          hintText: 'Name on card',
-                        ),
-                        onChanged: (val) => notifier.setCardHolderName(val),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
+          // 2. Digital Wallet Option Box
+          _buildPaymentOptionBox(
+            title: 'Digital Wallet',
+            value: 'wallet',
+            groupValue: state.paymentMethod,
+            icon: Icons.account_balance_wallet_outlined,
+            onSelect: () => notifier.setPaymentMethod('wallet'),
           ),
-        ),
-        const SizedBox(height: 10),
+          const SizedBox(height: 10),
 
-        // 2. Digital Wallet Option Box
-        _buildPaymentOptionBox(
-          title: 'Digital Wallet',
-          value: 'wallet',
-          groupValue: state.paymentMethod,
-          icon: Icons.account_balance_wallet_outlined,
-          onSelect: () => notifier.setPaymentMethod('wallet'),
-        ),
-        const SizedBox(height: 10),
-
-        // 3. Bank Transfer Option Box
-        _buildPaymentOptionBox(
-          title: 'Bank Transfer',
-          value: 'bank',
-          groupValue: state.paymentMethod,
-          icon: Icons.account_balance_outlined,
-          onSelect: () => notifier.setPaymentMethod('bank'),
-        ),
-      ],
+          // 3. Bank Transfer Option Box
+          _buildPaymentOptionBox(
+            title: 'Bank Transfer',
+            value: 'bank',
+            groupValue: state.paymentMethod,
+            icon: Icons.account_balance_outlined,
+            onSelect: () => notifier.setPaymentMethod('bank'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -420,11 +430,17 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
           children: [
             Radio<String>(
               value: value,
-              groupValue: groupValue,
-              activeColor: AppColors.primary,
-              onChanged: (_) => onSelect(),
+              fillColor: WidgetStateProperty.resolveWith(
+                (states) => states.contains(WidgetState.selected)
+                    ? AppColors.primary
+                    : null,
+              ),
             ),
-            Icon(icon, color: isSelected ? AppColors.primary : Colors.black54, size: 20),
+            Icon(
+              icon,
+              color: isSelected ? AppColors.primary : Colors.black54,
+              size: 20,
+            ),
             const SizedBox(width: 8),
             Text(
               title,
@@ -469,10 +485,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
 
   // ==================== Billing Details ====================
 
-  Widget _buildBillingDetails(
-    CheckoutState state,
-    CheckoutNotifier notifier,
-  ) {
+  Widget _buildBillingDetails(CheckoutState state, CheckoutNotifier notifier) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
@@ -484,8 +497,14 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         children: [
           Checkbox(
             value: state.sameAsProfileAddress,
-            activeColor: AppColors.primary,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+            fillColor: WidgetStateProperty.resolveWith(
+              (states) => states.contains(WidgetState.selected)
+                  ? AppColors.primary
+                  : null,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
             onChanged: (val) => notifier.toggleSameAsProfileAddress(val),
           ),
           Expanded(
@@ -557,7 +576,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                     ),
                   ),
                   child: const Center(
-                    child: Icon(Icons.music_note, color: Colors.white, size: 30),
+                    child: Icon(
+                      Icons.music_note,
+                      color: Colors.white,
+                      size: 30,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -588,8 +611,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(Icons.calendar_today_outlined,
-                              size: 12, color: Colors.black54),
+                          const Icon(
+                            Icons.calendar_today_outlined,
+                            size: 12,
+                            color: Colors.black54,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             'Oct 24, 2024',
@@ -603,8 +629,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                       const SizedBox(height: 2),
                       Row(
                         children: [
-                          const Icon(Icons.location_on_outlined,
-                              size: 12, color: Colors.black54),
+                          const Icon(
+                            Icons.location_on_outlined,
+                            size: 12,
+                            color: Colors.black54,
+                          ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
@@ -630,11 +659,20 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
           const SizedBox(height: 14),
 
           // Price Breakdown
-          _buildSummaryLine('1x VIP Admission', '\$${widget.price.toStringAsFixed(2)}'),
+          _buildSummaryLine(
+            '1x VIP Admission',
+            '\$${widget.price.toStringAsFixed(2)}',
+          ),
           const SizedBox(height: 8),
-          _buildSummaryLine('Service Fee', '\$${state.serviceFee.toStringAsFixed(2)}'),
+          _buildSummaryLine(
+            'Service Fee',
+            '\$${state.serviceFee.toStringAsFixed(2)}',
+          ),
           const SizedBox(height: 8),
-          _buildSummaryLine('Taxes & Processing', '\$${state.taxesAndProcessing.toStringAsFixed(2)}'),
+          _buildSummaryLine(
+            'Taxes & Processing',
+            '\$${state.taxesAndProcessing.toStringAsFixed(2)}',
+          ),
           if (state.isPromoApplied) ...[
             const SizedBox(height: 8),
             _buildSummaryLine(
@@ -655,8 +693,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             ),
             child: Row(
               children: [
-                const Icon(Icons.confirmation_number_outlined,
-                    color: Colors.black38, size: 18),
+                const Icon(
+                  Icons.confirmation_number_outlined,
+                  color: Colors.black38,
+                  size: 18,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: TextField(
@@ -818,7 +859,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     );
   }
 
-  Widget _buildSummaryLine(String label, String amount, {bool isDiscount = false}) {
+  Widget _buildSummaryLine(
+    String label,
+    String amount, {
+    bool isDiscount = false,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
