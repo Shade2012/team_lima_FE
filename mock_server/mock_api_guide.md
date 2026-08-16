@@ -85,7 +85,8 @@ Server sudah dilengkapi data awal (_seed data_) dari file `mock_server/data/init
 | :-------------- | :---------------------- | :------------- | :------------------------------------- | :------------------------------------ |
 | `CUSTOMER`      | `john@example.com`      | `Password123!` | `019146a0-7d1e-7abc-9a12-abcdef123456` | Pengunjung/Pembeli Tiket              |
 | `ORGANIZER`     | `organizer@example.com` | `Password123!` | `019146a0-0000-7abc-0000-abcdef000001` | Pemilik Event                         |
-| `GATE_OPERATOR` | `gateop@example.com`    | `Password123!` | `019146a0-0000-7abc-0000-abcdef000002` | Petugas Gerbang (`eventId` terhubung) |
+| `GATE_OPERATOR` | `gateop@example.com`    | `Password123!` | `019146a0-0000-7abc-0000-abcdef000002` | Petugas Gerbang (`eventId` & `gateId` terhubung) |
+| `ADMIN`         | `admin@example.com`     | `Password123!` | `019146a0-0000-7abc-0000-admin0000001` | Pengelola / Admin Sistem (Approve/Reject Refund) |
 
 ---
 
