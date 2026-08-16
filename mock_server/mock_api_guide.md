@@ -489,11 +489,19 @@ Server sudah dilengkapi data awal (_seed data_) dari file `mock_server/data/init
   ```
 - **Response 201 Created**: Object Refund dengan `status: "PENDING"`.
 
-#### 2. Approve Refund (`PATCH /refunds/:id/approve`)
+#### 2. Get My Refunds (`GET /refunds/my-refunds`)
+- **Auth**: Bearer Token (Role: `CUSTOMER`)
+- **Response 200 OK**: Array of Refund objects milik Customer login beserta perincian tiket, event, dan seat.
+
+#### 3. Get All Refunds (`GET /refunds`)
+- **Auth**: Bearer Token (Role: `ADMIN` atau `ORGANIZER`)
+- **Response 200 OK**: Array of Refund objects (`ADMIN`: seluruh pengajuan refund; `ORGANIZER`: refund khusus untuk event miliknya).
+
+#### 4. Approve Refund (`PATCH /refunds/:id/approve`)
 - **Auth**: Bearer Token (Role: `ADMIN`)
 - **Response 200 OK**: Object Refund dengan `status: "APPROVED"`.
 
-#### 3. Reject Refund (`PATCH /refunds/:id/reject`)
+#### 5. Reject Refund (`PATCH /refunds/:id/reject`)
 - **Auth**: Bearer Token (Role: `ADMIN`)
 - **Body Request**: `{ "rejectReason": "Alasan pengajuan tidak valid" }`
 - **Response 200 OK**: Object Refund dengan `status: "REJECTED"`.
