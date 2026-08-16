@@ -1,84 +1,83 @@
 class EventStatistics {
-  final String eventId;
-  final String eventName;
-  final int totalQuota;
-  final int totalTicketsSold;
-  final int grossRevenue;
-  final int totalRefundCount;
-  final int totalRefundAmount;
-  final int netRevenue;
-  final double percentageSold;
-  final int refundPercentage;
-  final List<EventStatisticsCategory> categories;
+  final String? eventId;
+  final String? eventName;
+  final int? totalQuota;
+  final int? totalTicketsSold;
+  final int? grossRevenue;
+  final int? totalRefundCount;
+  final int? totalRefundAmount;
+  final int? netRevenue;
+  final double? percentageSold;
+  final int? refundPercentage;
+  final List<EventStatisticsCategory>? categories;
 
   EventStatistics({
-    required this.eventId,
-    required this.eventName,
-    required this.totalQuota,
-    required this.totalTicketsSold,
-    required this.grossRevenue,
-    required this.totalRefundCount,
-    required this.totalRefundAmount,
-    required this.netRevenue,
-    required this.percentageSold,
-    required this.refundPercentage,
-    required this.categories,
+    this.eventId,
+    this.eventName,
+    this.totalQuota,
+    this.totalTicketsSold,
+    this.grossRevenue,
+    this.totalRefundCount,
+    this.totalRefundAmount,
+    this.netRevenue,
+    this.percentageSold,
+    this.refundPercentage,
+    this.categories,
   });
 
   factory EventStatistics.fromJson(Map<String, dynamic> json) {
     return EventStatistics(
-      eventId: json['eventId']?.toString() ?? '',
-      eventName: json['eventName']?.toString() ?? '',
-      totalQuota: json['totalQuota'] ?? 0,
-      totalTicketsSold: json['totalTicketsSold'] ?? 0,
-      grossRevenue: json['grossRevenue'] ?? 0,
-      totalRefundCount: json['totalRefundCount'] ?? 0,
-      totalRefundAmount: json['totalRefundAmount'] ?? 0,
-      netRevenue: json['netRevenue'] ?? 0,
-      percentageSold: (json['percentageSold'] ?? 0).toDouble(),
-      refundPercentage: json['refundPercentage'] ?? 0,
-      categories: (json['categories'] as List?)
-              ?.map((e) => EventStatisticsCategory.fromJson(e))
-              .toList() ??
-          [],
+      eventId: json['eventId']?.toString(),
+      eventName: json['eventName']?.toString(),
+      totalQuota: json['totalQuota'] as int?,
+      totalTicketsSold: json['totalTicketsSold'] as int?,
+      grossRevenue: json['grossRevenue'] as int?,
+      totalRefundCount: json['totalRefundCount'] as int?,
+      totalRefundAmount: json['totalRefundAmount'] as int?,
+      netRevenue: json['netRevenue'] as int?,
+      percentageSold: (json['percentageSold'] as num?)?.toDouble(),
+      refundPercentage: json['refundPercentage'] as int?,
+      categories: (json['categories'] as List<dynamic>?)
+          ?.map((e) => EventStatisticsCategory.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 }
 
 class EventStatisticsCategory {
-  final String categoryId;
-  final String categoryName;
-  final int price;
-  final int totalQuota;
-  final int ticketsSold;
-  final int grossRevenue;
-  final int refundCount;
-  final int totalRefundAmount;
-  final int refundPercentage;
+  final String? categoryId;
+  final String? categoryName;
+  final int? price;
+  final int? totalQuota;
+  final int? ticketsSold;
+  final int? grossRevenue;
+  final int? refundCount;
+  final int? totalRefundAmount;
+  final int? refundPercentage;
 
   EventStatisticsCategory({
-    required this.categoryId,
-    required this.categoryName,
-    required this.price,
-    required this.totalQuota,
-    required this.ticketsSold,
-    required this.grossRevenue,
-    required this.refundCount,
-    required this.totalRefundAmount,
-    required this.refundPercentage,
+    this.categoryId,
+    this.categoryName,
+    this.price,
+    this.totalQuota,
+    this.ticketsSold,
+    this.grossRevenue,
+    this.refundCount,
+    this.totalRefundAmount,
+    this.refundPercentage,
   });
 
   factory EventStatisticsCategory.fromJson(Map<String, dynamic> json) {
     return EventStatisticsCategory(
-      categoryId: json['categoryId']?.toString() ?? '',
-      categoryName: json['categoryName']?.toString() ?? '',
-      price: json['price'] ?? 0,
-      totalQuota: json['totalQuota'] ?? 0,
-      ticketsSold: json['ticketsSold'] ?? 0,
-      grossRevenue: json['grossRevenue'] ?? 0,
-      refundCount: json['refundCount'] ?? 0,
-      totalRefundAmount: json['totalRefundAmount'] ?? 0,
-      refundPercentage: json['refundPercentage'] ?? 0,
+      categoryId: json['categoryId']?.toString(),
+      categoryName: json['categoryName']?.toString(),
+      price: json['price'] as int?,
+      totalQuota: json['totalQuota'] as int?,
+      ticketsSold: json['ticketsSold'] as int?,
+      grossRevenue: json['grossRevenue'] as int?,
+      refundCount: json['refundCount'] as int?,
+      totalRefundAmount: json['totalRefundAmount'] as int?,
+      refundPercentage: json['refundPercentage'] as int?,
     );
   }
 }

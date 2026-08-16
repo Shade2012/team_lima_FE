@@ -45,4 +45,11 @@ class ApiConstants {
 
   // Feature: Gate Operator Registration (/users/register/gate-operator)
   static const String registerGateOperator = '/users/register/gate-operator';
+
+  // Feature: Admin Refund Management (/admin/refunds)
+  static const String adminRefunds = '/admin/refunds';
+  static String adminRefundDetail(String id) => '/admin/refunds/$id';
+  static String adminRefundApprove(String id) => '/admin/refunds/$id/approve';
+  static String adminRefundReject(String id) => '/admin/refunds/$id/reject';
+  static const String adminRefundStats = '/admin/refunds/stats';
 }

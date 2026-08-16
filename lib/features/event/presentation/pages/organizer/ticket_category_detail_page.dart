@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:team_five_fe/core/theme/app_colors.dart';
 import 'package:team_five_fe/core/theme/app_text_styles.dart';
+import 'package:team_five_fe/features/event/data/models/event_statistics_model.dart';
 import 'package:team_five_fe/features/event/presentation/providers/event_provider.dart';
 
 class TicketCategoryDetailPage extends ConsumerStatefulWidget {
@@ -28,7 +29,8 @@ class TicketCategoryDetailPage extends ConsumerStatefulWidget {
 
 class _TicketCategoryDetailPageState
     extends ConsumerState<TicketCategoryDetailPage> {
-  String _formatPrice(int price) {
+  String _formatPrice(int? price) {
+    if (price == null) return '-';
     final formatter = NumberFormat.currency(
       locale: 'id_ID',
       symbol: 'Rp',
@@ -37,32 +39,15 @@ class _TicketCategoryDetailPageState
     return formatter.format(price);
   }
 
-  // Dummy data for testing
-  dynamic _getDummyCategory() {
-    return {
-      'categoryId': widget.categoryId,
-      'categoryName': widget.categoryName.isNotEmpty
-          ? widget.categoryName
-          : 'VIP Front Row',
-      'price': 1500000,
-      'totalQuota': 100,
-      'ticketsSold': 42,
-      'grossRevenue': 63000000,
-      'refundCount': 3,
-      'totalRefundAmount': 4500000,
-      'refundPercentage': 80,
-    };
-  }
-
   @override
   Widget build(BuildContext context) {
     final statsState = ref.watch(eventStatisticsProvider);
     final statistics = statsState.statistics;
 
-    dynamic category;
-    if (statistics != null && statistics.categories.isNotEmpty) {
+    EventStatisticsCategory? category;
+    if (statistics != null && statistics.categories != null) {
       try {
-        category = statistics.categories.firstWhere(
+        category = statistics.categories!.firstWhere(
           (c) => c.categoryId == widget.categoryId,
         );
       } catch (_) {
@@ -70,16 +55,105 @@ class _TicketCategoryDetailPageState
       }
     }
 
-    // Use dummy data if category not found
-    final displayCategory = category ?? _getDummyCategory();
-
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
-      body: _buildBody(displayCategory),
+      body: category == null
+          ? _buildNotFound()
+          : _buildBody(category),
     );
   }
 
-  Widget _buildBody(dynamic category) {
+  Widget _buildNotFound() {
+    return Column(
+      children: [
+        _buildPurpleHeaderFallback(),
+        Expanded(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.inbox_outlined, size: 48, color: AppColors.grey),
+                const SizedBox(height: 16),
+                Text(
+                  'Category data not available',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPurpleHeaderFallback() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 12,
+        left: 20,
+        right: 20,
+        bottom: 24,
+      ),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF6B0096), AppColors.primary],
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.white.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.arrow_back,
+                color: AppColors.white,
+                size: 20,
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            widget.categoryName.isNotEmpty ? widget.categoryName : '-',
+            style: AppTextStyles.title.copyWith(
+              color: AppColors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              const Icon(Icons.event, color: Colors.white70, size: 14),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  widget.eventName,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: Colors.white70,
+                    fontSize: 13,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBody(EventStatisticsCategory category) {
     return Column(
       children: [
         _buildPurpleHeader(category),
@@ -101,7 +175,7 @@ class _TicketCategoryDetailPageState
     );
   }
 
-  Widget _buildPurpleHeader(dynamic category) {
+  Widget _buildPurpleHeader(EventStatisticsCategory category) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.only(
@@ -139,7 +213,7 @@ class _TicketCategoryDetailPageState
           const SizedBox(height: 20),
           // Category Name
           Text(
-            category.categoryName,
+            category.categoryName ?? '-',
             style: AppTextStyles.title.copyWith(
               color: AppColors.white,
               fontSize: 24,
@@ -192,9 +266,11 @@ class _TicketCategoryDetailPageState
     );
   }
 
-  Widget _buildSalesOverviewCard(dynamic category) {
-    final soldPercentage = category.totalQuota > 0
-        ? (category.ticketsSold / category.totalQuota * 100).round()
+  Widget _buildSalesOverviewCard(EventStatisticsCategory category) {
+    final totalQuota = category.totalQuota ?? 0;
+    final ticketsSold = category.ticketsSold ?? 0;
+    final soldPercentage = totalQuota > 0
+        ? (ticketsSold / totalQuota * 100).round()
         : 0;
 
     return Padding(
@@ -229,13 +305,13 @@ class _TicketCategoryDetailPageState
               children: [
                 _buildStatItem(
                   'Tickets Sold',
-                  '${category.ticketsSold}',
+                  '$ticketsSold',
                   AppColors.primary,
                 ),
                 const SizedBox(width: 16),
                 _buildStatItem(
                   'Total Quota',
-                  '${category.totalQuota}',
+                  '$totalQuota',
                   AppColors.grey,
                 ),
               ],
@@ -326,8 +402,9 @@ class _TicketCategoryDetailPageState
     );
   }
 
-  Widget _buildRefundInfoCard(dynamic category) {
-    if (category.refundPercentage <= 0) {
+  Widget _buildRefundInfoCard(EventStatisticsCategory category) {
+    final refundPercentage = category.refundPercentage ?? 0;
+    if (refundPercentage <= 0) {
       return const SizedBox.shrink();
     }
 
@@ -367,7 +444,7 @@ class _TicketCategoryDetailPageState
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    '${category.refundPercentage}%',
+                    '$refundPercentage%',
                     style: AppTextStyles.bodySmall.copyWith(
                       color: AppColors.white,
                       fontWeight: FontWeight.w700,
@@ -380,7 +457,7 @@ class _TicketCategoryDetailPageState
             const SizedBox(height: 12),
             _buildRefundStatRow(
               'Total Refunds',
-              '${category.refundCount}',
+              '${category.refundCount ?? 0}',
             ),
             const SizedBox(height: 8),
             _buildRefundStatRow(

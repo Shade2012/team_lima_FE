@@ -312,7 +312,10 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
   // ==================== Revenue Card ====================
 
   Widget _buildRevenueCard(EventStatistics? statistics) {
-    final netRevenue = statistics?.netRevenue ?? 0;
+    final netRevenue = statistics?.netRevenue;
+    final grossRevenue = statistics?.grossRevenue;
+    final totalRefundAmount = statistics?.totalRefundAmount;
+    final totalRefundCount = statistics?.totalRefundCount;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -329,9 +332,36 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
             ),
           ],
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
+            Text(
+              'Revenue',
+              style: AppTextStyles.bodyMedium.copyWith(
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
+                color: AppColors.black,
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Net Revenue - Large & Bold
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.primary.withValues(alpha: 0.1),
+                    AppColors.primary.withValues(alpha: 0.05),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.2),
+                ),
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -342,29 +372,45 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                       fontSize: 12,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Text(
-                    _formatPrice(netRevenue),
+                    netRevenue != null ? _formatPrice(netRevenue) : '-',
                     style: AppTextStyles.title.copyWith(
-                      fontSize: 24,
+                      fontSize: 28,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.black,
+                      color: AppColors.primary,
                     ),
                   ),
                 ],
               ),
             ),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: const BoxDecoration(
-                color: Color(0xFFE8F5E9),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.attach_money,
-                color: AppColors.success,
-                size: 24,
-              ),
+            const SizedBox(height: 12),
+            // Gross Revenue - Full Width
+            _buildRevenueStatMedium(
+              'Gross Revenue',
+              grossRevenue != null ? _formatPrice(grossRevenue) : '-',
+              AppColors.success,
+            ),
+            const SizedBox(height: 8),
+            // Refund Amount & Total Refunds - Side by side
+            Row(
+              children: [
+                Expanded(
+                  child: _buildRevenueStatMedium(
+                    'Refund Amount',
+                    totalRefundAmount != null ? _formatPrice(totalRefundAmount) : '-',
+                    AppColors.warning,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildRevenueStatMedium(
+                    'Total Refunds',
+                    totalRefundCount != null ? '$totalRefundCount' : '-',
+                    AppColors.danger,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -372,13 +418,47 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
     );
   }
 
+  Widget _buildRevenueStatMedium(String label, String value, Color color) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.grey,
+              fontSize: 11,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: AppTextStyles.bodyMedium.copyWith(
+              fontWeight: FontWeight.w700,
+              fontSize: 15,
+              color: color,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+
   // ==================== Ticket Distribution ====================
 
   Widget _buildTicketDistribution(EventStatistics? statistics, Event event) {
-    final categories = statistics?.categories ?? [];
-    final totalSold = statistics?.totalTicketsSold ?? 0;
-    final totalQuota = statistics?.totalQuota ?? 0;
-    final soldPercentage = statistics?.percentageSold.round() ?? 0;
+    final categories = statistics?.categories;
+    final totalSold = statistics?.totalTicketsSold;
+    final totalQuota = statistics?.totalQuota;
+    final soldPercentage = statistics?.percentageSold;
 
     final List<Color> categoryColors = [
       AppColors.primary,
@@ -418,36 +498,39 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                     color: AppColors.black,
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.danger.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    '$soldPercentage% Sold Out',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.danger,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 11,
+                if (soldPercentage != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.danger.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${soldPercentage.toStringAsFixed(1)}% Sold Out',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.danger,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 11,
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
             const SizedBox(height: 8),
             Text(
-              '$totalSold / $totalQuota tickets',
+              totalSold != null && totalQuota != null
+                  ? '$totalSold / $totalQuota tickets'
+                  : '-',
               style: AppTextStyles.bodySmall.copyWith(
                 color: AppColors.grey,
                 fontSize: 12,
               ),
             ),
             const SizedBox(height: 20),
-            if (categories.isEmpty)
+            if (categories == null || categories.isEmpty)
               Center(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20),
@@ -485,9 +568,9 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
     required DateTime eventDate,
     required bool isSeated,
   }) {
-    final progress = category.totalQuota > 0
-        ? category.ticketsSold / category.totalQuota
-        : 0.0;
+    final totalQuota = category.totalQuota ?? 0;
+    final ticketsSold = category.ticketsSold ?? 0;
+    final progress = totalQuota > 0 ? ticketsSold / totalQuota : 0.0;
 
     return GestureDetector(
       onTap: () {
@@ -495,8 +578,8 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
           context,
           MaterialPageRoute(
             builder: (_) => TicketCategoryDetailPage(
-              categoryId: category.categoryId,
-              categoryName: category.categoryName,
+              categoryId: category.categoryId ?? '',
+              categoryName: category.categoryName ?? '-',
               eventName: eventName,
               eventDate: eventDate,
               isSeated: isSeated,
@@ -523,7 +606,7 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      category.categoryName,
+                      category.categoryName ?? '-',
                       style: AppTextStyles.bodySmall.copyWith(
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
@@ -535,7 +618,7 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                 Row(
                   children: [
                     Text(
-                      '${category.ticketsSold} / ${category.totalQuota}',
+                      '$ticketsSold / $totalQuota',
                       style: AppTextStyles.bodySmall.copyWith(
                         color: AppColors.grey,
                         fontSize: 12,
