@@ -44,7 +44,47 @@ module.exports = function (db) {
     });
   });
 
-  // 2. POST /gates (Role: ORGANIZER)
+  // 2. GET /gates/operator/assigned (Role: GATE_OPERATOR)
+  router.get('/operator/assigned', (req, res) => {
+    const user = getUserFromToken(req, db);
+    if (!user || user.role !== 'GATE_OPERATOR') {
+      return res.status(403).json({
+        status_code: 403,
+        message: 'Forbidden: Only GATE_OPERATOR role can access assigned gate'
+      });
+    }
+
+    if (!user.gateId) {
+      return res.status(404).json({
+        status_code: 404,
+        message: 'Anda belum ditugaskan ke Gate manapun'
+      });
+    }
+
+    const gate = db.gates.find(g => g.id === user.gateId);
+    if (!gate) {
+      return res.status(404).json({
+        status_code: 404,
+        message: 'Gate assigned not found'
+      });
+    }
+
+    const event = db.events.find(e => e.id === gate.eventId);
+    const operators = db.users
+      .filter(u => u.role === 'GATE_OPERATOR' && u.gateId === gate.id)
+      .map(({ password, ...userRes }) => userRes);
+
+    return res.status(200).json({
+      message: 'Success',
+      data: {
+        ...gate,
+        event: event || null,
+        operators
+      }
+    });
+  });
+
+  // 3. POST /gates (Role: ORGANIZER)
   router.post('/', (req, res) => {
     const user = getUserFromToken(req, db);
     if (!user || user.role !== 'ORGANIZER') {
