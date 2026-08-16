@@ -9,35 +9,37 @@ import '../../../ticket_category/data/repositories/ticket_category_repository.da
 import 'seat_selection_page.dart';
 import 'checkout_page.dart';
 
-final customerCategoryRepositoryProvider = Provider<TicketCategoryRepository>((ref) {
+final customerCategoryRepositoryProvider = Provider<TicketCategoryRepository>((
+  ref,
+) {
   return TicketCategoryRepository();
 });
 
 final customerCategoriesByEventProvider =
     FutureProvider.family<List<TicketCategory>, String>((ref, eventId) async {
-  final repo = ref.watch(customerCategoryRepositoryProvider);
-  try {
-    return await repo.getCategoriesByEvent(eventId);
-  } catch (_) {
-    // Return sample categories if mock server is offline or empty
-    return [
-      TicketCategory(
-        id: 'cat_vip',
-        eventId: eventId,
-        name: 'VIP Front Row',
-        price: 1500000,
-        totalQuota: 100,
-      ),
-      TicketCategory(
-        id: 'cat_reg',
-        eventId: eventId,
-        name: 'Regular Admission',
-        price: 750000,
-        totalQuota: 250,
-      ),
-    ];
-  }
-});
+      final repo = ref.watch(customerCategoryRepositoryProvider);
+      try {
+        return await repo.getCategoriesByEvent(eventId);
+      } catch (_) {
+        // Return sample categories if mock server is offline or empty
+        return [
+          TicketCategory(
+            id: 'cat_vip',
+            eventId: eventId,
+            name: 'VIP Front Row',
+            price: 1500000,
+            totalQuota: 100,
+          ),
+          TicketCategory(
+            id: 'cat_reg',
+            eventId: eventId,
+            name: 'Regular Admission',
+            price: 750000,
+            totalQuota: 250,
+          ),
+        ];
+      }
+    });
 
 class CustomerEventDetailPage extends ConsumerStatefulWidget {
   final Event? event;
@@ -70,12 +72,16 @@ class _CustomerEventDetailPageState
 
   @override
   Widget build(BuildContext context) {
-    final targetEventId = widget.event?.id ?? widget.eventId ?? '019146a0-event';
-    final categoriesAsync = ref.watch(customerCategoriesByEventProvider(targetEventId));
+    final targetEventId =
+        widget.event?.id ?? widget.eventId ?? '019146a0-event';
+    final categoriesAsync = ref.watch(
+      customerCategoriesByEventProvider(targetEventId),
+    );
 
     final title = widget.event?.name ?? widget.eventName;
     final isSeated = widget.event?.isSeated ?? widget.isSeated;
-    final refundPolicy = widget.event?.refundPolicy ??
+    final refundPolicy =
+        widget.event?.refundPolicy ??
         'Refund dapat diajukan maksimal 7 hari sebelum event.';
     final refundPercentage = widget.event?.refundPercentage ?? 80;
 
@@ -116,7 +122,9 @@ class _CustomerEventDetailPageState
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(alpha: 0.1),
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.1,
+                                  ),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
@@ -167,7 +175,10 @@ class _CustomerEventDetailPageState
                           const SizedBox(height: 20),
 
                           // Refund Policy Box
-                          _buildRefundPolicyCard(refundPolicy, refundPercentage),
+                          _buildRefundPolicyCard(
+                            refundPolicy,
+                            refundPercentage,
+                          ),
                           const SizedBox(height: 24),
 
                           // Ticket Category List Section
@@ -192,7 +203,7 @@ class _CustomerEventDetailPageState
                                 ),
                               ),
                             ),
-                            error: (_, __) => _buildFallbackCategoryList(),
+                            error: (_, _) => _buildFallbackCategoryList(),
                           ),
                           const SizedBox(height: 32),
                         ],
@@ -253,9 +264,9 @@ class _CustomerEventDetailPageState
           ),
           IconButton(
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Sharing event...')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Sharing event...')));
             },
             icon: const Icon(Icons.share_outlined, color: AppColors.primary),
           ),
@@ -298,15 +309,21 @@ class _CustomerEventDetailPageState
               bottom: 16,
               right: 16,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.black45,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
                   children: const [
-                    Icon(Icons.photo_library_outlined,
-                        color: Colors.white, size: 14),
+                    Icon(
+                      Icons.photo_library_outlined,
+                      color: Colors.white,
+                      size: 14,
+                    ),
                     SizedBox(width: 6),
                     Text(
                       'Live Concert',
@@ -492,7 +509,9 @@ class _CustomerEventDetailPageState
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: isSelected ? AppColors.primary : const Color(0xFFE5E5EA),
+                  color: isSelected
+                      ? AppColors.primary
+                      : const Color(0xFFE5E5EA),
                   width: isSelected ? 2 : 1,
                 ),
               ),
@@ -567,7 +586,9 @@ class _CustomerEventDetailPageState
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: isSelected ? AppColors.primary : const Color(0xFFE5E5EA),
+                  color: isSelected
+                      ? AppColors.primary
+                      : const Color(0xFFE5E5EA),
                   width: isSelected ? 2 : 1,
                 ),
               ),
@@ -631,7 +652,8 @@ class _CustomerEventDetailPageState
         : 'VIP PASS';
 
     final categoryPrice = categories != null && categories.isNotEmpty
-        ? categories[_selectedCategoryIndex % categories.length].price.toDouble()
+        ? categories[_selectedCategoryIndex % categories.length].price
+              .toDouble()
         : widget.price;
 
     final categoryId = categories != null && categories.isNotEmpty
@@ -688,7 +710,10 @@ class _CustomerEventDetailPageState
                   context,
                   MaterialPageRoute(
                     builder: (_) => SeatSelectionPage(
-                      eventId: widget.event?.id ?? widget.eventId ?? '019146a0-event',
+                      eventId:
+                          widget.event?.id ??
+                          widget.eventId ??
+                          '019146a0-event',
                       eventName: title,
                       categoryName: categoryName,
                       categoryId: categoryId,

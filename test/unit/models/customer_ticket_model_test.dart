@@ -31,17 +31,20 @@ void main() {
       expect(ticket.price, 150.0);
     });
 
-    test('Unhappy Path: Should handle null or empty JSON fields gracefully', () {
-      final json = <String, dynamic>{};
+    test(
+      'Unhappy Path: Should handle null or empty JSON fields gracefully',
+      () {
+        final json = <String, dynamic>{};
 
-      final ticket = CustomerTicket.fromJson(json);
+        final ticket = CustomerTicket.fromJson(json);
 
-      expect(ticket.id, '');
-      expect(ticket.ticketCode, '#NJF-2491');
-      expect(ticket.eventName, 'Neon Jungle Festival');
-      expect(ticket.categoryName, 'VIP PASS');
-      expect(ticket.status, 'UPCOMING');
-    });
+        expect(ticket.id, '');
+        expect(ticket.ticketCode, '#NJF-2491');
+        expect(ticket.eventName, 'Neon Jungle Festival');
+        expect(ticket.categoryName, 'VIP PASS');
+        expect(ticket.status, 'UPCOMING');
+      },
+    );
 
     test('Happy Path: Should serialize CustomerTicket to JSON Map', () {
       final ticket = CustomerTicket(

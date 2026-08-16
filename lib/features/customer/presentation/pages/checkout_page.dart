@@ -47,10 +47,9 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     final checkoutNotifier = ref.read(checkoutProvider.notifier);
     final authState = ref.watch(authProvider);
 
-    final attendeeName =
-        authState.currentUser?.username.isNotEmpty == true
-            ? authState.currentUser!.username
-            : 'Alex Chen';
+    final attendeeName = authState.currentUser?.username.isNotEmpty == true
+        ? authState.currentUser!.username
+        : 'Alex Chen';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFC),
@@ -63,7 +62,10 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -166,7 +168,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                 const SnackBar(content: Text('Sharing event details...')),
               );
             },
-            icon: const Icon(Icons.share_outlined, color: AppColors.primary, size: 22),
+            icon: const Icon(
+              Icons.share_outlined,
+              color: AppColors.primary,
+              size: 22,
+            ),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
           ),
@@ -177,10 +183,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
 
   // ==================== Payment Methods Section ====================
 
-  Widget _buildPaymentMethods(
-    CheckoutState state,
-    CheckoutNotifier notifier,
-  ) {
+  Widget _buildPaymentMethods(CheckoutState state, CheckoutNotifier notifier) {
     return Column(
       children: [
         // 1. Credit or Debit Card Option Box
@@ -290,7 +293,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                                   decoration: _buildInputDecoration(
                                     hintText: 'MM/YY',
                                   ),
-                                  onChanged: (val) => notifier.setExpiryDate(val),
+                                  onChanged: (val) =>
+                                      notifier.setExpiryDate(val),
                                 ),
                               ],
                             ),
@@ -424,7 +428,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
               activeColor: AppColors.primary,
               onChanged: (_) => onSelect(),
             ),
-            Icon(icon, color: isSelected ? AppColors.primary : Colors.black54, size: 20),
+            Icon(
+              icon,
+              color: isSelected ? AppColors.primary : Colors.black54,
+              size: 20,
+            ),
             const SizedBox(width: 8),
             Text(
               title,
@@ -469,10 +477,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
 
   // ==================== Billing Details ====================
 
-  Widget _buildBillingDetails(
-    CheckoutState state,
-    CheckoutNotifier notifier,
-  ) {
+  Widget _buildBillingDetails(CheckoutState state, CheckoutNotifier notifier) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
@@ -485,7 +490,9 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
           Checkbox(
             value: state.sameAsProfileAddress,
             activeColor: AppColors.primary,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
             onChanged: (val) => notifier.toggleSameAsProfileAddress(val),
           ),
           Expanded(
@@ -557,7 +564,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                     ),
                   ),
                   child: const Center(
-                    child: Icon(Icons.music_note, color: Colors.white, size: 30),
+                    child: Icon(
+                      Icons.music_note,
+                      color: Colors.white,
+                      size: 30,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -588,8 +599,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(Icons.calendar_today_outlined,
-                              size: 12, color: Colors.black54),
+                          const Icon(
+                            Icons.calendar_today_outlined,
+                            size: 12,
+                            color: Colors.black54,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             'Oct 24, 2024',
@@ -603,8 +617,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                       const SizedBox(height: 2),
                       Row(
                         children: [
-                          const Icon(Icons.location_on_outlined,
-                              size: 12, color: Colors.black54),
+                          const Icon(
+                            Icons.location_on_outlined,
+                            size: 12,
+                            color: Colors.black54,
+                          ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
@@ -630,11 +647,20 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
           const SizedBox(height: 14),
 
           // Price Breakdown
-          _buildSummaryLine('1x VIP Admission', '\$${widget.price.toStringAsFixed(2)}'),
+          _buildSummaryLine(
+            '1x VIP Admission',
+            '\$${widget.price.toStringAsFixed(2)}',
+          ),
           const SizedBox(height: 8),
-          _buildSummaryLine('Service Fee', '\$${state.serviceFee.toStringAsFixed(2)}'),
+          _buildSummaryLine(
+            'Service Fee',
+            '\$${state.serviceFee.toStringAsFixed(2)}',
+          ),
           const SizedBox(height: 8),
-          _buildSummaryLine('Taxes & Processing', '\$${state.taxesAndProcessing.toStringAsFixed(2)}'),
+          _buildSummaryLine(
+            'Taxes & Processing',
+            '\$${state.taxesAndProcessing.toStringAsFixed(2)}',
+          ),
           if (state.isPromoApplied) ...[
             const SizedBox(height: 8),
             _buildSummaryLine(
@@ -655,8 +681,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             ),
             child: Row(
               children: [
-                const Icon(Icons.confirmation_number_outlined,
-                    color: Colors.black38, size: 18),
+                const Icon(
+                  Icons.confirmation_number_outlined,
+                  color: Colors.black38,
+                  size: 18,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: TextField(
@@ -818,7 +847,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     );
   }
 
-  Widget _buildSummaryLine(String label, String amount, {bool isDiscount = false}) {
+  Widget _buildSummaryLine(
+    String label,
+    String amount, {
+    bool isDiscount = false,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

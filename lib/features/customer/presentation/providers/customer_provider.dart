@@ -42,7 +42,8 @@ class CustomerExploreState {
 
   List<Event> get filteredEvents {
     return events.where((event) {
-      final matchesSearch = searchQuery.isEmpty ||
+      final matchesSearch =
+          searchQuery.isEmpty ||
           event.name.toLowerCase().contains(searchQuery.toLowerCase());
       return matchesSearch;
     }).toList();
@@ -213,7 +214,8 @@ class CheckoutState {
     this.error,
   });
 
-  double get total => admissionPrice + serviceFee + taxesAndProcessing - discount;
+  double get total =>
+      admissionPrice + serviceFee + taxesAndProcessing - discount;
 
   CheckoutState copyWith({
     String? paymentMethod,
@@ -237,8 +239,7 @@ class CheckoutState {
       expiryDate: expiryDate ?? this.expiryDate,
       cvc: cvc ?? this.cvc,
       cardHolderName: cardHolderName ?? this.cardHolderName,
-      sameAsProfileAddress:
-          sameAsProfileAddress ?? this.sameAsProfileAddress,
+      sameAsProfileAddress: sameAsProfileAddress ?? this.sameAsProfileAddress,
       promoCode: promoCode ?? this.promoCode,
       isPromoApplied: isPromoApplied ?? this.isPromoApplied,
       admissionPrice: admissionPrice ?? this.admissionPrice,
@@ -326,7 +327,6 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
   }
 }
 
-final checkoutProvider =
-    NotifierProvider<CheckoutNotifier, CheckoutState>(() {
-      return CheckoutNotifier();
-    });
+final checkoutProvider = NotifierProvider<CheckoutNotifier, CheckoutState>(() {
+  return CheckoutNotifier();
+});

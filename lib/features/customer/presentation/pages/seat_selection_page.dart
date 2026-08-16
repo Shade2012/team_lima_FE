@@ -107,7 +107,9 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
             Expanded(
               child: categoriesState.isLoading
                   ? const Center(
-                      child: CircularProgressIndicator(color: AppColors.primary),
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                      ),
                     )
                   : _buildSeatArea(categories, seatsListState),
             ),
@@ -221,7 +223,8 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
                 for (var i = 0; i < reversed.length; i++) ...[
                   _buildCategorySection(
                     category: reversed[i],
-                    seats: seatsListState.seatsByCategory[reversed[i].id] ??
+                    seats:
+                        seatsListState.seatsByCategory[reversed[i].id] ??
                         _generateFallbackSeats(reversed[i]),
                     color: _getCategoryColor(categories.length - 1 - i),
                   ),
@@ -361,7 +364,8 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
         final isSold = (index == 5 || index == 18);
         final isAvailable = !isHeld && !isSold;
 
-        final isSelected = _selectedSeatCode == seat.seatCode ||
+        final isSelected =
+            _selectedSeatCode == seat.seatCode ||
             (_selectedCategoryName == category.name &&
                 _selectedSeatDisplayNum == numStr);
 
@@ -391,19 +395,19 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
               color: isSelected
                   ? color
                   : isHeld
-                      ? AppColors.warning.withValues(alpha: 0.15)
-                      : isSold
-                          ? AppColors.danger.withValues(alpha: 0.15)
-                          : color.withValues(alpha: 0.08),
+                  ? AppColors.warning.withValues(alpha: 0.15)
+                  : isSold
+                  ? AppColors.danger.withValues(alpha: 0.15)
+                  : color.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(6),
               border: Border.all(
                 color: isSelected
                     ? color
                     : isHeld
-                        ? AppColors.warning
-                        : isSold
-                            ? AppColors.danger
-                            : color.withValues(alpha: 0.4),
+                    ? AppColors.warning
+                    : isSold
+                    ? AppColors.danger
+                    : color.withValues(alpha: 0.4),
                 width: isSelected ? 2 : 1,
               ),
               boxShadow: isSelected
@@ -425,10 +429,10 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
                   color: isSelected
                       ? AppColors.white
                       : isHeld
-                          ? AppColors.warning
-                          : isSold
-                              ? AppColors.danger
-                              : color,
+                      ? AppColors.warning
+                      : isSold
+                      ? AppColors.danger
+                      : color,
                   height: 1,
                 ),
               ),
@@ -573,7 +577,9 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
                         builder: (_) => CheckoutPage(
                           eventName: widget.eventName,
                           eventCategory: '$categoryLabel ($seatNumLabel)',
-                          price: priceToDisplay > 10000 ? 150.0 : priceToDisplay,
+                          price: priceToDisplay > 10000
+                              ? 150.0
+                              : priceToDisplay,
                           location: 'Main Stage Pavilion',
                         ),
                       ),
