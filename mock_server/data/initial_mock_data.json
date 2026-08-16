@@ -91,6 +91,8 @@
   ],
   "admissionScans": [],
   "orders": [],
+  "tickets": [],
   "payments": [],
+  "refunds": [],
   "blacklistedTokens": []
 }
