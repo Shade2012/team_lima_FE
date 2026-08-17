@@ -71,6 +71,54 @@ final myEventsProvider = NotifierProvider<MyEventsNotifier, MyEventsState>(() {
   return MyEventsNotifier();
 });
 
+// ==================== All Events State (Admin) ====================
+
+class AllEventsState {
+  final List<Event> events;
+  final bool isLoading;
+  final String? error;
+
+  AllEventsState({this.events = const [], this.isLoading = false, this.error});
+
+  AllEventsState copyWith({
+    List<Event>? events,
+    bool? isLoading,
+    String? error,
+  }) {
+    return AllEventsState(
+      events: events ?? this.events,
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
+    );
+  }
+}
+
+class AllEventsNotifier extends Notifier<AllEventsState> {
+  @override
+  AllEventsState build() {
+    Future.microtask(() => loadAllEvents());
+    return AllEventsState();
+  }
+
+  Future<void> loadAllEvents() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final repository = ref.read(eventRepositoryProvider);
+      final events = await repository.getAllEvents();
+      state = state.copyWith(events: events, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: e.toString().replaceAll('Exception: ', ''),
+      );
+    }
+  }
+}
+
+final allEventsProvider = NotifierProvider<AllEventsNotifier, AllEventsState>(() {
+  return AllEventsNotifier();
+});
+
 // ==================== Event Detail State ====================
 
 class EventDetailState {

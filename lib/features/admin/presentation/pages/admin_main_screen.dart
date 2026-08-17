@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
+import 'package:team_five_fe/core/theme/app_colors.dart';
+import 'package:team_five_fe/core/theme/app_text_styles.dart';
+import 'package:team_five_fe/features/auth/presentation/pages/profile_page.dart';
+import 'admin_events_page.dart';
 import 'admin_refund_management_page.dart';
-import 'package:team_five_fe/features/customer/presentation/pages/customer_explore_page.dart';
-import 'package:team_five_fe/features/customer/presentation/pages/customer_profile_page.dart';
 
 class AdminMainScreen extends StatefulWidget {
   final int initialIndex;
@@ -18,9 +18,9 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
   late int _currentIndex;
 
   final List<Widget> _pages = const [
-    CustomerExplorePage(),
+    AdminEventsPage(),
     AdminRefundManagementPage(),
-    CustomerProfilePage(),
+    ProfilePage(),
   ];
 
   @override
@@ -51,24 +51,14 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildNavItem(
-                  0,
-                  Icons.event_outlined,
-                  Icons.event,
-                  'Events',
-                ),
+                _buildNavItem(0, Icons.event_outlined, Icons.event, 'Events'),
                 _buildNavItem(
                   1,
                   Icons.receipt_long_outlined,
                   Icons.receipt_long,
                   'Refunds',
                 ),
-                _buildNavItem(
-                  2,
-                  Icons.person_outline,
-                  Icons.person,
-                  'Profile',
-                ),
+                _buildNavItem(2, Icons.person_outline, Icons.person, 'Profile'),
               ],
             ),
           ),

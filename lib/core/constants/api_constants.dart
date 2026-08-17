@@ -42,14 +42,13 @@ class ApiConstants {
   static const String gates = '/gates';
   static String gatesByEvent(String eventId) => '/gates/event/$eventId';
   static String gateDetail(String id) => '/gates/$id';
+  static const String assignedGate = '/gates/operator/assigned';
 
   // Feature: Gate Operator Registration (/users/register/gate-operator)
   static const String registerGateOperator = '/users/register/gate-operator';
 
-  // Feature: Admin Refund Management (/admin/refunds)
-  static const String adminRefunds = '/admin/refunds';
-  static String adminRefundDetail(String id) => '/admin/refunds/$id';
-  static String adminRefundApprove(String id) => '/admin/refunds/$id/approve';
-  static String adminRefundReject(String id) => '/admin/refunds/$id/reject';
-  static const String adminRefundStats = '/admin/refunds/stats';
+  // Feature: Refund Management (/refunds)
+  static const String refunds = '/refunds';
+  static String refundApprove(String id) => '/refunds/$id/approve';
+  static String refundReject(String id) => '/refunds/$id/reject';
 }

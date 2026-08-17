@@ -142,6 +142,7 @@ class _RegisterGateOperatorPageState
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
+                  ref.read(gatesProvider.notifier).loadGates();
                   if (mounted) Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(

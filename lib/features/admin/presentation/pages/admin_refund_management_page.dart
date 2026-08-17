@@ -19,6 +19,7 @@ class _AdminRefundManagementPageState
     extends ConsumerState<AdminRefundManagementPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  String _selectedFilter = 'ALL';
 
   @override
   void dispose() {
@@ -45,45 +46,59 @@ class _AdminRefundManagementPageState
     return DateFormat('MMM dd').format(date);
   }
 
-  List<RefundRequest> _filterBySearch(List<RefundRequest> refunds) {
-    if (_searchQuery.isEmpty) return refunds;
-    final q = _searchQuery.toLowerCase();
-    return refunds.where((r) {
-      return (r.orderId?.toLowerCase().contains(q) ?? false) ||
-          (r.customerName?.toLowerCase().contains(q) ?? false) ||
-          (r.eventName?.toLowerCase().contains(q) ?? false);
-    }).toList();
+  List<RefundRequest> _filterRefunds(List<RefundRequest> refunds) {
+    var filtered = refunds;
+
+    if (_selectedFilter != 'ALL') {
+      filtered = filtered
+          .where((r) => r.status?.toUpperCase() == _selectedFilter)
+          .toList();
+    }
+
+    if (_searchQuery.isNotEmpty) {
+      final q = _searchQuery.toLowerCase();
+      filtered = filtered.where((r) {
+        return (r.orderId?.toLowerCase().contains(q) ?? false) ||
+            (r.customerName?.toLowerCase().contains(q) ?? false) ||
+            (r.eventName?.toLowerCase().contains(q) ?? false);
+      }).toList();
+    }
+
+    return filtered;
   }
 
   @override
   Widget build(BuildContext context) {
-    final statsState = ref.watch(refundStatsProvider);
     final listState = ref.watch(refundListProvider);
+    final stats = listState.stats;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
-      body: Column(
-        children: [
-          _buildHeader(),
-          Expanded(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                children: [
-                  const SizedBox(height: 16),
-                  _buildStatsSection(statsState),
-                  const SizedBox(height: 20),
-                  _buildSearchBar(),
-                  const SizedBox(height: 12),
-                  _buildFilterTabs(listState),
-                  const SizedBox(height: 12),
-                  _buildRefundList(listState),
-                  const SizedBox(height: 32),
-                ],
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(),
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    _buildStatsSection(stats),
+                    const SizedBox(height: 20),
+                    _buildSearchBar(),
+                    const SizedBox(height: 12),
+                    _buildFilterTabs(),
+                    const SizedBox(height: 12),
+                    _buildRefundList(listState),
+                    const SizedBox(height: 32),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -91,48 +106,20 @@ class _AdminRefundManagementPageState
   // ==================== Header ====================
 
   Widget _buildHeader() {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 12,
-        left: 20,
-        right: 20,
-        bottom: 20,
-      ),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF6B0096), AppColors.primary],
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Admin',
-            style: AppTextStyles.title.copyWith(
-              color: AppColors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-            ),
+            'Refund Management',
+            style: AppTextStyles.title.copyWith(fontSize: 22),
           ),
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppColors.white.withValues(alpha: 0.2),
-              shape: BoxShape.circle,
-            ),
-            child: const Center(
-              child: Text(
-                'A',
-                style: TextStyle(
-                  color: AppColors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+          const SizedBox(height: 2),
+          Text(
+            'Manage customer refund requests',
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.grey,
             ),
           ),
         ],
@@ -142,9 +129,7 @@ class _AdminRefundManagementPageState
 
   // ==================== Stats Section ====================
 
-  Widget _buildStatsSection(RefundStatsState statsState) {
-    final stats = statsState.stats;
-
+  Widget _buildStatsSection(RefundStats stats) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -154,7 +139,7 @@ class _AdminRefundManagementPageState
               Expanded(
                 child: _buildStatCard(
                   label: 'Pending Refunds',
-                  value: stats?.pendingCount?.toString() ?? '-',
+                  value: stats.pendingCount.toString(),
                   icon: Icons.schedule,
                   color: AppColors.primary,
                 ),
@@ -163,19 +148,17 @@ class _AdminRefundManagementPageState
               Expanded(
                 child: _buildStatCardGradient(
                   label: 'Total Refunded',
-                  value: stats?.totalRefunded != null
-                      ? _formatCurrency(stats!.totalRefunded!)
-                      : '-',
+                  value: _formatCurrency(stats.totalRefundAmount),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 12),
           _buildStatCard(
-            label: 'Active Disputes',
-            value: stats?.activeDisputes?.toString() ?? '-',
-            icon: Icons.warning_amber_rounded,
-            color: AppColors.primary,
+            label: 'Approved Refunds',
+            value: stats.totalRefunded.toString(),
+            icon: Icons.check_circle_outline,
+            color: AppColors.success,
           ),
         ],
       ),
@@ -302,9 +285,7 @@ class _AdminRefundManagementPageState
           },
           decoration: InputDecoration(
             hintText: 'Search Order ID, Name, or Event...',
-            hintStyle: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.grey,
-            ),
+            hintStyle: AppTextStyles.bodySmall.copyWith(color: AppColors.grey),
             prefixIcon: const Icon(Icons.search, color: AppColors.grey, size: 20),
             suffixIcon: _searchQuery.isNotEmpty
                 ? IconButton(
@@ -333,42 +314,45 @@ class _AdminRefundManagementPageState
 
   // ==================== Filter Tabs ====================
 
-  Widget _buildFilterTabs(RefundListState listState) {
-    final filters = ['ALL', 'PENDING', 'APPROVED'];
-    final labels = ['All Requests', 'Pending', 'Approved'];
+  Widget _buildFilterTabs() {
+    final filters = ['ALL', 'PENDING', 'APPROVED', 'REJECTED'];
+    final labels = ['All', 'Pending', 'Approved', 'Rejected'];
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        children: List.generate(filters.length, (index) {
-          final isActive = listState.selectedFilter == filters[index];
-          return Padding(
-            padding: EdgeInsets.only(right: index < filters.length - 1 ? 8 : 0),
-            child: GestureDetector(
-              onTap: () {
-                ref.read(refundListProvider.notifier).setFilter(filters[index]);
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isActive ? AppColors.primary : AppColors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: isActive ? AppColors.primary : AppColors.greyLight,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: List.generate(filters.length, (index) {
+            final isActive = _selectedFilter == filters[index];
+            return Padding(
+              padding: EdgeInsets.only(right: index < filters.length - 1 ? 8 : 0),
+              child: GestureDetector(
+                onTap: () {
+                  setState(() => _selectedFilter = filters[index]);
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isActive ? AppColors.primary : AppColors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isActive ? AppColors.primary : AppColors.greyLight,
+                    ),
                   ),
-                ),
-                child: Text(
-                  labels[index],
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: isActive ? AppColors.white : AppColors.grey,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
+                  child: Text(
+                    labels[index],
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: isActive ? AppColors.white : AppColors.grey,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ),
-            ),
-          );
-        }),
+            );
+          }),
+        ),
       ),
     );
   }
@@ -398,7 +382,8 @@ class _AdminRefundManagementPageState
               ),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () => ref.read(refundListProvider.notifier).loadRefunds(),
+                onPressed: () =>
+                    ref.read(refundListProvider.notifier).loadRefunds(),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.white,
@@ -414,7 +399,7 @@ class _AdminRefundManagementPageState
       );
     }
 
-    final filteredRefunds = _filterBySearch(listState.refunds);
+    final filteredRefunds = _filterRefunds(listState.refunds);
 
     if (filteredRefunds.isEmpty) {
       return Padding(
@@ -425,7 +410,7 @@ class _AdminRefundManagementPageState
               Icon(Icons.inbox_outlined, size: 48, color: AppColors.grey),
               const SizedBox(height: 12),
               Text(
-                _searchQuery.isNotEmpty
+                _searchQuery.isNotEmpty || _selectedFilter != 'ALL'
                     ? 'No results found'
                     : 'No refund requests',
                 style: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey),
@@ -460,19 +445,21 @@ class _AdminRefundManagementPageState
       const Color(0xFF2196F3),
       const Color(0xFF9C27B0),
     ];
-    final colorIndex = (refund.customerName ?? '').hashCode.abs() % colors.length;
+    final colorIndex =
+        (refund.customerName ?? '').hashCode.abs() % colors.length;
     final avatarColor = colors[colorIndex];
 
     final statusConfig = _getStatusConfig(refund.status);
 
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => AdminRefundDetailPage(refund: refund),
           ),
         );
+        ref.read(refundListProvider.notifier).loadRefunds();
       },
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -489,7 +476,6 @@ class _AdminRefundManagementPageState
         ),
         child: Row(
           children: [
-            // Avatar
             Container(
               width: 44,
               height: 44,
@@ -509,7 +495,6 @@ class _AdminRefundManagementPageState
               ),
             ),
             const SizedBox(width: 12),
-            // Info
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -578,7 +563,6 @@ class _AdminRefundManagementPageState
               ),
             ),
             const SizedBox(width: 8),
-            // Amount
             Text(
               refund.amount != null ? _formatCurrency(refund.amount!) : '-',
               style: AppTextStyles.bodyMedium.copyWith(
@@ -597,10 +581,7 @@ class _AdminRefundManagementPageState
     switch (status?.toUpperCase()) {
       case 'PENDING':
         return _StatusConfig('Pending', AppColors.primary);
-      case 'PROCESSING':
-        return _StatusConfig('Processing', AppColors.warning);
       case 'APPROVED':
-      case 'RESOLVED':
         return _StatusConfig('Approved', AppColors.success);
       case 'REJECTED':
         return _StatusConfig('Rejected', AppColors.danger);

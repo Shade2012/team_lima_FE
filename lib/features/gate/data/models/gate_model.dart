@@ -1,3 +1,5 @@
+import '../../../auth/data/models/user_model.dart';
+
 class Gate {
   final String id;
   final String name;
@@ -5,6 +7,7 @@ class Gate {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final List<AdmissionScan> scans;
+  final List<UserModel> operators;
 
   Gate({
     required this.id,
@@ -13,12 +16,14 @@ class Gate {
     this.createdAt,
     this.updatedAt,
     this.scans = const [],
+    this.operators = const [],
   });
 
   int get scannedCount => scans.length;
 
   factory Gate.fromJson(Map<String, dynamic> json) {
     final scansData = json['scans'];
+    final operatorsData = json['operators'];
     return Gate(
       id: json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
@@ -31,6 +36,11 @@ class Gate {
           : null,
       scans: scansData is List
           ? scansData.map((e) => AdmissionScan.fromJson(e)).toList()
+          : [],
+      operators: operatorsData is List
+          ? operatorsData
+              .map((e) => UserModel.fromJson(e as Map<String, dynamic>))
+              .toList()
           : [],
     );
   }

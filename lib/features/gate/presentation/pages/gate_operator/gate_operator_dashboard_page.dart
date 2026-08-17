@@ -24,6 +24,11 @@ class _GateOperatorDashboardPageState
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(gateOperatorDashboardProvider.notifier).loadAssignedGate();
+      }
+    });
   }
 
   @override
@@ -44,7 +49,68 @@ class _GateOperatorDashboardPageState
           children: [
             _buildHeader(context),
             _buildTabBar(),
-            Expanded(child: _buildEventList(context, ref, state)),
+            Expanded(child: _buildBody(context, ref, state)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBody(BuildContext context, WidgetRef ref, GateOperatorDashboardState state) {
+    if (state.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (state.error != null) {
+      return _buildErrorState(state.error!);
+    }
+
+    return _buildEventList(context, ref, state);
+  }
+
+  Widget _buildErrorState(String message) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: AppColors.danger.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.error_outline,
+                size: 40,
+                color: AppColors.danger.withValues(alpha: 0.5),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              message,
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: () {
+                ref.read(gateOperatorDashboardProvider.notifier).loadAssignedGate();
+              },
+              icon: const Icon(Icons.refresh, size: 18),
+              label: Text('Retry', style: AppTextStyles.button),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                elevation: 0,
+              ),
+            ),
           ],
         ),
       ),
@@ -146,7 +212,9 @@ class _GateOperatorDashboardPageState
     }
 
     return RefreshIndicator(
-      onRefresh: () async {},
+      onRefresh: () async {
+        await ref.read(gateOperatorDashboardProvider.notifier).loadAssignedGate();
+      },
       child: ListView.builder(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 80),
         itemCount: events.length,
@@ -235,8 +303,6 @@ class _GateOperatorDashboardPageState
                                 color: AppColors.grey,
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            _buildProgressInfo(event),
                           ],
                         ),
                       ),
@@ -277,35 +343,6 @@ class _GateOperatorDashboardPageState
               : AppColors.grey.withValues(alpha: 0.5),
         ),
       ),
-    );
-  }
-
-  Widget _buildProgressInfo(GateOperatorEvent event) {
-    if (event.isActive && event.isSelected) {
-      return Row(
-        children: [
-          Icon(Icons.check_circle, size: 14, color: AppColors.primary),
-          const SizedBox(width: 4),
-          Text(
-            '${NumberFormat('#,###').format(event.scannedCount)} Scanned',
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      );
-    }
-
-    return Row(
-      children: [
-        Icon(Icons.people_outline, size: 14, color: AppColors.grey),
-        const SizedBox(width: 4),
-        Text(
-          'Progress: ${NumberFormat('#,###').format(event.scannedCount)} / ${NumberFormat('#,###').format(event.totalAttendees)}',
-          style: AppTextStyles.bodySmall.copyWith(color: AppColors.grey),
-        ),
-      ],
     );
   }
 

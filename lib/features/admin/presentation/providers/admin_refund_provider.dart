@@ -12,26 +12,26 @@ class RefundListState {
   final List<RefundRequest> refunds;
   final bool isLoading;
   final String? error;
-  final String selectedFilter;
+  final RefundStats stats;
 
   RefundListState({
     this.refunds = const [],
     this.isLoading = false,
     this.error,
-    this.selectedFilter = 'ALL',
+    this.stats = const RefundStats(),
   });
 
   RefundListState copyWith({
     List<RefundRequest>? refunds,
     bool? isLoading,
     String? error,
-    String? selectedFilter,
+    RefundStats? stats,
   }) {
     return RefundListState(
       refunds: refunds ?? this.refunds,
       isLoading: isLoading ?? this.isLoading,
       error: error,
-      selectedFilter: selectedFilter ?? this.selectedFilter,
+      stats: stats ?? this.stats,
     );
   }
 }
@@ -47,11 +47,9 @@ class RefundListNotifier extends Notifier<RefundListState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final repository = ref.read(adminRefundRepositoryProvider);
-      final statusFilter = state.selectedFilter == 'ALL'
-          ? null
-          : state.selectedFilter;
-      final refunds = await repository.getRefundRequests(status: statusFilter);
-      state = state.copyWith(refunds: refunds, isLoading: false);
+      final refunds = await repository.getRefundRequests();
+      final stats = RefundStats.fromRefunds(refunds);
+      state = state.copyWith(refunds: refunds, stats: stats, isLoading: false);
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -60,15 +58,10 @@ class RefundListNotifier extends Notifier<RefundListState> {
     }
   }
 
-  Future<void> setFilter(String filter) async {
-    state = state.copyWith(selectedFilter: filter);
-    await loadRefunds();
-  }
-
-  Future<bool> approveRefund(String id, {String? notes}) async {
+  Future<bool> approveRefund(String id) async {
     try {
       final repository = ref.read(adminRefundRepositoryProvider);
-      await repository.approveRefund(id, notes: notes);
+      await repository.approveRefund(id);
       await loadRefunds();
       return true;
     } catch (e) {
@@ -79,7 +72,7 @@ class RefundListNotifier extends Notifier<RefundListState> {
     }
   }
 
-  Future<bool> rejectRefund(String id, {String? reason}) async {
+  Future<bool> rejectRefund(String id, {required String reason}) async {
     try {
       final repository = ref.read(adminRefundRepositoryProvider);
       await repository.rejectRefund(id, reason: reason);
@@ -97,53 +90,4 @@ class RefundListNotifier extends Notifier<RefundListState> {
 final refundListProvider =
     NotifierProvider<RefundListNotifier, RefundListState>(() {
   return RefundListNotifier();
-});
-
-// ==================== Refund Stats State ====================
-
-class RefundStatsState {
-  final RefundStats? stats;
-  final bool isLoading;
-  final String? error;
-
-  RefundStatsState({this.stats, this.isLoading = false, this.error});
-
-  RefundStatsState copyWith({
-    RefundStats? stats,
-    bool? isLoading,
-    String? error,
-  }) {
-    return RefundStatsState(
-      stats: stats ?? this.stats,
-      isLoading: isLoading ?? this.isLoading,
-      error: error,
-    );
-  }
-}
-
-class RefundStatsNotifier extends Notifier<RefundStatsState> {
-  @override
-  RefundStatsState build() {
-    Future.microtask(() => loadStats());
-    return RefundStatsState();
-  }
-
-  Future<void> loadStats() async {
-    state = state.copyWith(isLoading: true, error: null);
-    try {
-      final repository = ref.read(adminRefundRepositoryProvider);
-      final stats = await repository.getRefundStats();
-      state = state.copyWith(stats: stats, isLoading: false);
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString().replaceAll('Exception: ', ''),
-      );
-    }
-  }
-}
-
-final refundStatsProvider =
-    NotifierProvider<RefundStatsNotifier, RefundStatsState>(() {
-  return RefundStatsNotifier();
 });

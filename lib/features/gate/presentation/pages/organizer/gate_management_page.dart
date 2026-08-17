@@ -271,7 +271,6 @@ class _GateManagementPageState extends ConsumerState<GateManagementPage> {
   Widget _buildGateCard(Gate gate) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
@@ -284,73 +283,166 @@ class _GateManagementPageState extends ConsumerState<GateManagementPage> {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(
-              Icons.door_front_door,
-              color: AppColors.primary,
-              size: 24,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
               children: [
-                Text(
-                  gate.name,
-                  style: AppTextStyles.bodyLarge.copyWith(
-                    fontWeight: FontWeight.w600,
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    Icons.door_front_door,
+                    color: AppColors.primary,
+                    size: 24,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Gate ID: ${gate.id.substring(0, 8)}...',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.grey,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        gate.name,
+                        style: AppTextStyles.bodyLarge.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Gate ID: ${gate.id.substring(0, 8)}...',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.grey,
+                        ),
+                      ),
+                    ],
                   ),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      onPressed: () => _navigateToRegisterOperator(gate),
+                      icon: Icon(
+                        Icons.person_add_outlined,
+                        color: AppColors.success,
+                        size: 20,
+                      ),
+                      tooltip: 'Register Operator',
+                    ),
+                    IconButton(
+                      onPressed: () => _navigateToEditGate(gate),
+                      icon: Icon(
+                        Icons.edit_outlined,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
+                      tooltip: 'Edit Gate',
+                    ),
+                    IconButton(
+                      onPressed: () => _showDeleteConfirmation(gate),
+                      icon: Icon(
+                        Icons.delete_outline,
+                        color: AppColors.danger,
+                        size: 20,
+                      ),
+                      tooltip: 'Delete Gate',
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                onPressed: () => _navigateToRegisterOperator(gate),
-                icon: Icon(
-                  Icons.person_add_outlined,
-                  color: AppColors.success,
-                  size: 20,
-                ),
-                tooltip: 'Register Operator',
+          if (gate.operators.isNotEmpty)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Divider(height: 1, color: AppColors.greyLight),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Operators (${gate.operators.length})',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ...gate.operators.map((operator) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: AppColors.success.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Icon(
+                            Icons.person,
+                            color: AppColors.success,
+                            size: 14,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                operator.username,
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Text(
+                                operator.email,
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  color: AppColors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
+                ],
               ),
-              IconButton(
-                onPressed: () => _navigateToEditGate(gate),
-                icon: Icon(
-                  Icons.edit_outlined,
-                  color: AppColors.primary,
-                  size: 20,
-                ),
-                tooltip: 'Edit Gate',
+            )
+          else
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Column(
+                children: [
+                  Divider(height: 1, color: AppColors.greyLight),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        size: 14,
+                        color: AppColors.grey,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Belum ada operator',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              IconButton(
-                onPressed: () => _showDeleteConfirmation(gate),
-                icon: Icon(
-                  Icons.delete_outline,
-                  color: AppColors.danger,
-                  size: 20,
-                ),
-                tooltip: 'Delete Gate',
-              ),
-            ],
-          ),
+            ),
         ],
       ),
     );
@@ -393,7 +485,11 @@ class _GateManagementPageState extends ConsumerState<GateManagementPage> {
             gateName: gate.name,
           ),
         ),
-      );
+      ).then((_) {
+        if (mounted) {
+          ref.read(gatesProvider.notifier).loadGates();
+        }
+      });
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

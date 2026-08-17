@@ -23,7 +23,7 @@ class GatesState {
     return GatesState(
       gates: gates ?? this.gates,
       isLoading: isLoading ?? this.isLoading,
-      error: error,
+      error: error ?? this.error,
     );
   }
 }

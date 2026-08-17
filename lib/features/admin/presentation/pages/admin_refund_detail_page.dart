@@ -64,7 +64,7 @@ class _AdminRefundDetailPageState extends ConsumerState<AdminRefundDetailPage> {
     setState(() => _isProcessing = true);
     final success = await ref
         .read(refundListProvider.notifier)
-        .approveRefund(widget.refund.id!, notes: _noteController.text);
+        .approveRefund(widget.refund.id!);
     setState(() => _isProcessing = false);
 
     if (mounted) {
@@ -88,6 +88,16 @@ class _AdminRefundDetailPageState extends ConsumerState<AdminRefundDetailPage> {
   }
 
   Future<void> _rejectRefund() async {
+    if (_noteController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please provide a reason for rejection'),
+          backgroundColor: AppColors.warning,
+        ),
+      );
+      return;
+    }
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -284,7 +294,6 @@ class _AdminRefundDetailPageState extends ConsumerState<AdminRefundDetailPage> {
           const SizedBox(height: 16),
           _buildDetailRow('Order ID', refund.orderId ?? '-'),
           _buildDetailRow('Customer', refund.customerName ?? '-'),
-          _buildDetailRow('Email', refund.customerEmail ?? '-'),
           _buildDetailRow('Event', refund.eventName ?? '-'),
           if (refund.ticketCategoryName != null)
             _buildDetailRow('Category', refund.ticketCategoryName!),

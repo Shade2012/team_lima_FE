@@ -2,14 +2,12 @@ class RefundRequest {
   final String? id;
   final String? orderId;
   final String? customerName;
-  final String? customerEmail;
   final String? eventName;
-  final String? eventNameFull;
   final String? status;
   final int? amount;
   final DateTime? requestedAt;
   final String? reason;
-  final String? notes;
+  final String? rejectReason;
   final String? ticketCategoryId;
   final String? ticketCategoryName;
 
@@ -17,51 +15,38 @@ class RefundRequest {
     this.id,
     this.orderId,
     this.customerName,
-    this.customerEmail,
     this.eventName,
-    this.eventNameFull,
     this.status,
     this.amount,
     this.requestedAt,
     this.reason,
-    this.notes,
+    this.rejectReason,
     this.ticketCategoryId,
     this.ticketCategoryName,
   });
 
   factory RefundRequest.fromJson(Map<String, dynamic> json) {
+    final ticket = json['ticket'] as Map<String, dynamic>?;
+    final category = ticket?['category'] as Map<String, dynamic>?;
+    final event = category?['event'] as Map<String, dynamic>?;
+    final order = json['order'] as Map<String, dynamic>?;
+    final customer = json['customer'] as Map<String, dynamic>?;
+
     return RefundRequest(
       id: json['id']?.toString(),
-      orderId: json['orderId']?.toString() ?? json['order_id']?.toString(),
-      customerName: json['customerName']?.toString() ?? json['customer_name']?.toString(),
-      customerEmail: json['customerEmail']?.toString() ?? json['customer_email']?.toString(),
-      eventName: json['eventName']?.toString() ?? json['event_name']?.toString(),
-      eventNameFull: json['eventNameFull']?.toString(),
+      orderId: order?['orderId']?.toString() ?? ticket?['orderId']?.toString(),
+      customerName: customer?['username']?.toString() ?? json['customerName']?.toString(),
+      eventName: event?['name']?.toString() ?? json['eventName']?.toString(),
       status: json['status']?.toString(),
       amount: json['amount'] as int?,
-      requestedAt: json['requestedAt'] != null
-          ? DateTime.tryParse(json['requestedAt'].toString())
+      requestedAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'].toString())
           : null,
       reason: json['reason']?.toString(),
-      notes: json['notes']?.toString(),
-      ticketCategoryId: json['ticketCategoryId']?.toString(),
-      ticketCategoryName: json['ticketCategoryName']?.toString(),
+      rejectReason: json['rejectReason']?.toString(),
+      ticketCategoryId: category?['id']?.toString(),
+      ticketCategoryName: category?['name']?.toString(),
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'orderId': orderId,
-      'customerName': customerName,
-      'customerEmail': customerEmail,
-      'eventName': eventName,
-      'status': status,
-      'amount': amount,
-      'requestedAt': requestedAt?.toIso8601String(),
-      'reason': reason,
-      'notes': notes,
-    };
   }
 
   String get initials {
@@ -75,21 +60,24 @@ class RefundRequest {
 }
 
 class RefundStats {
-  final int? pendingCount;
-  final int? totalRefunded;
-  final int? activeDisputes;
+  final int pendingCount;
+  final int totalRefunded;
+  final int totalRefundAmount;
 
-  RefundStats({
-    this.pendingCount,
-    this.totalRefunded,
-    this.activeDisputes,
+  const RefundStats({
+    this.pendingCount = 0,
+    this.totalRefunded = 0,
+    this.totalRefundAmount = 0,
   });
 
-  factory RefundStats.fromJson(Map<String, dynamic> json) {
+  factory RefundStats.fromRefunds(List<RefundRequest> refunds) {
+    final pending = refunds.where((r) => r.status == 'PENDING').length;
+    final approved = refunds.where((r) => r.status == 'APPROVED');
+    final totalAmount = approved.fold<int>(0, (sum, r) => sum + (r.amount ?? 0));
     return RefundStats(
-      pendingCount: json['pendingCount'] as int? ?? json['pending_count'] as int?,
-      totalRefunded: json['totalRefunded'] as int? ?? json['total_refunded'] as int?,
-      activeDisputes: json['activeDisputes'] as int? ?? json['active_disputes'] as int?,
+      pendingCount: pending,
+      totalRefunded: approved.length,
+      totalRefundAmount: totalAmount,
     );
   }
 }

@@ -6,6 +6,7 @@ import '../models/gate_operator_request.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../auth/data/models/user_model.dart';
+import '../../../event/data/models/event_model.dart';
 
 class GateRepository {
   final DioClient _dioClient = DioClient();
@@ -89,6 +90,26 @@ class GateRepository {
     } on DioException catch (e) {
       throw Exception(
         _extractErrorMessage(e, fallback: 'Failed to register gate operator'),
+      );
+    }
+  }
+
+  /// GET /gates/operator/assigned
+  Future<(Gate gate, Event event)?> getAssignedGate() async {
+    try {
+      final response = await _dioClient.dio.get(
+        ApiConstants.assignedGate,
+      );
+      final data = response.data['data'] as Map<String, dynamic>;
+      if (data.isEmpty) return null;
+      final gate = Gate.fromJson(data);
+      final eventData = data['event'];
+      if (eventData == null || eventData is! Map<String, dynamic>) return null;
+      final event = Event.fromJson(eventData);
+      return (gate, event);
+    } on DioException catch (e) {
+      throw Exception(
+        _extractErrorMessage(e, fallback: 'Failed to fetch assigned gate'),
       );
     }
   }

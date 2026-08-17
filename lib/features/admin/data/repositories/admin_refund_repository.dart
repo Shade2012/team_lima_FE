@@ -6,17 +6,16 @@ import '../../../../core/constants/api_constants.dart';
 class AdminRefundRepository {
   final DioClient _dioClient = DioClient();
 
-  /// GET /admin/refunds?status=PENDING
-  Future<List<RefundRequest>> getRefundRequests({String? status}) async {
+  /// GET /refunds
+  Future<List<RefundRequest>> getRefundRequests() async {
     try {
-      final response = await _dioClient.dio.get(
-        ApiConstants.adminRefunds,
-        queryParameters: status != null ? {'status': status} : null,
-      );
+      final response = await _dioClient.dio.get(ApiConstants.refunds);
       final data = response.data['data'];
       if (data == null) return [];
       if (data is List) {
-        return data.map((e) => RefundRequest.fromJson(e as Map<String, dynamic>)).toList();
+        return data
+            .map((e) => RefundRequest.fromJson(e as Map<String, dynamic>))
+            .toList();
       }
       return [];
     } on DioException catch (e) {
@@ -26,27 +25,10 @@ class AdminRefundRepository {
     }
   }
 
-  /// GET /admin/refunds/:id
-  Future<RefundRequest> getRefundDetail(String id) async {
+  /// PATCH /refunds/:id/approve
+  Future<void> approveRefund(String id) async {
     try {
-      final response = await _dioClient.dio.get(
-        ApiConstants.adminRefundDetail(id),
-      );
-      return RefundRequest.fromJson(response.data['data']);
-    } on DioException catch (e) {
-      throw Exception(
-        _extractErrorMessage(e, fallback: 'Failed to fetch refund detail'),
-      );
-    }
-  }
-
-  /// POST /admin/refunds/:id/approve
-  Future<void> approveRefund(String id, {String? notes}) async {
-    try {
-      await _dioClient.dio.post(
-        ApiConstants.adminRefundApprove(id),
-        data: notes != null ? {'notes': notes} : null,
-      );
+      await _dioClient.dio.patch(ApiConstants.refundApprove(id));
     } on DioException catch (e) {
       throw Exception(
         _extractErrorMessage(e, fallback: 'Failed to approve refund'),
@@ -54,30 +36,16 @@ class AdminRefundRepository {
     }
   }
 
-  /// POST /admin/refunds/:id/reject
-  Future<void> rejectRefund(String id, {String? reason}) async {
+  /// PATCH /refunds/:id/reject
+  Future<void> rejectRefund(String id, {required String reason}) async {
     try {
-      await _dioClient.dio.post(
-        ApiConstants.adminRefundReject(id),
-        data: reason != null ? {'reason': reason} : null,
+      await _dioClient.dio.patch(
+        ApiConstants.refundReject(id),
+        data: {'rejectReason': reason},
       );
     } on DioException catch (e) {
       throw Exception(
         _extractErrorMessage(e, fallback: 'Failed to reject refund'),
-      );
-    }
-  }
-
-  /// GET /admin/refunds/stats
-  Future<RefundStats> getRefundStats() async {
-    try {
-      final response = await _dioClient.dio.get(
-        ApiConstants.adminRefundStats,
-      );
-      return RefundStats.fromJson(response.data['data']);
-    } on DioException catch (e) {
-      throw Exception(
-        _extractErrorMessage(e, fallback: 'Failed to fetch refund stats'),
       );
     }
   }
