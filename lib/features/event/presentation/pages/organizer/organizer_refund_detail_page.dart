@@ -137,7 +137,7 @@ class OrganizerRefundDetailPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Order Details',
+            'Refund Details',
             style: AppTextStyles.bodyMedium.copyWith(
               fontWeight: FontWeight.w700,
               fontSize: 14,
@@ -145,11 +145,12 @@ class OrganizerRefundDetailPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          _buildDetailRow('Order ID', refund.orderId ?? '-'),
           _buildDetailRow('Customer', refund.customerName ?? '-'),
           _buildDetailRow('Event', refund.eventName ?? '-'),
           if (refund.ticketCategoryName != null)
             _buildDetailRow('Category', refund.ticketCategoryName!),
+          if (refund.seatCode != null)
+            _buildDetailRow('Seat', refund.seatCode!),
           const Divider(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -248,7 +249,7 @@ class OrganizerRefundDetailPage extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Requested: ${_formatDate(refund.requestedAt)}',
+            'Requested: ${_formatDate(refund.createdAt)}',
             style: AppTextStyles.bodySmall.copyWith(
               color: AppColors.grey,
               fontSize: 11,

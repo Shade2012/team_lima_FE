@@ -139,20 +139,42 @@ module.exports = function (db) {
         const category = ticket ? db.categories.find(c => c.id === ticket.categoryId) : null;
         const event = category ? db.events.find(e => e.id === category.eventId) : null;
         const seat = ticket && ticket.seatId ? db.seats.find(s => s.id === ticket.seatId) : null;
+        const order = ticket ? db.orders.find(o => o.id === ticket.orderId) : null;
 
         return {
-          ...r,
+          id: r.id,
+          reason: r.reason,
+          amount: r.amount,
+          ticketId: r.ticketId,
+          status: r.status,
+          rejectReason: r.rejectReason,
+          adminId: r.adminId,
+          providerRefundId: r.providerRefundId,
+          processedAt: r.processedAt,
+          createdAt: r.createdAt,
+          updatedAt: r.updatedAt,
           ticket: ticket ? {
-            ...ticket,
+            id: ticket.id,
+            status: ticket.status,
             category: category ? {
-              ...category,
+              id: category.id,
+              name: category.name,
+              price: category.price,
               event: event ? {
                 id: event.id,
                 name: event.name,
                 eventDate: event.eventDate
               } : null
             } : null,
-            seat
+            seat: seat ? {
+              id: seat.id,
+              seatCode: seat.seatCode
+            } : null,
+            order: order ? {
+              id: order.id,
+              customerId: order.customerId,
+              status: order.status
+            } : null
           } : null
         };
       })
@@ -191,20 +213,44 @@ module.exports = function (db) {
         const category = ticket ? db.categories.find(c => c.id === ticket.categoryId) : null;
         const event = category ? db.events.find(e => e.id === category.eventId) : null;
         const seat = ticket && ticket.seatId ? db.seats.find(s => s.id === ticket.seatId) : null;
+        const order = ticket ? db.orders.find(o => o.id === ticket.orderId) : null;
+        const customer = order ? db.users.find(u => u.id === order.customerId) : null;
 
         return {
-          ...r,
+          id: r.id,
+          reason: r.reason,
+          amount: r.amount,
+          ticketId: r.ticketId,
+          status: r.status,
+          rejectReason: r.rejectReason,
+          adminId: r.adminId,
+          providerRefundId: r.providerRefundId,
+          processedAt: r.processedAt,
+          createdAt: r.createdAt,
+          updatedAt: r.updatedAt,
+          customerName: customer ? customer.username : null,
           ticket: ticket ? {
-            ...ticket,
+            id: ticket.id,
+            status: ticket.status,
             category: category ? {
-              ...category,
+              id: category.id,
+              name: category.name,
+              price: category.price,
               event: event ? {
                 id: event.id,
                 name: event.name,
                 eventDate: event.eventDate
               } : null
             } : null,
-            seat
+            seat: seat ? {
+              id: seat.id,
+              seatCode: seat.seatCode
+            } : null,
+            order: order ? {
+              id: order.id,
+              customerId: order.customerId,
+              status: order.status
+            } : null
           } : null
         };
       })

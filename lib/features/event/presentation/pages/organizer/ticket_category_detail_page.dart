@@ -5,8 +5,10 @@ import 'package:team_five_fe/core/theme/app_colors.dart';
 import 'package:team_five_fe/core/theme/app_text_styles.dart';
 import 'package:team_five_fe/features/event/data/models/event_statistics_model.dart';
 import 'package:team_five_fe/features/event/presentation/providers/event_provider.dart';
+import 'package:team_five_fe/features/ticket_category/presentation/pages/organizer/seat_preview_page.dart';
 
 class TicketCategoryDetailPage extends ConsumerStatefulWidget {
+  final String eventId;
   final String categoryId;
   final String categoryName;
   final String eventName;
@@ -15,6 +17,7 @@ class TicketCategoryDetailPage extends ConsumerStatefulWidget {
 
   const TicketCategoryDetailPage({
     super.key,
+    required this.eventId,
     required this.categoryId,
     required this.categoryName,
     required this.eventName,
@@ -166,6 +169,46 @@ class _TicketCategoryDetailPageState
                 _buildSalesOverviewCard(category),
                 const SizedBox(height: 16),
                 _buildRefundInfoCard(category),
+                if (widget.isSeated) ...[
+                  const SizedBox(height: 16),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => SeatPreviewPage(
+                                eventId: widget.eventId,
+                                eventName: widget.eventName,
+                                eventDate: widget.eventDate,
+                                categoryId: widget.categoryId,
+                              ),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.preview, size: 18),
+                        label: Text(
+                          'Preview Seats',
+                          style: AppTextStyles.button.copyWith(fontSize: 14),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          side: const BorderSide(
+                            color: AppColors.primary,
+                            width: 1.5,
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 32),
               ],
             ),

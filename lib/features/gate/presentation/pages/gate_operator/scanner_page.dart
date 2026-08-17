@@ -242,7 +242,7 @@ class _ScannerPageState extends ConsumerState<ScannerPage> {
             ),
             const SizedBox(height: 12),
             Text(
-              result.isValid ? 'Valid Ticket' : 'Invalid Ticket',
+              result.isValid ? 'Scan Successful' : 'Scan Failed',
               style: AppTextStyles.title.copyWith(
                 fontSize: 18,
                 color: result.isValid ? AppColors.success : AppColors.danger,
@@ -250,56 +250,21 @@ class _ScannerPageState extends ConsumerState<ScannerPage> {
             ),
             const SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                result.ticketType,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.background,
+                color: result.isValid
+                    ? AppColors.success.withValues(alpha: 0.05)
+                    : AppColors.danger.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Row(
-                children: [
-                  const CircleAvatar(
-                    radius: 22,
-                    backgroundColor: AppColors.greyLight,
-                    child: Icon(Icons.person, color: AppColors.grey),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'ATTENDEE',
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.grey,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          result.attendeeName,
-                          style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              child: Text(
+                result.isValid ? (result.message.isNotEmpty ? result.message : 'Success') : (result.errorMessage ?? 'Unknown error'),
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: result.isValid ? AppColors.success : AppColors.danger,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
             const SizedBox(height: 16),

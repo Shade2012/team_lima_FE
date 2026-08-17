@@ -7,41 +7,22 @@ import 'package:team_five_fe/features/admin/data/models/refund_model.dart';
 import 'package:team_five_fe/features/admin/presentation/providers/admin_refund_provider.dart';
 import 'package:team_five_fe/features/admin/presentation/pages/admin_refund_detail_page.dart';
 
-class AdminRefundManagementPage extends ConsumerStatefulWidget {
-  const AdminRefundManagementPage({super.key});
+class AdminRefundRequestPage extends ConsumerStatefulWidget {
+  const AdminRefundRequestPage({super.key});
 
   @override
-  ConsumerState<AdminRefundManagementPage> createState() =>
-      _AdminRefundManagementPageState();
+  ConsumerState<AdminRefundRequestPage> createState() =>
+      _AdminRefundRequestPageState();
 }
 
-class _AdminRefundManagementPageState
-    extends ConsumerState<AdminRefundManagementPage>
-    with SingleTickerProviderStateMixin {
+class _AdminRefundRequestPageState
+    extends ConsumerState<AdminRefundRequestPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  String _selectedFilter = 'ALL';
-  late TabController _tabController;
-
-  static const _filters = ['ALL', 'PENDING', 'APPROVED', 'REJECTED'];
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: _filters.length, vsync: this);
-    _tabController.addListener(() {
-      if (!_tabController.indexIsChanging) {
-        setState(() {
-          _selectedFilter = _filters[_tabController.index];
-        });
-      }
-    });
-  }
 
   @override
   void dispose() {
     _searchController.dispose();
-    _tabController.dispose();
     super.dispose();
   }
 
@@ -65,13 +46,7 @@ class _AdminRefundManagementPageState
   }
 
   List<RefundRequest> _filterRefunds(List<RefundRequest> refunds) {
-    var filtered = refunds;
-
-    if (_selectedFilter != 'ALL') {
-      filtered = filtered
-          .where((r) => r.status?.toUpperCase() == _selectedFilter)
-          .toList();
-    }
+    var filtered = refunds.where((r) => r.status?.toUpperCase() == 'PENDING').toList();
 
     if (_searchQuery.isNotEmpty) {
       final q = _searchQuery.toLowerCase();
@@ -88,7 +63,6 @@ class _AdminRefundManagementPageState
   @override
   Widget build(BuildContext context) {
     final listState = ref.watch(refundListProvider);
-    final stats = listState.stats;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -97,17 +71,13 @@ class _AdminRefundManagementPageState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(),
-            _buildStatsRow(stats),
             _buildSearchBar(),
-            _buildFilterTabs(),
             Expanded(child: _buildRefundList(listState)),
           ],
         ),
       ),
     );
   }
-
-  // ==================== Header ====================
 
   Widget _buildHeader() {
     return Padding(
@@ -116,12 +86,12 @@ class _AdminRefundManagementPageState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Refund Management',
+            'Refund Requests',
             style: AppTextStyles.title.copyWith(fontSize: 22),
           ),
           const SizedBox(height: 2),
           Text(
-            'Manage customer refund requests',
+            'Approve or reject customer refund requests',
             style: AppTextStyles.bodySmall.copyWith(
               color: AppColors.grey,
             ),
@@ -130,105 +100,6 @@ class _AdminRefundManagementPageState
       ),
     );
   }
-
-  // ==================== Stats Row ====================
-
-  Widget _buildStatsRow(RefundStats stats) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-      child: Column(
-        children: [
-          // Total on top (full width)
-          _buildStatCard(
-            icon: Icons.attach_money,
-            label: 'Total Refunded',
-            value: _formatCurrency(stats.totalRefundAmount),
-            color: AppColors.danger,
-          ),
-          const SizedBox(height: 8),
-          // Pending and Approved below (side by side)
-          Row(
-            children: [
-              Expanded(
-                child: _buildStatCard(
-                  icon: Icons.schedule,
-                  label: 'Pending',
-                  value: '${stats.pendingCount}',
-                  color: AppColors.primary,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _buildStatCard(
-                  icon: Icons.check_circle_outline,
-                  label: 'Approved',
-                  value: '${stats.totalRefunded}',
-                  color: AppColors.success,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatCard({
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: color),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  label,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.grey,
-                    fontSize: 13,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.black,
-                    fontSize: 16,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ==================== Search Bar ====================
 
   Widget _buildSearchBar() {
     return Padding(
@@ -240,7 +111,7 @@ class _AdminRefundManagementPageState
         },
         style: AppTextStyles.bodyMedium,
         decoration: InputDecoration(
-          hintText: 'Search Order ID, Name, or Event...',
+          hintText: 'Search by name or event...',
           hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey),
           prefixIcon: const Icon(Icons.search, color: AppColors.grey),
           suffixIcon: _searchQuery.isNotEmpty
@@ -274,35 +145,6 @@ class _AdminRefundManagementPageState
       ),
     );
   }
-
-  // ==================== Filter Tabs ====================
-
-  Widget _buildFilterTabs() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-      child: TabBar(
-        controller: _tabController,
-        labelColor: AppColors.primary,
-        unselectedLabelColor: AppColors.grey,
-        labelStyle: AppTextStyles.bodyMedium.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
-        unselectedLabelStyle: AppTextStyles.bodyMedium,
-        indicatorColor: AppColors.primary,
-        indicatorWeight: 3,
-        dividerColor: AppColors.greyLight,
-        dividerHeight: 1,
-        tabs: const [
-          Tab(text: 'All'),
-          Tab(text: 'Pending'),
-          Tab(text: 'Approved'),
-          Tab(text: 'Rejected'),
-        ],
-      ),
-    );
-  }
-
-  // ==================== Refund List ====================
 
   Widget _buildRefundList(RefundListState listState) {
     if (listState.isLoading) {
@@ -350,27 +192,23 @@ class _AdminRefundManagementPageState
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: AppColors.success.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Icons.inbox_outlined,
+                Icons.check_circle_outline,
                 size: 40,
-                color: AppColors.primary.withValues(alpha: 0.5),
+                color: AppColors.success.withValues(alpha: 0.5),
               ),
             ),
             const SizedBox(height: 16),
             Text(
-              _searchQuery.isNotEmpty || _selectedFilter != 'ALL'
-                  ? 'No results found'
-                  : 'No refund requests',
+              'No pending requests',
               style: AppTextStyles.bodyLarge.copyWith(color: AppColors.grey),
             ),
             const SizedBox(height: 8),
             Text(
-              _searchQuery.isNotEmpty || _selectedFilter != 'ALL'
-                  ? 'Try adjusting your filters'
-                  : 'Refund requests will appear here.',
+              'All refund requests have been processed.',
               style: AppTextStyles.bodySmall.copyWith(color: AppColors.grey),
             ),
           ],
@@ -394,24 +232,7 @@ class _AdminRefundManagementPageState
     );
   }
 
-  // ==================== Refund Card ====================
-
   Widget _buildRefundCard(RefundRequest refund) {
-    final colors = [
-      AppColors.primary,
-      AppColors.warning,
-      AppColors.success,
-      AppColors.danger,
-      const Color(0xFF2196F3),
-      const Color(0xFF9C27B0),
-    ];
-    final colorIndex =
-        (refund.customerName ?? '').hashCode.abs() % colors.length;
-    final avatarColor = colors[colorIndex];
-
-    final statusConfig = _getStatusConfig(refund.status);
-    final isPending = refund.status?.toUpperCase() == 'PENDING';
-
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -443,14 +264,14 @@ class _AdminRefundManagementPageState
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: avatarColor.withValues(alpha: 0.15),
+                    color: AppColors.primary.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
                   child: Center(
                     child: Text(
                       refund.initials,
-                      style: TextStyle(
-                        color: avatarColor,
+                      style: const TextStyle(
+                        color: AppColors.primary,
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),
@@ -482,13 +303,13 @@ class _AdminRefundManagementPageState
                               vertical: 3,
                             ),
                             decoration: BoxDecoration(
-                              color: statusConfig.color.withValues(alpha: 0.1),
+                              color: AppColors.primary.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Text(
-                              statusConfig.label,
+                            child: const Text(
+                              'Pending',
                               style: TextStyle(
-                                color: statusConfig.color,
+                                color: AppColors.primary,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -529,52 +350,50 @@ class _AdminRefundManagementPageState
               ],
             ),
           ),
-          if (isPending) ...[
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => _showRejectDialog(refund),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.danger,
-                      side: const BorderSide(color: AppColors.danger),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => _showRejectDialog(refund),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.danger,
+                    side: const BorderSide(color: AppColors.danger),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Text(
-                      'Reject',
-                      style: AppTextStyles.button.copyWith(
-                        color: AppColors.danger,
-                        fontSize: 13,
-                      ),
+                  ),
+                  child: Text(
+                    'Reject',
+                    style: AppTextStyles.button.copyWith(
+                      color: AppColors.danger,
+                      fontSize: 13,
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => _approveRefund(refund),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.success,
-                      foregroundColor: AppColors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      elevation: 0,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => _approveRefund(refund),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.success,
+                    foregroundColor: AppColors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Text(
-                      'Approve',
-                      style: AppTextStyles.button.copyWith(fontSize: 13),
-                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    'Approve',
+                    style: AppTextStyles.button.copyWith(fontSize: 13),
                   ),
                 ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -593,7 +412,7 @@ class _AdminRefundManagementPageState
           ],
         ),
         content: Text(
-          'Are you sure you want to approve this refund for ${refund.customerName ?? '-'}?',
+          'Approve refund for ${refund.customerName ?? '-'}?',
           style: AppTextStyles.bodyMedium,
         ),
         actions: [
@@ -725,23 +544,4 @@ class _AdminRefundManagementPageState
       }
     }
   }
-
-  _StatusConfig _getStatusConfig(String? status) {
-    switch (status?.toUpperCase()) {
-      case 'PENDING':
-        return _StatusConfig('Pending', AppColors.primary);
-      case 'APPROVED':
-        return _StatusConfig('Approved', AppColors.success);
-      case 'REJECTED':
-        return _StatusConfig('Rejected', AppColors.danger);
-      default:
-        return _StatusConfig(status ?? '-', AppColors.grey);
-    }
-  }
-}
-
-class _StatusConfig {
-  final String label;
-  final Color color;
-  _StatusConfig(this.label, this.color);
 }

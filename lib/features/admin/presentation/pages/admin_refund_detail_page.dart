@@ -255,7 +255,7 @@ class _AdminRefundDetailPageState extends ConsumerState<AdminRefundDetailPage> {
           ),
           const SizedBox(height: 4),
           Text(
-            refund.orderId ?? '-',
+            refund.eventName ?? '-',
             style: AppTextStyles.bodySmall.copyWith(
               color: Colors.white70,
               fontSize: 13,
@@ -284,7 +284,7 @@ class _AdminRefundDetailPageState extends ConsumerState<AdminRefundDetailPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Order Details',
+            'Refund Details',
             style: AppTextStyles.bodyMedium.copyWith(
               fontWeight: FontWeight.w700,
               fontSize: 14,
@@ -292,11 +292,14 @@ class _AdminRefundDetailPageState extends ConsumerState<AdminRefundDetailPage> {
             ),
           ),
           const SizedBox(height: 16),
-          _buildDetailRow('Order ID', refund.orderId ?? '-'),
           _buildDetailRow('Customer', refund.customerName ?? '-'),
           _buildDetailRow('Event', refund.eventName ?? '-'),
           if (refund.ticketCategoryName != null)
             _buildDetailRow('Category', refund.ticketCategoryName!),
+          if (refund.seatCode != null)
+            _buildDetailRow('Seat', refund.seatCode!),
+          _buildDetailRow('Ticket Status', refund.ticketStatus ?? '-'),
+          _buildDetailRow('Order Status', refund.orderStatus ?? '-'),
           const Divider(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -395,7 +398,7 @@ class _AdminRefundDetailPageState extends ConsumerState<AdminRefundDetailPage> {
           ),
           const SizedBox(height: 12),
           Text(
-            'Requested: ${_formatDate(refund.requestedAt)}',
+            'Requested: ${_formatDate(refund.createdAt)}',
             style: AppTextStyles.bodySmall.copyWith(
               color: AppColors.grey,
               fontSize: 11,

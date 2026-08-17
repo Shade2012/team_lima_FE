@@ -82,8 +82,7 @@ module.exports = function (db) {
     let totalRefundAmountSum = 0;
 
     const categoryStats = categories.map(cat => {
-      const seats = db.seats.filter(s => s.categoryId === cat.id);
-      const ticketsSold = seats.length;
+      const ticketsSold = (db.tickets || []).filter(t => t.categoryId === cat.id).length;
       const grossRevenue = ticketsSold * cat.price;
       const refundCount = 0;
       const totalRefundAmount = 0;

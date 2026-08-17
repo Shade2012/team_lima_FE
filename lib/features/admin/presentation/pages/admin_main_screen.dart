@@ -3,7 +3,8 @@ import 'package:team_five_fe/core/theme/app_colors.dart';
 import 'package:team_five_fe/core/theme/app_text_styles.dart';
 import 'package:team_five_fe/features/auth/presentation/pages/profile_page.dart';
 import 'admin_events_page.dart';
-import 'admin_refund_management_page.dart';
+import 'admin_refund_request_page.dart';
+import 'admin_refund_status_page.dart';
 
 class AdminMainScreen extends StatefulWidget {
   final int initialIndex;
@@ -19,7 +20,8 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
 
   final List<Widget> _pages = const [
     AdminEventsPage(),
-    AdminRefundManagementPage(),
+    AdminRefundRequestPage(),
+    AdminRefundStatusPage(),
     ProfilePage(),
   ];
 
@@ -47,18 +49,24 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
         child: SafeArea(
           child: Container(
             height: 64,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildNavItem(0, Icons.event_outlined, Icons.event, 'Events'),
                 _buildNavItem(
                   1,
+                  Icons.pending_actions_outlined,
+                  Icons.pending_actions,
+                  'Request',
+                ),
+                _buildNavItem(
+                  2,
                   Icons.receipt_long_outlined,
                   Icons.receipt_long,
-                  'Refunds',
+                  'Status',
                 ),
-                _buildNavItem(2, Icons.person_outline, Icons.person, 'Profile'),
+                _buildNavItem(3, Icons.person_outline, Icons.person, 'Profile'),
               ],
             ),
           ),
@@ -100,7 +108,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
             style: AppTextStyles.bodySmall.copyWith(
               color: isSelected ? AppColors.primary : Colors.black45,
               fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-              fontSize: 11,
+              fontSize: 10,
             ),
           ),
         ],

@@ -42,22 +42,33 @@ class GateOperatorDashboardState {
   final List<GateOperatorEvent> events;
   final bool isLoading;
   final String? error;
+  final int scannedCount;
+  final int totalScans;
 
   GateOperatorDashboardState({
     this.events = const [],
     this.isLoading = false,
     this.error,
+    this.scannedCount = 0,
+    this.totalScans = 0,
   });
+
+  double get scanProgress =>
+      totalScans > 0 ? (scannedCount / totalScans) : 0.0;
 
   GateOperatorDashboardState copyWith({
     List<GateOperatorEvent>? events,
     bool? isLoading,
     String? error,
+    int? scannedCount,
+    int? totalScans,
   }) {
     return GateOperatorDashboardState(
       events: events ?? this.events,
       isLoading: isLoading ?? this.isLoading,
       error: error,
+      scannedCount: scannedCount ?? this.scannedCount,
+      totalScans: totalScans ?? this.totalScans,
     );
   }
 }
@@ -91,11 +102,26 @@ class GateOperatorDashboardNotifier
         isLoading: false,
         events: [operatorEvent],
       );
+
+      await loadScanStats();
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: e.toString().replaceAll('Exception: ', ''),
       );
+    }
+  }
+
+  Future<void> loadScanStats() async {
+    try {
+      final repository = ref.read(gateRepositoryProvider);
+      final stats = await repository.getScanStats();
+      state = state.copyWith(
+        scannedCount: stats['scanned'] ?? 0,
+        totalScans: stats['total'] ?? 0,
+      );
+    } catch (_) {
+      // Silently ignore scan stats errors
     }
   }
 

@@ -5,24 +5,24 @@ import 'package:team_five_fe/core/theme/app_colors.dart';
 import 'package:team_five_fe/core/theme/app_text_styles.dart';
 import 'package:team_five_fe/features/admin/data/models/refund_model.dart';
 import 'package:team_five_fe/features/admin/presentation/providers/admin_refund_provider.dart';
-import 'organizer_refund_detail_page.dart';
+import 'package:team_five_fe/features/admin/presentation/pages/admin_refund_detail_page.dart';
 
-class OrganizerRefundPage extends ConsumerStatefulWidget {
-  const OrganizerRefundPage({super.key});
+class AdminRefundStatusPage extends ConsumerStatefulWidget {
+  const AdminRefundStatusPage({super.key});
 
   @override
-  ConsumerState<OrganizerRefundPage> createState() =>
-      _OrganizerRefundPageState();
+  ConsumerState<AdminRefundStatusPage> createState() =>
+      _AdminRefundStatusPageState();
 }
 
-class _OrganizerRefundPageState extends ConsumerState<OrganizerRefundPage>
+class _AdminRefundStatusPageState extends ConsumerState<AdminRefundStatusPage>
     with SingleTickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String _selectedFilter = 'ALL';
   late TabController _tabController;
 
-  static const _filters = ['ALL', 'PENDING', 'APPROVED', 'REJECTED'];
+  static const _filters = ['ALL', 'APPROVED', 'REJECTED'];
 
   @override
   void initState() {
@@ -64,7 +64,9 @@ class _OrganizerRefundPageState extends ConsumerState<OrganizerRefundPage>
   }
 
   List<RefundRequest> _filterRefunds(List<RefundRequest> refunds) {
-    var filtered = refunds;
+    var filtered = refunds
+        .where((r) => r.status?.toUpperCase() != 'PENDING')
+        .toList();
 
     if (_selectedFilter != 'ALL') {
       filtered = filtered
@@ -104,8 +106,6 @@ class _OrganizerRefundPageState extends ConsumerState<OrganizerRefundPage>
     );
   }
 
-  // ==================== Header ====================
-
   Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
@@ -113,12 +113,12 @@ class _OrganizerRefundPageState extends ConsumerState<OrganizerRefundPage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Refund Requests',
+            'Refund History',
             style: AppTextStyles.title.copyWith(fontSize: 22),
           ),
           const SizedBox(height: 2),
           Text(
-            'View refund requests for your events',
+            'View processed refund requests',
             style: AppTextStyles.bodySmall.copyWith(
               color: AppColors.grey,
             ),
@@ -127,8 +127,6 @@ class _OrganizerRefundPageState extends ConsumerState<OrganizerRefundPage>
       ),
     );
   }
-
-  // ==================== Search Bar ====================
 
   Widget _buildSearchBar() {
     return Padding(
@@ -140,7 +138,7 @@ class _OrganizerRefundPageState extends ConsumerState<OrganizerRefundPage>
         },
         style: AppTextStyles.bodyMedium,
         decoration: InputDecoration(
-          hintText: 'Search Order ID, Name, or Event...',
+          hintText: 'Search by name or event...',
           hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey),
           prefixIcon: const Icon(Icons.search, color: AppColors.grey),
           suffixIcon: _searchQuery.isNotEmpty
@@ -175,11 +173,9 @@ class _OrganizerRefundPageState extends ConsumerState<OrganizerRefundPage>
     );
   }
 
-  // ==================== Filter Tabs ====================
-
   Widget _buildFilterTabs() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: TabBar(
         controller: _tabController,
         labelColor: AppColors.primary,
@@ -194,15 +190,12 @@ class _OrganizerRefundPageState extends ConsumerState<OrganizerRefundPage>
         dividerHeight: 1,
         tabs: const [
           Tab(text: 'All'),
-          Tab(text: 'Pending'),
           Tab(text: 'Approved'),
           Tab(text: 'Rejected'),
         ],
       ),
     );
   }
-
-  // ==================== Refund List ====================
 
   Widget _buildRefundList(RefundListState listState) {
     if (listState.isLoading) {
@@ -250,27 +243,23 @@ class _OrganizerRefundPageState extends ConsumerState<OrganizerRefundPage>
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: AppColors.grey.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Icons.inbox_outlined,
+                Icons.history,
                 size: 40,
-                color: AppColors.primary.withValues(alpha: 0.5),
+                color: AppColors.grey.withValues(alpha: 0.5),
               ),
             ),
             const SizedBox(height: 16),
             Text(
-              _searchQuery.isNotEmpty || _selectedFilter != 'ALL'
-                  ? 'No results found'
-                  : 'No refund requests',
+              'No history yet',
               style: AppTextStyles.bodyLarge.copyWith(color: AppColors.grey),
             ),
             const SizedBox(height: 8),
             Text(
-              _searchQuery.isNotEmpty || _selectedFilter != 'ALL'
-                  ? 'Try adjusting your filters'
-                  : 'Refund requests will appear here.',
+              'Processed refunds will appear here.',
               style: AppTextStyles.bodySmall.copyWith(color: AppColors.grey),
             ),
           ],
@@ -294,31 +283,20 @@ class _OrganizerRefundPageState extends ConsumerState<OrganizerRefundPage>
     );
   }
 
-  // ==================== Refund Card ====================
-
   Widget _buildRefundCard(RefundRequest refund) {
-    final colors = [
-      AppColors.primary,
-      AppColors.warning,
-      AppColors.success,
-      AppColors.danger,
-      const Color(0xFF2196F3),
-      const Color(0xFF9C27B0),
-    ];
-    final colorIndex =
-        (refund.customerName ?? '').hashCode.abs() % colors.length;
-    final avatarColor = colors[colorIndex];
-
-    final statusConfig = _getStatusConfig(refund.status);
+    final isApproved = refund.status?.toUpperCase() == 'APPROVED';
+    final statusColor = isApproved ? AppColors.success : AppColors.danger;
+    final statusLabel = isApproved ? 'Approved' : 'Rejected';
 
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => OrganizerRefundDetailPage(refund: refund),
+            builder: (_) => AdminRefundDetailPage(refund: refund),
           ),
         );
+        ref.read(refundListProvider.notifier).loadRefunds();
       },
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -339,17 +317,14 @@ class _OrganizerRefundPageState extends ConsumerState<OrganizerRefundPage>
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: avatarColor.withValues(alpha: 0.15),
+                color: statusColor.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: Center(
-                child: Text(
-                  refund.initials,
-                  style: TextStyle(
-                    color: avatarColor,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                  ),
+                child: Icon(
+                  isApproved ? Icons.check : Icons.close,
+                  color: statusColor,
+                  size: 20,
                 ),
               ),
             ),
@@ -378,13 +353,13 @@ class _OrganizerRefundPageState extends ConsumerState<OrganizerRefundPage>
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: statusConfig.color.withValues(alpha: 0.1),
+                          color: statusColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          statusConfig.label,
+                          statusLabel,
                           style: TextStyle(
-                            color: statusConfig.color,
+                            color: statusColor,
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
                           ),
@@ -404,7 +379,7 @@ class _OrganizerRefundPageState extends ConsumerState<OrganizerRefundPage>
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Requested ${_timeAgo(refund.createdAt)}',
+                    'Processed ${_timeAgo(refund.processedAt ?? refund.updatedAt)}',
                     style: AppTextStyles.bodySmall.copyWith(
                       color: AppColors.grey,
                       fontSize: 10,
@@ -427,23 +402,4 @@ class _OrganizerRefundPageState extends ConsumerState<OrganizerRefundPage>
       ),
     );
   }
-
-  _StatusConfig _getStatusConfig(String? status) {
-    switch (status?.toUpperCase()) {
-      case 'PENDING':
-        return _StatusConfig('Pending', AppColors.primary);
-      case 'APPROVED':
-        return _StatusConfig('Approved', AppColors.success);
-      case 'REJECTED':
-        return _StatusConfig('Rejected', AppColors.danger);
-      default:
-        return _StatusConfig(status ?? '-', AppColors.grey);
-    }
-  }
-}
-
-class _StatusConfig {
-  final String label;
-  final Color color;
-  _StatusConfig(this.label, this.color);
 }

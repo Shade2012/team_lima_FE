@@ -1,16 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/repositories/gate_repository.dart';
+
+final gateRepositoryProvider = Provider<GateRepository>((ref) {
+  return GateRepository();
+});
 
 class ScanResult {
   final bool isValid;
-  final String ticketType;
-  final String attendeeName;
-  final String? attendeeEmail;
+  final String message;
+  final String? errorMessage;
 
   ScanResult({
     required this.isValid,
-    required this.ticketType,
-    required this.attendeeName,
-    this.attendeeEmail,
+    this.message = '',
+    this.errorMessage,
   });
 }
 
@@ -61,21 +64,32 @@ class ScannerNotifier extends Notifier<ScannerState> {
 
     state = state.copyWith(isProcessing: true);
 
-    // Simulate API call delay
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      final repo = ref.read(gateRepositoryProvider);
+      final responseMessage = await repo.scanTicket(qrData);
 
-    // Dummy scan result
-    final result = ScanResult(
-      isValid: true,
-      ticketType: 'VIP PASS',
-      attendeeName: 'Alex Mercer',
-      attendeeEmail: 'alex@example.com',
-    );
+      final result = ScanResult(
+        isValid: true,
+        message: responseMessage,
+      );
 
-    state = state.copyWith(
-      isProcessing: false,
-      currentResult: result,
-    );
+      state = state.copyWith(
+        isProcessing: false,
+        currentResult: result,
+      );
+    } catch (e) {
+      final cleanMessage = e.toString().replaceAll('Exception: ', '');
+
+      final result = ScanResult(
+        isValid: false,
+        errorMessage: cleanMessage,
+      );
+
+      state = state.copyWith(
+        isProcessing: false,
+        currentResult: result,
+      );
+    }
   }
 
   void resetScanner() {

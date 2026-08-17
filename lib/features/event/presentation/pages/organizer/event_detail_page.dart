@@ -578,6 +578,7 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
           context,
           MaterialPageRoute(
             builder: (_) => TicketCategoryDetailPage(
+              eventId: widget.eventId,
               categoryId: category.categoryId ?? '',
               categoryName: category.categoryName ?? '-',
               eventName: eventName,
@@ -924,6 +925,12 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                       ),
                     ),
                   );
+                  if (mounted) {
+                    ref
+                        .read(eventStatisticsProvider.notifier)
+                        .loadStatistics(widget.eventId);
+                    ref.read(categoriesProvider.notifier).loadCategories();
+                  }
                 } catch (e) {
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/ticket_category_model.dart';
 import '../../data/models/create_ticket_category_request.dart';
+import '../../data/models/update_ticket_category_request.dart';
 import '../../data/repositories/ticket_category_repository.dart';
 import '../../../seat/data/models/bulk_seats_request.dart';
 import '../../../seat/presentation/providers/seat_provider.dart';
@@ -98,6 +99,26 @@ class CategoriesNotifier extends Notifier<CategoriesState> {
       await repository.deleteCategory(id);
       state = state.copyWith(
         categories: state.categories.where((c) => c.id != id).toList(),
+      );
+      return true;
+    } catch (e) {
+      state = state.copyWith(error: e.toString().replaceAll('Exception: ', ''));
+      return false;
+    }
+  }
+
+  Future<bool> updateCategory(
+    String id,
+    UpdateTicketCategoryRequest request,
+  ) async {
+    state = state.copyWith(error: null);
+    try {
+      final repository = ref.read(ticketCategoryRepositoryProvider);
+      final updated = await repository.updateCategory(id, request);
+      state = state.copyWith(
+        categories: state.categories.map((c) {
+          return c.id == id ? updated : c;
+        }).toList(),
       );
       return true;
     } catch (e) {

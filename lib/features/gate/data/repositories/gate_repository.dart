@@ -114,6 +114,37 @@ class GateRepository {
     }
   }
 
+  /// POST /scans
+  Future<String> scanTicket(String ticketId) async {
+    try {
+      final response = await _dioClient.dio.post(
+        ApiConstants.scans,
+        data: {'ticketId': ticketId},
+      );
+      return response.data['data'].toString();
+    } on DioException catch (e) {
+      throw Exception(
+        _extractErrorMessage(e, fallback: 'Failed to scan ticket'),
+      );
+    }
+  }
+
+  /// GET /scans
+  Future<Map<String, int>> getScanStats() async {
+    try {
+      final response = await _dioClient.dio.get(ApiConstants.scans);
+      final data = response.data['data'];
+      return {
+        'scanned': (data['scanned'] ?? 0) as int,
+        'total': (data['total'] ?? 0) as int,
+      };
+    } on DioException catch (e) {
+      throw Exception(
+        _extractErrorMessage(e, fallback: 'Failed to fetch scan stats'),
+      );
+    }
+  }
+
   String _extractErrorMessage(DioException e, {required String fallback}) {
     if (e.response?.data != null) {
       final data = e.response!.data;
