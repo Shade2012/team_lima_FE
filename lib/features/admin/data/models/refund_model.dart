@@ -40,10 +40,10 @@ class RefundRequest {
 
   factory RefundRequest.fromJson(Map<String, dynamic> json) {
     final ticketData = json['ticket'] as Map<String, dynamic>?;
-    final categoryData = ticketData?['category'] as Map<String, dynamic>?;
-    final eventData = categoryData?['event'] as Map<String, dynamic>?;
-    final seatData = ticketData?['seat'] as Map<String, dynamic>?;
-    final orderData = ticketData?['order'] as Map<String, dynamic>?;
+    //final _categoryData = ticketData?['category'] as Map<String, dynamic>?;
+    //final _eventData = categoryData?['event'] as Map<String, dynamic>?;
+    //final _seatData = ticketData?['seat'] as Map<String, dynamic>?;
+    //final _orderData = ticketData?['order'] as Map<String, dynamic>?;
 
     return RefundRequest(
       id: json['id']?.toString(),
