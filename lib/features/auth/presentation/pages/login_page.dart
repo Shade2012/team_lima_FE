@@ -6,7 +6,7 @@ import 'package:team_five_fe/core/theme/app_text_styles.dart';
 import 'package:team_five_fe/core/widgets/custom_text_field.dart';
 import 'package:team_five_fe/features/auth/presentation/providers/auth_provider.dart';
 import 'package:team_five_fe/features/auth/presentation/pages/signup_page.dart';
-import 'package:team_five_fe/features/event/presentation/pages/organizer/my_events_page.dart';
+import 'package:team_five_fe/features/event/presentation/pages/organizer/organizer_main_screen.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -246,7 +246,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (role == 'ORGANIZER' || role == 'EVENT_ORGANIZER') {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const MyEventsPage()),
+        MaterialPageRoute(builder: (_) => const OrganizerMainScreen()),
       );
     }
   }

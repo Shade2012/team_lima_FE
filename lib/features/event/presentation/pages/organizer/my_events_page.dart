@@ -6,7 +6,6 @@ import 'package:team_five_fe/core/theme/app_colors.dart';
 import 'package:team_five_fe/core/theme/app_text_styles.dart';
 import 'package:team_five_fe/features/event/data/models/event_model.dart';
 import 'package:team_five_fe/features/event/presentation/providers/event_provider.dart';
-import 'package:team_five_fe/features/auth/presentation/pages/profile_page.dart';
 import 'package:team_five_fe/features/event/presentation/pages/organizer/create_event_page.dart';
 import 'package:team_five_fe/features/event/presentation/pages/organizer/event_detail_page.dart';
 
@@ -97,49 +96,18 @@ class _MyEventsPageState extends ConsumerState<MyEventsPage>
   Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'My Events',
-                  style: AppTextStyles.title.copyWith(fontSize: 22),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Manage your events',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.grey,
-                  ),
-                ),
-              ],
-            ),
+          Text(
+            'My Events',
+            style: AppTextStyles.title.copyWith(fontSize: 22),
           ),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ProfilePage()),
-              );
-            },
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: AppColors.primaryGradient,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: const Icon(Icons.person, color: AppColors.white, size: 20),
+          const SizedBox(height: 2),
+          Text(
+            'Manage your events',
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.grey,
             ),
           ),
         ],
