@@ -26,10 +26,9 @@ class _ScannerPageState extends ConsumerState<ScannerPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(scannerProvider.notifier).init(
-        gateName: widget.gateName,
-        eventName: widget.eventName,
-      );
+      ref
+          .read(scannerProvider.notifier)
+          .init(gateName: widget.gateName, eventName: widget.eventName);
     });
   }
 
@@ -46,7 +45,9 @@ class _ScannerPageState extends ConsumerState<ScannerPage> {
   Widget build(BuildContext context) {
     final scannerState = ref.watch(scannerProvider);
 
-    if (_isProcessing && !scannerState.isProcessing && scannerState.currentResult != null) {
+    if (_isProcessing &&
+        !scannerState.isProcessing &&
+        scannerState.currentResult != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) setState(() => _isProcessing = false);
       });
@@ -73,7 +74,12 @@ class _ScannerPageState extends ConsumerState<ScannerPage> {
       left: 0,
       right: 0,
       child: Container(
-        padding: EdgeInsets.fromLTRB(20, MediaQuery.of(context).padding.top + 12, 20, 16),
+        padding: EdgeInsets.fromLTRB(
+          20,
+          MediaQuery.of(context).padding.top + 12,
+          20,
+          16,
+        ),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -92,7 +98,11 @@ class _ScannerPageState extends ConsumerState<ScannerPage> {
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+                child: const Icon(
+                  Icons.arrow_back_ios_new,
+                  color: Colors.white,
+                  size: 20,
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -102,11 +112,17 @@ class _ScannerPageState extends ConsumerState<ScannerPage> {
                 children: [
                   Text(
                     widget.gateName,
-                    style: AppTextStyles.title.copyWith(color: Colors.white, fontSize: 20),
+                    style: AppTextStyles.title.copyWith(
+                      color: Colors.white,
+                      fontSize: 20,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.primary,
                       borderRadius: BorderRadius.circular(6),
@@ -133,18 +149,28 @@ class _ScannerPageState extends ConsumerState<ScannerPage> {
     return IgnorePointer(
       child: Column(
         children: [
-          Expanded(flex: 2, child: Container(color: Colors.black.withValues(alpha: 0.5))),
+          Expanded(
+            flex: 2,
+            child: Container(color: Colors.black.withValues(alpha: 0.5)),
+          ),
           SizedBox(
             height: 280,
             child: Row(
               children: [
-                Expanded(child: Container(color: Colors.black.withValues(alpha: 0.5))),
+                Expanded(
+                  child: Container(color: Colors.black.withValues(alpha: 0.5)),
+                ),
                 _buildScanFrame(scannerState),
-                Expanded(child: Container(color: Colors.black.withValues(alpha: 0.5))),
+                Expanded(
+                  child: Container(color: Colors.black.withValues(alpha: 0.5)),
+                ),
               ],
             ),
           ),
-          Expanded(flex: 2, child: Container(color: Colors.black.withValues(alpha: 0.5))),
+          Expanded(
+            flex: 2,
+            child: Container(color: Colors.black.withValues(alpha: 0.5)),
+          ),
         ],
       ),
     );
@@ -166,7 +192,9 @@ class _ScannerPageState extends ConsumerState<ScannerPage> {
                 color: AppColors.primary.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Center(child: CircularProgressIndicator(color: Colors.white)),
+              child: const Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              ),
             ),
         ],
       ),
@@ -184,16 +212,28 @@ class _ScannerPageState extends ConsumerState<ScannerPage> {
         height: 40,
         decoration: BoxDecoration(
           border: Border(
-            top: isTop ? const BorderSide(color: AppColors.primary, width: 4) : BorderSide.none,
-            bottom: isTop ? BorderSide.none : const BorderSide(color: AppColors.primary, width: 4),
-            left: isLeft ? const BorderSide(color: AppColors.primary, width: 4) : BorderSide.none,
-            right: isLeft ? BorderSide.none : const BorderSide(color: AppColors.primary, width: 4),
+            top: isTop
+                ? const BorderSide(color: AppColors.primary, width: 4)
+                : BorderSide.none,
+            bottom: isTop
+                ? BorderSide.none
+                : const BorderSide(color: AppColors.primary, width: 4),
+            left: isLeft
+                ? const BorderSide(color: AppColors.primary, width: 4)
+                : BorderSide.none,
+            right: isLeft
+                ? BorderSide.none
+                : const BorderSide(color: AppColors.primary, width: 4),
           ),
           borderRadius: BorderRadius.only(
             topLeft: isTop && isLeft ? const Radius.circular(8) : Radius.zero,
             topRight: isTop && !isLeft ? const Radius.circular(8) : Radius.zero,
-            bottomLeft: !isTop && isLeft ? const Radius.circular(8) : Radius.zero,
-            bottomRight: !isTop && !isLeft ? const Radius.circular(8) : Radius.zero,
+            bottomLeft: !isTop && isLeft
+                ? const Radius.circular(8)
+                : Radius.zero,
+            bottomRight: !isTop && !isLeft
+                ? const Radius.circular(8)
+                : Radius.zero,
           ),
         ),
       ),
@@ -208,7 +248,12 @@ class _ScannerPageState extends ConsumerState<ScannerPage> {
       left: 0,
       right: 0,
       child: Container(
-        padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).padding.bottom + 24),
+        padding: EdgeInsets.fromLTRB(
+          24,
+          24,
+          24,
+          MediaQuery.of(context).padding.bottom + 24,
+        ),
         decoration: const BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -259,7 +304,9 @@ class _ScannerPageState extends ConsumerState<ScannerPage> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                result.isValid ? (result.message.isNotEmpty ? result.message : 'Success') : (result.errorMessage ?? 'Unknown error'),
+                result.isValid
+                    ? (result.message.isNotEmpty ? result.message : 'Success')
+                    : (result.errorMessage ?? 'Unknown error'),
                 style: AppTextStyles.bodyMedium.copyWith(
                   color: result.isValid ? AppColors.success : AppColors.danger,
                   fontWeight: FontWeight.w500,
@@ -271,7 +318,8 @@ class _ScannerPageState extends ConsumerState<ScannerPage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () => ref.read(scannerProvider.notifier).resetScanner(),
+                onPressed: () =>
+                    ref.read(scannerProvider.notifier).resetScanner(),
                 icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
                 label: Text(
                   'Scan Next Ticket',
@@ -280,7 +328,9 @@ class _ScannerPageState extends ConsumerState<ScannerPage> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   elevation: 0,
                 ),
               ),

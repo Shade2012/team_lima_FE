@@ -34,7 +34,8 @@ class Event {
       name: json['name']?.toString() ?? '',
       isSeated: json['isSeated'] == true,
       salesStartTime: json['salesStartTime'] != null
-          ? DateTime.tryParse(json['salesStartTime'].toString()) ?? DateTime.now()
+          ? DateTime.tryParse(json['salesStartTime'].toString()) ??
+                DateTime.now()
           : DateTime.now(),
       salesEndTime: json['salesEndTime'] != null
           ? DateTime.tryParse(json['salesEndTime'].toString()) ?? DateTime.now()

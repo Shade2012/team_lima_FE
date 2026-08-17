@@ -10,11 +10,7 @@ class ScanResult {
   final String message;
   final String? errorMessage;
 
-  ScanResult({
-    required this.isValid,
-    this.message = '',
-    this.errorMessage,
-  });
+  ScanResult({required this.isValid, this.message = '', this.errorMessage});
 }
 
 class ScannerState {
@@ -53,10 +49,7 @@ class ScannerNotifier extends Notifier<ScannerState> {
   }
 
   void init({required String gateName, required String eventName}) {
-    state = state.copyWith(
-      gateName: gateName,
-      eventName: eventName,
-    );
+    state = state.copyWith(gateName: gateName, eventName: eventName);
   }
 
   Future<void> processQrCode(String qrData) async {
@@ -68,27 +61,15 @@ class ScannerNotifier extends Notifier<ScannerState> {
       final repo = ref.read(gateRepositoryProvider);
       final responseMessage = await repo.scanTicket(qrData);
 
-      final result = ScanResult(
-        isValid: true,
-        message: responseMessage,
-      );
+      final result = ScanResult(isValid: true, message: responseMessage);
 
-      state = state.copyWith(
-        isProcessing: false,
-        currentResult: result,
-      );
+      state = state.copyWith(isProcessing: false, currentResult: result);
     } catch (e) {
       final cleanMessage = e.toString().replaceAll('Exception: ', '');
 
-      final result = ScanResult(
-        isValid: false,
-        errorMessage: cleanMessage,
-      );
+      final result = ScanResult(isValid: false, errorMessage: cleanMessage);
 
-      state = state.copyWith(
-        isProcessing: false,
-        currentResult: result,
-      );
+      state = state.copyWith(isProcessing: false, currentResult: result);
     }
   }
 

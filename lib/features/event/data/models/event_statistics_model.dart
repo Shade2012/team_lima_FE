@@ -38,7 +38,9 @@ class EventStatistics {
       percentageSold: (json['percentageSold'] as num?)?.toDouble(),
       refundPercentage: json['refundPercentage'] as int?,
       categories: (json['categories'] as List<dynamic>?)
-          ?.map((e) => EventStatisticsCategory.fromJson(e as Map<String, dynamic>))
+          ?.map(
+            (e) => EventStatisticsCategory.fromJson(e as Map<String, dynamic>),
+          )
           .toList(),
     );
   }

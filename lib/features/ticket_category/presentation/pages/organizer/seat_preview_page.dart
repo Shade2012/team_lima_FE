@@ -144,12 +144,13 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
                 ? _buildEmptyState()
                 : widget.categoryId != null
                 ? (targetCategory == null
-                    ? _buildEmptyState()
-                    : _buildSingleCategorySeatArea(
-                        targetCategory,
-                        seatsListState.seatsByCategory[targetCategory.id] ?? [],
-                        _getCategoryColor(0),
-                      ))
+                      ? _buildEmptyState()
+                      : _buildSingleCategorySeatArea(
+                          targetCategory,
+                          seatsListState.seatsByCategory[targetCategory.id] ??
+                              [],
+                          _getCategoryColor(0),
+                        ))
                 : _buildSeatArea(categoriesState.categories, seatsListState),
           ),
           _buildLegendBar(),
@@ -200,7 +201,9 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  categoryName != null ? 'Seat Preview: $categoryName' : 'Seat Preview',
+                  categoryName != null
+                      ? 'Seat Preview: $categoryName'
+                      : 'Seat Preview',
                   style: AppTextStyles.title.copyWith(
                     color: AppColors.white,
                     fontSize: 17,
@@ -357,7 +360,9 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
     final rows = category.rows as int?;
     final columns = category.columns as int?;
     final totalQuota = category.totalQuota as int;
-    final totalCells = (rows != null && columns != null) ? rows * columns : seats.length;
+    final totalCells = (rows != null && columns != null)
+        ? rows * columns
+        : seats.length;
     final blockedCount = totalCells - seats.length;
     final hasGrid = rows != null && columns != null && rows > 0 && columns > 0;
 

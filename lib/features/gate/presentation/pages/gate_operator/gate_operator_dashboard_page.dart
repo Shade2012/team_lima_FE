@@ -56,7 +56,11 @@ class _GateOperatorDashboardPageState
     );
   }
 
-  Widget _buildBody(BuildContext context, WidgetRef ref, GateOperatorDashboardState state) {
+  Widget _buildBody(
+    BuildContext context,
+    WidgetRef ref,
+    GateOperatorDashboardState state,
+  ) {
     if (state.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -107,7 +111,10 @@ class _GateOperatorDashboardPageState
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -132,11 +139,7 @@ class _GateOperatorDashboardPageState
                   AppColors.success,
                 ),
                 const SizedBox(width: 12),
-                _buildStatItem(
-                  'Total',
-                  '${state.totalScans}',
-                  AppColors.grey,
-                ),
+                _buildStatItem('Total', '${state.totalScans}', AppColors.grey),
               ],
             ),
             const SizedBox(height: 12),
@@ -146,7 +149,9 @@ class _GateOperatorDashboardPageState
                 value: progress,
                 minHeight: 8,
                 backgroundColor: AppColors.primary.withValues(alpha: 0.15),
-                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  AppColors.primary,
+                ),
               ),
             ),
           ],
@@ -217,14 +222,19 @@ class _GateOperatorDashboardPageState
             const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: () {
-                ref.read(gateOperatorDashboardProvider.notifier).loadAssignedGate();
+                ref
+                    .read(gateOperatorDashboardProvider.notifier)
+                    .loadAssignedGate();
               },
               icon: const Icon(Icons.refresh, size: 18),
               label: Text('Retry', style: AppTextStyles.button),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -290,7 +300,9 @@ class _GateOperatorDashboardPageState
         controller: _tabController,
         labelColor: AppColors.primary,
         unselectedLabelColor: AppColors.grey,
-        labelStyle: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+        labelStyle: AppTextStyles.bodyMedium.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
         unselectedLabelStyle: AppTextStyles.bodyMedium,
         indicatorColor: AppColors.primary,
         indicatorWeight: 3,
@@ -307,15 +319,30 @@ class _GateOperatorDashboardPageState
   // ==================== Event List ====================
 
   Widget _buildEventList(
-      BuildContext context, WidgetRef ref, GateOperatorDashboardState state) {
+    BuildContext context,
+    WidgetRef ref,
+    GateOperatorDashboardState state,
+  ) {
     final activeEvents = state.events.where((e) => e.isActive).toList();
     final upcomingEvents = state.events.where((e) => !e.isActive).toList();
 
     return TabBarView(
       controller: _tabController,
       children: [
-        _buildEventListView(context, ref, activeEvents, isEmpty: activeEvents.isEmpty, isEmptyMessage: 'No active events'),
-        _buildEventListView(context, ref, upcomingEvents, isEmpty: upcomingEvents.isEmpty, isEmptyMessage: 'No upcoming events'),
+        _buildEventListView(
+          context,
+          ref,
+          activeEvents,
+          isEmpty: activeEvents.isEmpty,
+          isEmptyMessage: 'No active events',
+        ),
+        _buildEventListView(
+          context,
+          ref,
+          upcomingEvents,
+          isEmpty: upcomingEvents.isEmpty,
+          isEmptyMessage: 'No upcoming events',
+        ),
       ],
     );
   }
@@ -333,7 +360,9 @@ class _GateOperatorDashboardPageState
 
     return RefreshIndicator(
       onRefresh: () async {
-        await ref.read(gateOperatorDashboardProvider.notifier).loadAssignedGate();
+        await ref
+            .read(gateOperatorDashboardProvider.notifier)
+            .loadAssignedGate();
       },
       child: ListView.builder(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 80),
@@ -376,7 +405,10 @@ class _GateOperatorDashboardPageState
   // ==================== Event Card ====================
 
   Widget _buildEventCard(
-      BuildContext context, WidgetRef ref, GateOperatorEvent event) {
+    BuildContext context,
+    WidgetRef ref,
+    GateOperatorEvent event,
+  ) {
     final isSelected = event.isSelected;
     final dateFormat = DateFormat('MMMM dd, yyyy');
 
@@ -451,7 +483,10 @@ class _GateOperatorDashboardPageState
           end: Alignment.bottomRight,
           colors: event.isActive
               ? [AppColors.primary, AppColors.primary.withValues(alpha: 0.7)]
-              : [AppColors.greyLight, AppColors.greyLight.withValues(alpha: 0.7)],
+              : [
+                  AppColors.greyLight,
+                  AppColors.greyLight.withValues(alpha: 0.7),
+                ],
         ),
       ),
       child: Center(
@@ -475,11 +510,7 @@ class _GateOperatorDashboardPageState
           color: AppColors.primary.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(
-          Icons.celebration,
-          color: AppColors.primary,
-          size: 22,
-        ),
+        child: Icon(Icons.celebration, color: AppColors.primary, size: 22),
       );
     }
 
@@ -490,11 +521,7 @@ class _GateOperatorDashboardPageState
         color: AppColors.greyLight.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Icon(
-        Icons.calendar_today,
-        color: AppColors.grey,
-        size: 22,
-      ),
+      child: Icon(Icons.calendar_today, color: AppColors.grey, size: 22),
     );
   }
 
@@ -539,7 +566,9 @@ class _GateOperatorDashboardPageState
               ),
             );
           } else {
-            ref.read(gateOperatorDashboardProvider.notifier).selectEvent(event.id);
+            ref
+                .read(gateOperatorDashboardProvider.notifier)
+                .selectEvent(event.id);
           }
         },
         style: ElevatedButton.styleFrom(

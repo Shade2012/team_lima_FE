@@ -50,7 +50,9 @@ class EventRepository {
   /// GET /events/:id/statistics
   Future<EventStatistics> getEventStatistics(String id) async {
     try {
-      final response = await _dioClient.dio.get(ApiConstants.eventStatistics(id));
+      final response = await _dioClient.dio.get(
+        ApiConstants.eventStatistics(id),
+      );
       return EventStatistics.fromJson(response.data['data']);
     } on DioException catch (e) {
       throw Exception(

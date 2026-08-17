@@ -64,9 +64,7 @@ class RefundRequest {
           ? DateTime.tryParse(json['updatedAt'].toString())
           : null,
       customerName: json['customerName']?.toString(),
-      ticket: ticketData != null
-          ? RefundTicket.fromJson(ticketData)
-          : null,
+      ticket: ticketData != null ? RefundTicket.fromJson(ticketData) : null,
     );
   }
 
@@ -76,7 +74,9 @@ class RefundRequest {
     if (parts.length >= 2) {
       return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     }
-    return parts[0].substring(0, parts[0].length > 2 ? 2 : parts[0].length).toUpperCase();
+    return parts[0]
+        .substring(0, parts[0].length > 2 ? 2 : parts[0].length)
+        .toUpperCase();
   }
 }
 
@@ -87,13 +87,7 @@ class RefundTicket {
   final RefundSeat? seat;
   final RefundOrder? order;
 
-  RefundTicket({
-    this.id,
-    this.status,
-    this.category,
-    this.seat,
-    this.order,
-  });
+  RefundTicket({this.id, this.status, this.category, this.seat, this.order});
 
   factory RefundTicket.fromJson(Map<String, dynamic> json) {
     return RefundTicket(
@@ -118,12 +112,7 @@ class RefundCategory {
   final int? price;
   final RefundEvent? event;
 
-  RefundCategory({
-    this.id,
-    this.name,
-    this.price,
-    this.event,
-  });
+  RefundCategory({this.id, this.name, this.price, this.event});
 
   factory RefundCategory.fromJson(Map<String, dynamic> json) {
     return RefundCategory(
@@ -142,11 +131,7 @@ class RefundEvent {
   final String? name;
   final DateTime? eventDate;
 
-  RefundEvent({
-    this.id,
-    this.name,
-    this.eventDate,
-  });
+  RefundEvent({this.id, this.name, this.eventDate});
 
   factory RefundEvent.fromJson(Map<String, dynamic> json) {
     return RefundEvent(
@@ -163,10 +148,7 @@ class RefundSeat {
   final String? id;
   final String? seatCode;
 
-  RefundSeat({
-    this.id,
-    this.seatCode,
-  });
+  RefundSeat({this.id, this.seatCode});
 
   factory RefundSeat.fromJson(Map<String, dynamic> json) {
     return RefundSeat(
@@ -181,11 +163,7 @@ class RefundOrder {
   final String? customerId;
   final String? status;
 
-  RefundOrder({
-    this.id,
-    this.customerId,
-    this.status,
-  });
+  RefundOrder({this.id, this.customerId, this.status});
 
   factory RefundOrder.fromJson(Map<String, dynamic> json) {
     return RefundOrder(
@@ -210,7 +188,10 @@ class RefundStats {
   factory RefundStats.fromRefunds(List<RefundRequest> refunds) {
     final pending = refunds.where((r) => r.status == 'PENDING').length;
     final approved = refunds.where((r) => r.status == 'APPROVED');
-    final totalAmount = approved.fold<int>(0, (sum, r) => sum + (r.amount ?? 0));
+    final totalAmount = approved.fold<int>(
+      0,
+      (sum, r) => sum + (r.amount ?? 0),
+    );
     return RefundStats(
       pendingCount: pending,
       totalRefunded: approved.length,

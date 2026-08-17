@@ -49,8 +49,8 @@ class TicketCategory {
       isAvailable: json['isAvailable'] is bool
           ? json['isAvailable']
           : (json['isAvailable'] != null
-              ? json['isAvailable'].toString().toLowerCase() == 'true'
-              : null),
+                ? json['isAvailable'].toString().toLowerCase() == 'true'
+                : null),
     );
   }
 

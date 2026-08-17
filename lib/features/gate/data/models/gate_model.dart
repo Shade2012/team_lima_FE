@@ -39,8 +39,8 @@ class Gate {
           : [],
       operators: operatorsData is List
           ? operatorsData
-              .map((e) => UserModel.fromJson(e as Map<String, dynamic>))
-              .toList()
+                .map((e) => UserModel.fromJson(e as Map<String, dynamic>))
+                .toList()
           : [],
     );
   }
@@ -74,7 +74,8 @@ class AdmissionScan {
   factory AdmissionScan.fromJson(Map<String, dynamic> json) {
     return AdmissionScan(
       id: json['id']?.toString() ?? '',
-      scannedAt: DateTime.tryParse(json['scannedAt'].toString()) ?? DateTime.now(),
+      scannedAt:
+          DateTime.tryParse(json['scannedAt'].toString()) ?? DateTime.now(),
       ticketId: json['ticketId']?.toString(),
       gateOperatorId: json['gateOperatorId']?.toString(),
       gateId: json['gateId']?.toString(),

@@ -53,7 +53,10 @@ class _AdminRefundDetailPageState extends ConsumerState<AdminRefundDetailPage> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Approve', style: TextStyle(color: AppColors.success)),
+            child: const Text(
+              'Approve',
+              style: TextStyle(color: AppColors.success),
+            ),
           ),
         ],
       ),
@@ -79,7 +82,9 @@ class _AdminRefundDetailPageState extends ConsumerState<AdminRefundDetailPage> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(ref.read(refundListProvider).error ?? 'Failed to approve'),
+            content: Text(
+              ref.read(refundListProvider).error ?? 'Failed to approve',
+            ),
             backgroundColor: AppColors.danger,
           ),
         );
@@ -110,7 +115,10 @@ class _AdminRefundDetailPageState extends ConsumerState<AdminRefundDetailPage> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Reject', style: TextStyle(color: AppColors.danger)),
+            child: const Text(
+              'Reject',
+              style: TextStyle(color: AppColors.danger),
+            ),
           ),
         ],
       ),
@@ -136,7 +144,9 @@ class _AdminRefundDetailPageState extends ConsumerState<AdminRefundDetailPage> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(ref.read(refundListProvider).error ?? 'Failed to reject'),
+            content: Text(
+              ref.read(refundListProvider).error ?? 'Failed to reject',
+            ),
             backgroundColor: AppColors.danger,
           ),
         );
@@ -228,7 +238,10 @@ class _AdminRefundDetailPageState extends ConsumerState<AdminRefundDetailPage> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: statusConfig.color,
                   borderRadius: BorderRadius.circular(20),
@@ -440,7 +453,9 @@ class _AdminRefundDetailPageState extends ConsumerState<AdminRefundDetailPage> {
             maxLines: 3,
             decoration: InputDecoration(
               hintText: 'Add notes about this refund decision...',
-              hintStyle: AppTextStyles.bodySmall.copyWith(color: AppColors.grey),
+              hintStyle: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.grey,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: AppColors.greyLight),

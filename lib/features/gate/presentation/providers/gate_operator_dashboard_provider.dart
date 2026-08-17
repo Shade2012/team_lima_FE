@@ -53,8 +53,7 @@ class GateOperatorDashboardState {
     this.totalScans = 0,
   });
 
-  double get scanProgress =>
-      totalScans > 0 ? (scannedCount / totalScans) : 0.0;
+  double get scanProgress => totalScans > 0 ? (scannedCount / totalScans) : 0.0;
 
   GateOperatorDashboardState copyWith({
     List<GateOperatorEvent>? events,
@@ -98,10 +97,7 @@ class GateOperatorDashboardNotifier
         event: event,
         isSelected: state.events.isNotEmpty && state.events.first.isSelected,
       );
-      state = state.copyWith(
-        isLoading: false,
-        events: [operatorEvent],
-      );
+      state = state.copyWith(isLoading: false, events: [operatorEvent]);
 
       await loadScanStats();
     } catch (e) {

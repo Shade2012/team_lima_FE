@@ -115,9 +115,11 @@ class AllEventsNotifier extends Notifier<AllEventsState> {
   }
 }
 
-final allEventsProvider = NotifierProvider<AllEventsNotifier, AllEventsState>(() {
-  return AllEventsNotifier();
-});
+final allEventsProvider = NotifierProvider<AllEventsNotifier, AllEventsState>(
+  () {
+    return AllEventsNotifier();
+  },
+);
 
 // ==================== Event Detail State ====================
 

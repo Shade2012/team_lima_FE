@@ -398,7 +398,9 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                 Expanded(
                   child: _buildRevenueStatMedium(
                     'Refund Amount',
-                    totalRefundAmount != null ? _formatPrice(totalRefundAmount) : '-',
+                    totalRefundAmount != null
+                        ? _formatPrice(totalRefundAmount)
+                        : '-',
                     AppColors.warning,
                   ),
                 ),

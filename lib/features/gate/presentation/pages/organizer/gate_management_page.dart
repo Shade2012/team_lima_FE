@@ -150,23 +150,16 @@ class _GateManagementPageState extends ConsumerState<GateManagementPage> {
               child: Center(child: CircularProgressIndicator()),
             )
           else if (gatesState.error != null)
-            SliverFillRemaining(
-              child: _buildErrorState(gatesState),
-            )
+            SliverFillRemaining(child: _buildErrorState(gatesState))
           else if (gatesState.gates.isEmpty)
-            SliverFillRemaining(
-              child: _buildEmptyState(),
-            )
+            SliverFillRemaining(child: _buildEmptyState())
           else
             SliverPadding(
               padding: const EdgeInsets.all(16),
               sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    return _buildGateCard(gatesState.gates[index]);
-                  },
-                  childCount: gatesState.gates.length,
-                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  return _buildGateCard(gatesState.gates[index]);
+                }, childCount: gatesState.gates.length),
               ),
             ),
         ],
@@ -374,45 +367,47 @@ class _GateManagementPageState extends ConsumerState<GateManagementPage> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  ...gate.operators.map((operator) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: AppColors.success.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(6),
+                  ...gate.operators.map(
+                    (operator) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: AppColors.success.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Icon(
+                              Icons.person,
+                              color: AppColors.success,
+                              size: 14,
+                            ),
                           ),
-                          child: Icon(
-                            Icons.person,
-                            color: AppColors.success,
-                            size: 14,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                operator.username,
-                                style: AppTextStyles.bodyMedium.copyWith(
-                                  fontWeight: FontWeight.w500,
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  operator.username,
+                                  style: AppTextStyles.bodyMedium.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                operator.email,
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: AppColors.grey,
+                                Text(
+                                  operator.email,
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: AppColors.grey,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  )),
+                  ),
                 ],
               ),
             )
@@ -426,11 +421,7 @@ class _GateManagementPageState extends ConsumerState<GateManagementPage> {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Icon(
-                        Icons.info_outline,
-                        size: 14,
-                        color: AppColors.grey,
-                      ),
+                      Icon(Icons.info_outline, size: 14, color: AppColors.grey),
                       const SizedBox(width: 6),
                       Text(
                         'Belum ada operator',

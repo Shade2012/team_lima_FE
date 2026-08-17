@@ -65,9 +65,7 @@ class RefundListNotifier extends Notifier<RefundListState> {
       await loadRefunds();
       return true;
     } catch (e) {
-      state = state.copyWith(
-        error: e.toString().replaceAll('Exception: ', ''),
-      );
+      state = state.copyWith(error: e.toString().replaceAll('Exception: ', ''));
       return false;
     }
   }
@@ -79,9 +77,7 @@ class RefundListNotifier extends Notifier<RefundListState> {
       await loadRefunds();
       return true;
     } catch (e) {
-      state = state.copyWith(
-        error: e.toString().replaceAll('Exception: ', ''),
-      );
+      state = state.copyWith(error: e.toString().replaceAll('Exception: ', ''));
       return false;
     }
   }
@@ -89,5 +85,5 @@ class RefundListNotifier extends Notifier<RefundListState> {
 
 final refundListProvider =
     NotifierProvider<RefundListNotifier, RefundListState>(() {
-  return RefundListNotifier();
-});
+      return RefundListNotifier();
+    });

@@ -134,7 +134,12 @@ class _RegisterGateOperatorPageState
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text('Register Another', style: AppTextStyles.button.copyWith(color: AppColors.primary)),
+                child: Text(
+                  'Register Another',
+                  style: AppTextStyles.button.copyWith(
+                    color: AppColors.primary,
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 12),
@@ -192,26 +197,53 @@ class _RegisterGateOperatorPageState
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Event', style: AppTextStyles.bodySmall.copyWith(color: AppColors.grey)),
-                            Text(widget.eventName, style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+                            Text(
+                              'Event',
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: AppColors.grey,
+                              ),
+                            ),
+                            Text(
+                              widget.eventName,
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ],
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Divider(height: 1, color: AppColors.primary.withValues(alpha: 0.2)),
+                  Divider(
+                    height: 1,
+                    color: AppColors.primary.withValues(alpha: 0.2),
+                  ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Icon(Icons.door_front_door_outlined, color: AppColors.primary, size: 20),
+                      Icon(
+                        Icons.door_front_door_outlined,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Gate', style: AppTextStyles.bodySmall.copyWith(color: AppColors.grey)),
-                            Text(widget.gateName, style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+                            Text(
+                              'Gate',
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: AppColors.grey,
+                              ),
+                            ),
+                            Text(
+                              widget.gateName,
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -223,7 +255,12 @@ class _RegisterGateOperatorPageState
             const SizedBox(height: 24),
 
             // Username
-            Text('Username', style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+            Text(
+              'Username',
+              style: AppTextStyles.bodyMedium.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             const SizedBox(height: 8),
             TextFormField(
               controller: _usernameController,
@@ -246,14 +283,21 @@ class _RegisterGateOperatorPageState
                 ),
               ),
               validator: (value) {
-                if (value == null || value.isEmpty) return 'Username is required';
+                if (value == null || value.isEmpty) {
+                  return 'Username is required';
+                }
                 return null;
               },
             ),
             const SizedBox(height: 16),
 
             // Email
-            Text('Email', style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+            Text(
+              'Email',
+              style: AppTextStyles.bodyMedium.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             const SizedBox(height: 8),
             TextFormField(
               controller: _emailController,
@@ -278,14 +322,21 @@ class _RegisterGateOperatorPageState
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) return 'Email is required';
-                if (!value.contains('@') || !value.contains('.')) return 'Please enter a valid email';
+                if (!value.contains('@') || !value.contains('.')) {
+                  return 'Please enter a valid email';
+                }
                 return null;
               },
             ),
             const SizedBox(height: 16),
 
             // Password
-            Text('Password', style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+            Text(
+              'Password',
+              style: AppTextStyles.bodyMedium.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             const SizedBox(height: 8),
             TextFormField(
               controller: _passwordController,
@@ -295,10 +346,13 @@ class _RegisterGateOperatorPageState
                 prefixIcon: const Icon(Icons.lock_outline),
                 suffixIcon: IconButton(
                   icon: Icon(
-                    _isPasswordVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                    _isPasswordVisible
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
                     color: AppColors.grey,
                   ),
-                  onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                  onPressed: () =>
+                      setState(() => _isPasswordVisible = !_isPasswordVisible),
                 ),
                 filled: true,
                 fillColor: AppColors.white,
@@ -316,8 +370,12 @@ class _RegisterGateOperatorPageState
                 ),
               ),
               validator: (value) {
-                if (value == null || value.isEmpty) return 'Password is required';
-                if (value.length < 8) return 'Password must be at least 8 characters';
+                if (value == null || value.isEmpty) {
+                  return 'Password is required';
+                }
+                if (value.length < 8) {
+                  return 'Password must be at least 8 characters';
+                }
                 return null;
               },
             ),
@@ -333,10 +391,19 @@ class _RegisterGateOperatorPageState
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.error_outline, color: AppColors.danger, size: 20),
+                    Icon(
+                      Icons.error_outline,
+                      color: AppColors.danger,
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text(_error!, style: AppTextStyles.bodySmall.copyWith(color: AppColors.danger)),
+                      child: Text(
+                        _error!,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.danger,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -353,11 +420,20 @@ class _RegisterGateOperatorPageState
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   elevation: 0,
                 ),
                 child: _isSubmitting
-                    ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: AppColors.white, strokeWidth: 2))
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          color: AppColors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
                     : Text('Register Operator', style: AppTextStyles.button),
               ),
             ),
@@ -385,7 +461,9 @@ class _RegisterGateOperatorPageState
         gateId: widget.gateId,
       );
 
-      final success = await ref.read(gateOperatorProvider.notifier).registerGateOperator(request);
+      final success = await ref
+          .read(gateOperatorProvider.notifier)
+          .registerGateOperator(request);
 
       if (!mounted) return;
 
@@ -413,9 +491,17 @@ class _RegisterGateOperatorPageState
   Widget _buildInfoRow(String label, String value) {
     return Row(
       children: [
-        Text('$label: ', style: AppTextStyles.bodySmall.copyWith(color: AppColors.grey)),
+        Text(
+          '$label: ',
+          style: AppTextStyles.bodySmall.copyWith(color: AppColors.grey),
+        ),
         Expanded(
-          child: Text(value, style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w600)),
+          child: Text(
+            value,
+            style: AppTextStyles.bodySmall.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
       ],
     );

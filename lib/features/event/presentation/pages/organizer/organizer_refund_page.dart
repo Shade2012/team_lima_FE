@@ -119,9 +119,7 @@ class _OrganizerRefundPageState extends ConsumerState<OrganizerRefundPage>
           const SizedBox(height: 2),
           Text(
             'View refund requests for your events',
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.grey,
-            ),
+            style: AppTextStyles.bodySmall.copyWith(color: AppColors.grey),
           ),
         ],
       ),

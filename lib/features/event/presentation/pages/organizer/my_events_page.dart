@@ -99,16 +99,11 @@ class _MyEventsPageState extends ConsumerState<MyEventsPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'My Events',
-            style: AppTextStyles.title.copyWith(fontSize: 22),
-          ),
+          Text('My Events', style: AppTextStyles.title.copyWith(fontSize: 22)),
           const SizedBox(height: 2),
           Text(
             'Manage your events',
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.grey,
-            ),
+            style: AppTextStyles.bodySmall.copyWith(color: AppColors.grey),
           ),
         ],
       ),

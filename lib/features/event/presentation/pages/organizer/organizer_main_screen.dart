@@ -51,24 +51,14 @@ class _OrganizerMainScreenState extends State<OrganizerMainScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildNavItem(
-                  0,
-                  Icons.event_outlined,
-                  Icons.event,
-                  'Events',
-                ),
+                _buildNavItem(0, Icons.event_outlined, Icons.event, 'Events'),
                 _buildNavItem(
                   1,
                   Icons.receipt_long_outlined,
                   Icons.receipt_long,
                   'Refunds',
                 ),
-                _buildNavItem(
-                  2,
-                  Icons.person_outline,
-                  Icons.person,
-                  'Profile',
-                ),
+                _buildNavItem(2, Icons.person_outline, Icons.person, 'Profile'),
               ],
             ),
           ),

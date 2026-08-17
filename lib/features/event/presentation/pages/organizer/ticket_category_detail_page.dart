@@ -60,9 +60,7 @@ class _TicketCategoryDetailPageState
 
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
-      body: category == null
-          ? _buildNotFound()
-          : _buildBody(category),
+      body: category == null ? _buildNotFound() : _buildBody(category),
     );
   }
 
@@ -267,11 +265,7 @@ class _TicketCategoryDetailPageState
           // Event Name
           Row(
             children: [
-              const Icon(
-                Icons.event,
-                color: Colors.white70,
-                size: 14,
-              ),
+              const Icon(Icons.event, color: Colors.white70, size: 14),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -289,11 +283,7 @@ class _TicketCategoryDetailPageState
           // Price
           Row(
             children: [
-              const Icon(
-                Icons.attach_money,
-                color: Colors.white70,
-                size: 14,
-              ),
+              const Icon(Icons.attach_money, color: Colors.white70, size: 14),
               const SizedBox(width: 6),
               Text(
                 _formatPrice(category.price),
@@ -352,11 +342,7 @@ class _TicketCategoryDetailPageState
                   AppColors.primary,
                 ),
                 const SizedBox(width: 16),
-                _buildStatItem(
-                  'Total Quota',
-                  '$totalQuota',
-                  AppColors.grey,
-                ),
+                _buildStatItem('Total Quota', '$totalQuota', AppColors.grey),
               ],
             ),
             const SizedBox(height: 16),
@@ -401,7 +387,9 @@ class _TicketCategoryDetailPageState
                     value: soldPercentage / 100,
                     minHeight: 8,
                     backgroundColor: AppColors.primary.withValues(alpha: 0.15),
-                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      AppColors.primary,
+                    ),
                   ),
                 ),
               ],
@@ -481,7 +469,10 @@ class _TicketCategoryDetailPageState
                 ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.warning,
                     borderRadius: BorderRadius.circular(20),

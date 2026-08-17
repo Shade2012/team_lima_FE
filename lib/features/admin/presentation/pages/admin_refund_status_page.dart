@@ -119,9 +119,7 @@ class _AdminRefundStatusPageState extends ConsumerState<AdminRefundStatusPage>
           const SizedBox(height: 2),
           Text(
             'View processed refund requests',
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.grey,
-            ),
+            style: AppTextStyles.bodySmall.copyWith(color: AppColors.grey),
           ),
         ],
       ),

@@ -361,7 +361,9 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                                   vertical: 3,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(alpha: 0.1),
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.1,
+                                  ),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Row(
@@ -592,8 +594,12 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                         if (value == null || value.isEmpty) {
                           return 'Price is required';
                         }
-                        if (int.tryParse(value) == null) return 'Must be a number';
-                        if (int.parse(value) < 0) return 'Price cannot be negative';
+                        if (int.tryParse(value) == null) {
+                          return 'Must be a number';
+                        }
+                        if (int.parse(value) < 0) {
+                          return 'Price cannot be negative';
+                        }
                         return null;
                       },
                     ),
@@ -613,7 +619,8 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                                 if (value == null || value.isEmpty) {
                                   return 'Rows required';
                                 }
-                                if (int.tryParse(value) == null || int.parse(value) <= 0) {
+                                if (int.tryParse(value) == null ||
+                                    int.parse(value) <= 0) {
                                   return 'Invalid rows';
                                 }
                                 return null;
@@ -632,7 +639,8 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                                 if (value == null || value.isEmpty) {
                                   return 'Columns required';
                                 }
-                                if (int.tryParse(value) == null || int.parse(value) <= 0) {
+                                if (int.tryParse(value) == null ||
+                                    int.parse(value) <= 0) {
                                   return 'Invalid columns';
                                 }
                                 return null;
@@ -671,7 +679,9 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                           if (totalSeats > 0 && q > 0 && q < totalSeats) {
                             final blockedCount = totalSeats - q;
                             return Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                              ),
                               child: Text(
                                 'Note: $blockedCount remaining seats (top-left) will be marked as blocked seats.',
                                 style: AppTextStyles.bodySmall.copyWith(
@@ -695,8 +705,12 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                           if (value == null || value.isEmpty) {
                             return 'Quota is required';
                           }
-                          if (int.tryParse(value) == null) return 'Must be a number';
-                          if (int.parse(value) <= 0) return 'Quota must be at least 1';
+                          if (int.tryParse(value) == null) {
+                            return 'Must be a number';
+                          }
+                          if (int.parse(value) <= 0) {
+                            return 'Quota must be at least 1';
+                          }
                           return null;
                         },
                       ),
@@ -718,7 +732,9 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                             ),
                             child: Text(
                               'Cancel',
-                              style: AppTextStyles.button.copyWith(fontSize: 14),
+                              style: AppTextStyles.button.copyWith(
+                                fontSize: 14,
+                              ),
                             ),
                           ),
                         ),
@@ -727,17 +743,23 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                           child: ElevatedButton(
                             onPressed: () async {
                               if (!formKey.currentState!.validate()) return;
-                              
+
                               int? rows;
                               int? columns;
                               int? totalQuota;
 
                               if (widget.isSeated) {
                                 rows = int.parse(rowsController.text.trim());
-                                columns = int.parse(columnsController.text.trim());
-                                totalQuota = int.parse(quotaController.text.trim());
+                                columns = int.parse(
+                                  columnsController.text.trim(),
+                                );
+                                totalQuota = int.parse(
+                                  quotaController.text.trim(),
+                                );
                               } else {
-                                totalQuota = int.parse(quotaController.text.trim());
+                                totalQuota = int.parse(
+                                  quotaController.text.trim(),
+                                );
                               }
 
                               final request = CreateTicketCategoryRequest(
@@ -750,7 +772,10 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                               );
                               final success = await ref
                                   .read(categoriesProvider.notifier)
-                                  .createCategory(request, isSeated: widget.isSeated);
+                                  .createCategory(
+                                    request,
+                                    isSeated: widget.isSeated,
+                                  );
                               if (!context.mounted) return;
                               if (success) {
                                 Navigator.pop(context);
@@ -851,8 +876,12 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
 
   void _showEditCategoryDialog(dynamic category) {
     final nameController = TextEditingController(text: category.name);
-    final priceController = TextEditingController(text: category.price.toString());
-    final quotaController = TextEditingController(text: category.totalQuota.toString());
+    final priceController = TextEditingController(
+      text: category.price.toString(),
+    );
+    final quotaController = TextEditingController(
+      text: category.totalQuota.toString(),
+    );
     final rowsController = TextEditingController(
       text: category.rows?.toString() ?? '',
     );
@@ -942,8 +971,12 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                         if (value == null || value.isEmpty) {
                           return 'Price is required';
                         }
-                        if (int.tryParse(value) == null) return 'Must be a number';
-                        if (int.parse(value) < 0) return 'Price cannot be negative';
+                        if (int.tryParse(value) == null) {
+                          return 'Must be a number';
+                        }
+                        if (int.parse(value) < 0) {
+                          return 'Price cannot be negative';
+                        }
                         return null;
                       },
                     ),
@@ -958,8 +991,12 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                         if (value == null || value.isEmpty) {
                           return 'Quota is required';
                         }
-                        if (int.tryParse(value) == null) return 'Must be a number';
-                        if (int.parse(value) <= 0) return 'Quota must be at least 1';
+                        if (int.tryParse(value) == null) {
+                          return 'Must be a number';
+                        }
+                        if (int.parse(value) <= 0) {
+                          return 'Quota must be at least 1';
+                        }
                         return null;
                       },
                     ),
@@ -976,7 +1013,8 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                               keyboardType: TextInputType.number,
                               validator: (value) {
                                 if (value != null && value.isNotEmpty) {
-                                  if (int.tryParse(value) == null || int.parse(value) <= 0) {
+                                  if (int.tryParse(value) == null ||
+                                      int.parse(value) <= 0) {
                                     return 'Invalid';
                                   }
                                 }
@@ -993,7 +1031,8 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                               keyboardType: TextInputType.number,
                               validator: (value) {
                                 if (value != null && value.isNotEmpty) {
-                                  if (int.tryParse(value) == null || int.parse(value) <= 0) {
+                                  if (int.tryParse(value) == null ||
+                                      int.parse(value) <= 0) {
                                     return 'Invalid';
                                   }
                                 }
@@ -1021,7 +1060,9 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                             ),
                             child: Text(
                               'Cancel',
-                              style: AppTextStyles.button.copyWith(fontSize: 14),
+                              style: AppTextStyles.button.copyWith(
+                                fontSize: 14,
+                              ),
                             ),
                           ),
                         ),
@@ -1044,7 +1085,9 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                                   totalQuota = rows * columns;
                                 }
                               } else {
-                                totalQuota = int.parse(quotaController.text.trim());
+                                totalQuota = int.parse(
+                                  quotaController.text.trim(),
+                                );
                               }
 
                               final request = UpdateTicketCategoryRequest(
@@ -1072,7 +1115,9 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                                   ),
                                 );
                               } else {
-                                final error = ref.read(categoriesProvider).error;
+                                final error = ref
+                                    .read(categoriesProvider)
+                                    .error;
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(

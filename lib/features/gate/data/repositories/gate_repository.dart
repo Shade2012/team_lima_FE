@@ -81,7 +81,9 @@ class GateRepository {
         return [];
       }
       if (data is List) {
-        return data.map((e) => UserModel.fromJson(e as Map<String, dynamic>)).toList();
+        return data
+            .map((e) => UserModel.fromJson(e as Map<String, dynamic>))
+            .toList();
       }
       if (data is Map<String, dynamic>) {
         return [UserModel.fromJson(data)];
@@ -97,9 +99,7 @@ class GateRepository {
   /// GET /gates/operator/assigned
   Future<(Gate gate, Event event)?> getAssignedGate() async {
     try {
-      final response = await _dioClient.dio.get(
-        ApiConstants.assignedGate,
-      );
+      final response = await _dioClient.dio.get(ApiConstants.assignedGate);
       final data = response.data['data'] as Map<String, dynamic>;
       if (data.isEmpty) return null;
       final gate = Gate.fromJson(data);

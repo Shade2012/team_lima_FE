@@ -122,9 +122,7 @@ class _AdminRefundManagementPageState
           const SizedBox(height: 2),
           Text(
             'Manage customer refund requests',
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.grey,
-            ),
+            style: AppTextStyles.bodySmall.copyWith(color: AppColors.grey),
           ),
         ],
       ),
@@ -587,9 +585,16 @@ class _AdminRefundManagementPageState
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            const Icon(Icons.check_circle_outline, color: AppColors.success, size: 24),
+            const Icon(
+              Icons.check_circle_outline,
+              color: AppColors.success,
+              size: 24,
+            ),
             const SizedBox(width: 8),
-            Text('Approve Refund', style: AppTextStyles.title.copyWith(fontSize: 18)),
+            Text(
+              'Approve Refund',
+              style: AppTextStyles.title.copyWith(fontSize: 18),
+            ),
           ],
         ),
         content: Text(
@@ -599,11 +604,19 @@ class _AdminRefundManagementPageState
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey)),
+            child: Text(
+              'Cancel',
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Approve', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.success)),
+            child: Text(
+              'Approve',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.success,
+              ),
+            ),
           ),
         ],
       ),
@@ -626,7 +639,9 @@ class _AdminRefundManagementPageState
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(ref.read(refundListProvider).error ?? 'Failed to approve'),
+            content: Text(
+              ref.read(refundListProvider).error ?? 'Failed to approve',
+            ),
             backgroundColor: AppColors.danger,
           ),
         );
@@ -643,9 +658,16 @@ class _AdminRefundManagementPageState
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            const Icon(Icons.cancel_outlined, color: AppColors.danger, size: 24),
+            const Icon(
+              Icons.cancel_outlined,
+              color: AppColors.danger,
+              size: 24,
+            ),
             const SizedBox(width: 8),
-            Text('Reject Refund', style: AppTextStyles.title.copyWith(fontSize: 18)),
+            Text(
+              'Reject Refund',
+              style: AppTextStyles.title.copyWith(fontSize: 18),
+            ),
           ],
         ),
         content: Column(
@@ -662,7 +684,9 @@ class _AdminRefundManagementPageState
               maxLines: 3,
               decoration: InputDecoration(
                 hintText: 'Reason for rejection...',
-                hintStyle: AppTextStyles.bodySmall.copyWith(color: AppColors.grey),
+                hintStyle: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.grey,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: const BorderSide(color: AppColors.greyLight),
@@ -679,7 +703,10 @@ class _AdminRefundManagementPageState
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey)),
+            child: Text(
+              'Cancel',
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey),
+            ),
           ),
           TextButton(
             onPressed: () {
@@ -695,7 +722,10 @@ class _AdminRefundManagementPageState
               Navigator.pop(context);
               _rejectRefund(refund, reasonController.text.trim());
             },
-            child: Text('Reject', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.danger)),
+            child: Text(
+              'Reject',
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.danger),
+            ),
           ),
         ],
       ),
@@ -718,7 +748,9 @@ class _AdminRefundManagementPageState
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(ref.read(refundListProvider).error ?? 'Failed to reject'),
+            content: Text(
+              ref.read(refundListProvider).error ?? 'Failed to reject',
+            ),
             backgroundColor: AppColors.danger,
           ),
         );
