@@ -508,6 +508,40 @@ Server sudah dilengkapi data awal (_seed data_) dari file `mock_server/data/init
 
 ---
 
+### J. Admission Scans (`/scans`)
+
+#### 1. Scan Ticket (`POST /scans`)
+- **Auth**: Bearer Token (Role: `GATE_OPERATOR`)
+- **Body Request**:
+  ```json
+  {
+    "ticketId": "019146a0-0000-7abc-0000-abcdef000010"
+  }
+  ```
+- **Response 201 Created**:
+  ```json
+  {
+    "message": "Success",
+    "data": "Success scans"
+  }
+  ```
+- **Error Response 409 Conflict**: Tiket sudah discan sebelumnya atau belum lunas.
+
+#### 2. Get Admission Scans Count (`GET /scans`)
+- **Auth**: Bearer Token (Role: `GATE_OPERATOR`)
+- **Response 200 OK**:
+  ```json
+  {
+    "message": "Success",
+    "data": {
+      "scanned": 45,
+      "total": 100
+    }
+  }
+  ```
+
+---
+
 ## 5. Integrasi dengan Aplikasi Flutter
 
 Aplikasi Flutter sudah terhubung dengan Mock Server ini melalui layer `lib/core/`.

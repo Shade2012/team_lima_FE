@@ -219,6 +219,20 @@ Seluruh exception yang ditangkap oleh `HttpExceptionFilter` menghasilkan format:
 
 ---
 
+### I. Feature: Admission Scans (`/scans`)
+
+#### 1. Scan Ticket (`POST /scans`)
+- **Auth**: Bearer Token (Role: `GATE_OPERATOR`)
+- **Request Body**: `{ "ticketId": "019ff387-745c-76cf-8f69-f5acdd2eba8" }` (UUID v7)
+- **Response 201 Created**: `{ "message": "Success", "data": "Success scans" }`
+- **Response 409 Conflict**: Tiket telah digunakan/scanned sebelumnya (`SEATED`) atau pesanan belum `PAID`.
+
+#### 2. Get Total Admission Scans (`GET /scans`)
+- **Auth**: Bearer Token (Role: `GATE_OPERATOR`)
+- **Response 200 OK**: `{ "message": "Success", "data": { "scanned": 45, "total": 100 } }` (`TotalScansResponse`)
+
+---
+
 ### H. Feature: Payment Gateway Simulation (`/mock-pg`)
 
 #### 1. Create Transaction (`POST /mock-pg/transaction`)

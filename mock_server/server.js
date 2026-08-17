@@ -62,6 +62,7 @@ app.get('/', (req, res) => {
       '/orders/customer',
       '/orders/clear',
       '/tickets/my-tickets',
+      '/scans',
       '/refunds',
       '/refunds/my-refunds',
       '/mock-pg/transaction',
@@ -78,6 +79,7 @@ app.use('/seats', require('./routes/seats')(db));
 app.use('/gates', require('./routes/gates')(db));
 app.use('/orders', require('./routes/orders')(db));
 app.use('/tickets', require('./routes/tickets')(db));
+app.use('/scans', require('./routes/scans')(db));
 app.use('/refunds', require('./routes/refunds')(db));
 app.use('/mock-pg', require('./routes/mock_pg')(db));
 

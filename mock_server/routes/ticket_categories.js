@@ -22,11 +22,25 @@ function getUserFromToken(req, db) {
   }
 }
 
+function formatCategoryResponse(c, db) {
+  const soldTicketsCount = (db.tickets || []).filter(t => t.categoryId === c.id && ['AVAILABLE', 'SEATED'].includes(t.status)).length;
+  const availableQuota = Math.max(0, (c.totalQuota || 0) - soldTicketsCount);
+  return {
+    ...c,
+    posIndex: c.posIndex || 0,
+    rows: c.rows !== undefined ? c.rows : null,
+    columns: c.columns !== undefined ? c.columns : null,
+    availableQuota,
+    isAvailable: availableQuota > 0
+  };
+}
+
 module.exports = function (db) {
   // 1. GET /ticket-categories/event/:eventId (Public)
   router.get('/event/:eventId', (req, res) => {
     const categories = db.categories
       .filter(c => c.eventId === req.params.eventId)
+      .map(c => formatCategoryResponse(c, db))
       .sort((a, b) => b.price - a.price);
 
     return res.status(200).json({
@@ -47,7 +61,7 @@ module.exports = function (db) {
 
     return res.status(200).json({
       message: 'Success',
-      data: category
+      data: formatCategoryResponse(category, db)
     });
   });
 
@@ -61,12 +75,12 @@ module.exports = function (db) {
       });
     }
 
-    const { eventId, name, price, totalQuota } = req.body;
+    const { eventId, name, price, totalQuota, posIndex, rows, columns } = req.body;
 
-    if (!eventId || !name || price === undefined || !totalQuota) {
+    if (!eventId || !name || price === undefined) {
       return res.status(400).json({
         status_code: 400,
-        message: ['eventId, name, price, and totalQuota are required']
+        message: ['eventId, name, and price are required']
       });
     }
 
@@ -85,12 +99,17 @@ module.exports = function (db) {
       });
     }
 
+    const calculatedQuota = totalQuota ? Number(totalQuota) : (rows && columns ? Number(rows) * Number(columns) : 100);
+
     const newCategory = {
       id: generateUuid(),
       eventId,
       name,
       price: Number(price),
-      totalQuota: Number(totalQuota),
+      totalQuota: calculatedQuota,
+      posIndex: posIndex !== undefined ? Number(posIndex) : 0,
+      rows: rows !== undefined ? Number(rows) : null,
+      columns: columns !== undefined ? Number(columns) : null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -98,7 +117,7 @@ module.exports = function (db) {
     db.categories.push(newCategory);
     return res.status(201).json({
       message: 'Success',
-      data: newCategory
+      data: formatCategoryResponse(newCategory, db)
     });
   });
 
@@ -124,25 +143,22 @@ module.exports = function (db) {
     if (!event || event.organizerId !== user.id) {
       return res.status(403).json({
         status_code: 403,
-        message: 'Forbidden: You do not own the event associated with this category'
+        message: 'Forbidden: You do not own this event'
       });
     }
 
-    const { totalQuota } = req.body;
-    if (totalQuota !== undefined) {
-      const existingSeatsCount = db.seats.filter(s => s.categoryId === category.id).length;
-      if (Number(totalQuota) < existingSeatsCount) {
-        return res.status(400).json({
-          status_code: 400,
-          message: `totalQuota cannot be reduced below existing seats count (${existingSeatsCount})`
-        });
-      }
-    }
+    const { name, price, totalQuota, posIndex, rows, columns } = req.body;
+    if (name !== undefined) category.name = name;
+    if (price !== undefined) category.price = Number(price);
+    if (totalQuota !== undefined) category.totalQuota = Number(totalQuota);
+    if (posIndex !== undefined) category.posIndex = Number(posIndex);
+    if (rows !== undefined) category.rows = Number(rows);
+    if (columns !== undefined) category.columns = Number(columns);
+    category.updatedAt = new Date().toISOString();
 
-    Object.assign(category, req.body, { updatedAt: new Date().toISOString() });
     return res.status(200).json({
       message: 'Success',
-      data: category
+      data: formatCategoryResponse(category, db)
     });
   });
 
@@ -169,22 +185,15 @@ module.exports = function (db) {
     if (!event || event.organizerId !== user.id) {
       return res.status(403).json({
         status_code: 403,
-        message: 'Forbidden: You do not own the event associated with this category'
-      });
-    }
-
-    const existingSeatsCount = db.seats.filter(s => s.categoryId === category.id).length;
-    if (existingSeatsCount > 0) {
-      return res.status(400).json({
-        status_code: 400,
-        message: `Cannot delete category with existing generated seats (${existingSeatsCount}). Delete seats first via DELETE /seats/category/:categoryId.`
+        message: 'Forbidden: You do not own this event'
       });
     }
 
     const deleted = db.categories.splice(index, 1)[0];
+
     return res.status(200).json({
       message: 'Success',
-      data: deleted
+      data: formatCategoryResponse(deleted, db)
     });
   });
 
