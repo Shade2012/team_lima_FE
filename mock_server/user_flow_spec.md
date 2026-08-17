@@ -51,10 +51,12 @@ flowchart TD
     end
 
     subgraph GateFlow["5. Gate Admission (Gate Operator)"]
-        E -->|Role: GATE_OPERATOR| Z[Scan QR Tiket Pengunjung di Gate]
-        Z --> AA{Validasi Tiket & Gate}
-        AA -->|Valid| AB[AdmissionScan Recorded - Pintu Terbuka]
-        AA -->|Invalid / Already Used| AC[Deny Entry / Warning]
+        E -->|Role: GATE_OPERATOR| Z1[GET /gates/operator/assigned - Ambil Gate & Event Info]
+        Z1 --> Z2[GET /scans - Pantau Total Tiket vs Total Scanned]
+        Z2 --> Z3[POST /scans - Scan QR Tiket Pengunjung di Gate]
+        Z3 --> AA{Validasi Tiket & Status Order}
+        AA -->|Paid & Available| AB[Ticket Status -> SEATED & Record AdmissionScan]
+        AA -->|Already Scanned / Not Paid| AC[Return 409 Conflict - Deny Entry]
     end
 ```
 
