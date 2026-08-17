@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../models/ticket_category_model.dart';
 import '../models/create_ticket_category_request.dart';
+import '../models/update_ticket_category_request.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../../core/constants/api_constants.dart';
 
@@ -46,6 +47,24 @@ class TicketCategoryRepository {
     } on DioException catch (e) {
       throw Exception(
         _extractErrorMessage(e, fallback: 'Failed to delete category'),
+      );
+    }
+  }
+
+  /// PATCH /ticket-categories/:id
+  Future<TicketCategory> updateCategory(
+    String id,
+    UpdateTicketCategoryRequest request,
+  ) async {
+    try {
+      final response = await _dioClient.dio.patch(
+        ApiConstants.categoryDetail(id),
+        data: request.toJson(),
+      );
+      return TicketCategory.fromJson(response.data['data']);
+    } on DioException catch (e) {
+      throw Exception(
+        _extractErrorMessage(e, fallback: 'Failed to update category'),
       );
     }
   }

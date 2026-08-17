@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/event_model.dart';
+import '../../data/models/event_statistics_model.dart';
 import '../../data/models/create_event_request.dart';
 import '../../data/models/update_event_request.dart';
 import '../../data/repositories/event_repository.dart';
@@ -69,6 +70,56 @@ class MyEventsNotifier extends Notifier<MyEventsState> {
 final myEventsProvider = NotifierProvider<MyEventsNotifier, MyEventsState>(() {
   return MyEventsNotifier();
 });
+
+// ==================== All Events State (Admin) ====================
+
+class AllEventsState {
+  final List<Event> events;
+  final bool isLoading;
+  final String? error;
+
+  AllEventsState({this.events = const [], this.isLoading = false, this.error});
+
+  AllEventsState copyWith({
+    List<Event>? events,
+    bool? isLoading,
+    String? error,
+  }) {
+    return AllEventsState(
+      events: events ?? this.events,
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
+    );
+  }
+}
+
+class AllEventsNotifier extends Notifier<AllEventsState> {
+  @override
+  AllEventsState build() {
+    Future.microtask(() => loadAllEvents());
+    return AllEventsState();
+  }
+
+  Future<void> loadAllEvents() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final repository = ref.read(eventRepositoryProvider);
+      final events = await repository.getAllEvents();
+      state = state.copyWith(events: events, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: e.toString().replaceAll('Exception: ', ''),
+      );
+    }
+  }
+}
+
+final allEventsProvider = NotifierProvider<AllEventsNotifier, AllEventsState>(
+  () {
+    return AllEventsNotifier();
+  },
+);
 
 // ==================== Event Detail State ====================
 
@@ -239,4 +290,56 @@ class UpdateEventNotifier extends Notifier<UpdateEventState> {
 final updateEventProvider =
     NotifierProvider<UpdateEventNotifier, UpdateEventState>(() {
       return UpdateEventNotifier();
+    });
+
+// ==================== Event Statistics State ====================
+
+class EventStatisticsState {
+  final EventStatistics? statistics;
+  final bool isLoading;
+  final String? error;
+
+  EventStatisticsState({this.statistics, this.isLoading = false, this.error});
+
+  EventStatisticsState copyWith({
+    EventStatistics? statistics,
+    bool? isLoading,
+    String? error,
+  }) {
+    return EventStatisticsState(
+      statistics: statistics ?? this.statistics,
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
+    );
+  }
+}
+
+class EventStatisticsNotifier extends Notifier<EventStatisticsState> {
+  @override
+  EventStatisticsState build() {
+    return EventStatisticsState();
+  }
+
+  Future<void> loadStatistics(String eventId) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final repository = ref.read(eventRepositoryProvider);
+      final statistics = await repository.getEventStatistics(eventId);
+      state = state.copyWith(statistics: statistics, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: e.toString().replaceAll('Exception: ', ''),
+      );
+    }
+  }
+
+  void reset() {
+    state = EventStatisticsState();
+  }
+}
+
+final eventStatisticsProvider =
+    NotifierProvider<EventStatisticsNotifier, EventStatisticsState>(() {
+      return EventStatisticsNotifier();
     });

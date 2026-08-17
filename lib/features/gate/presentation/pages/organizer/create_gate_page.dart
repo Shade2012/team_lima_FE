@@ -4,7 +4,9 @@ import 'package:team_five_fe/core/theme/app_colors.dart';
 import 'package:team_five_fe/core/theme/app_text_styles.dart';
 import 'package:team_five_fe/core/widgets/custom_text_field.dart';
 import 'package:team_five_fe/features/gate/data/models/create_gate_request.dart';
+import 'package:team_five_fe/features/gate/data/models/gate_model.dart';
 import 'package:team_five_fe/features/gate/presentation/providers/gate_provider.dart';
+import 'package:team_five_fe/features/gate/presentation/pages/organizer/register_gate_operator_page.dart';
 
 class CreateGatePage extends ConsumerStatefulWidget {
   final String eventId;
@@ -23,6 +25,7 @@ class CreateGatePage extends ConsumerStatefulWidget {
 class _CreateGatePageState extends ConsumerState<CreateGatePage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  Gate? _createdGate;
 
   @override
   void dispose() {
@@ -33,15 +36,6 @@ class _CreateGatePageState extends ConsumerState<CreateGatePage> {
   @override
   Widget build(BuildContext context) {
     final gatesState = ref.watch(gatesProvider);
-
-    ref.listen<GatesState>(gatesProvider, (prev, next) {
-      if (prev?.isLoading == true &&
-          next.isLoading == false &&
-          next.error == null &&
-          mounted) {
-        _showSuccessDialog();
-      }
-    });
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -192,11 +186,20 @@ class _CreateGatePageState extends ConsumerState<CreateGatePage> {
         eventId: widget.eventId,
         name: _nameController.text.trim(),
       );
-      await ref.read(gatesProvider.notifier).createGate(request);
+      final gate = await ref.read(gatesProvider.notifier).createGate(request);
+      if (gate != null && mounted) {
+        setState(() {
+          _createdGate = gate;
+        });
+        _showSuccessDialog();
+      }
     }
   }
 
   void _showSuccessDialog() {
+    final gateName = _createdGate?.name ?? _nameController.text.trim();
+    final gateId = _createdGate?.id;
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -217,7 +220,7 @@ class _CreateGatePageState extends ConsumerState<CreateGatePage> {
           ],
         ),
         content: Text(
-          'Gate "${_nameController.text.trim()}" has been created successfully. Would you like to register gate operators now?',
+          'Gate "$gateName" has been created successfully. Would you like to register gate operators now?',
           style: AppTextStyles.bodyMedium,
         ),
         actions: [
@@ -236,8 +239,18 @@ class _CreateGatePageState extends ConsumerState<CreateGatePage> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(dialogContext);
-              if (mounted) {
-                Navigator.pop(context, 'register');
+              if (mounted && gateId != null) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => RegisterGateOperatorPage(
+                      eventId: widget.eventId,
+                      eventName: widget.eventName,
+                      gateId: gateId,
+                      gateName: gateName,
+                    ),
+                  ),
+                );
               }
             },
             style: ElevatedButton.styleFrom(

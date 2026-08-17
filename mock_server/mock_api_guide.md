@@ -243,6 +243,7 @@ Server sudah dilengkapi data awal (_seed data_) dari file `mock_server/data/init
 - **Response 201 Created**: Object Event baru.
 
 #### 3. Get Event Statistics (`GET /events/:id/statistics`)
+
 - **Headers**: `Authorization: Bearer <organizer_token>` (Role must be `ORGANIZER` owner of event)
 - **Response 200 OK**:
   ```json
@@ -390,6 +391,7 @@ Server sudah dilengkapi data awal (_seed data_) dari file `mock_server/data/init
 ### F. Payment Gateway Simulation (`/mock-pg`)
 
 #### 1. Create Transaction / Generate Snap Token (`POST /mock-pg/transaction`)
+
 - **Auth**: Public
 - **Body Request**:
   ```json
@@ -412,6 +414,7 @@ Server sudah dilengkapi data awal (_seed data_) dari file `mock_server/data/init
   ```
 
 #### 2. Simulate Payment Completion (`POST /mock-pg/simulate-payment`)
+
 - **Auth**: Public
 - **Body Request**:
   ```json

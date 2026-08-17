@@ -23,6 +23,7 @@ class ApiConstants {
   static const String events = '/events';
   static const String myOrganizerEvents = '/events/organizer/me';
   static String eventDetail(String id) => '/events/$id';
+  static String eventStatistics(String id) => '/events/$id/statistics';
 
   // Feature: Ticket Category (/ticket-categories)
   static const String ticketCategories = '/ticket-categories';
@@ -41,7 +42,16 @@ class ApiConstants {
   static const String gates = '/gates';
   static String gatesByEvent(String eventId) => '/gates/event/$eventId';
   static String gateDetail(String id) => '/gates/$id';
+  static const String assignedGate = '/gates/operator/assigned';
 
   // Feature: Gate Operator Registration (/users/register/gate-operator)
   static const String registerGateOperator = '/users/register/gate-operator';
+
+  // Feature: Admission Scans (/scans)
+  static const String scans = '/scans';
+
+  // Feature: Refund Management (/refunds)
+  static const String refunds = '/refunds';
+  static String refundApprove(String id) => '/refunds/$id/approve';
+  static String refundReject(String id) => '/refunds/$id/reject';
 }

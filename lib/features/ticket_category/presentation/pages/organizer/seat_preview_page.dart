@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,12 +12,14 @@ class SeatPreviewPage extends ConsumerStatefulWidget {
   final String eventId;
   final String eventName;
   final DateTime? eventDate;
+  final String? categoryId;
 
   const SeatPreviewPage({
     super.key,
     required this.eventId,
     required this.eventName,
     this.eventDate,
+    this.categoryId,
   });
 
   @override
@@ -118,11 +119,22 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
 
     _loadAllSeatsIfReady();
 
+    dynamic targetCategory;
+    if (widget.categoryId != null && categoriesState.categories.isNotEmpty) {
+      try {
+        targetCategory = categoriesState.categories.firstWhere(
+          (c) => c.id == widget.categoryId,
+        );
+      } catch (_) {
+        targetCategory = null;
+      }
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Column(
         children: [
-          _buildAppBar(),
+          _buildAppBar(targetCategory?.name),
           Expanded(
             child: categoriesState.isLoading
                 ? const Center(
@@ -130,6 +142,15 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
                   )
                 : categoriesState.categories.isEmpty
                 ? _buildEmptyState()
+                : widget.categoryId != null
+                ? (targetCategory == null
+                      ? _buildEmptyState()
+                      : _buildSingleCategorySeatArea(
+                          targetCategory,
+                          seatsListState.seatsByCategory[targetCategory.id] ??
+                              [],
+                          _getCategoryColor(0),
+                        ))
                 : _buildSeatArea(categoriesState.categories, seatsListState),
           ),
           _buildLegendBar(),
@@ -140,7 +161,7 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
 
   // ==================== App Bar ====================
 
-  Widget _buildAppBar() {
+  Widget _buildAppBar(String? categoryName) {
     return Container(
       padding: EdgeInsets.fromLTRB(
         4,
@@ -180,7 +201,9 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Seat Preview',
+                  categoryName != null
+                      ? 'Seat Preview: $categoryName'
+                      : 'Seat Preview',
                   style: AppTextStyles.title.copyWith(
                     color: AppColors.white,
                     fontSize: 17,
@@ -232,6 +255,36 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
     );
   }
 
+  // ==================== Single Category Seat Area ====================
+
+  Widget _buildSingleCategorySeatArea(
+    dynamic category,
+    List<dynamic> seats,
+    Color color,
+  ) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.greyLight),
+            ),
+            child: _buildCategorySection(
+              category: category,
+              seats: seats,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 30),
+          _buildStageVisual(),
+        ],
+      ),
+    );
+  }
+
   // ==================== Seat Area ====================
 
   Widget _buildSeatArea(List categories, SeatsListState seatsListState) {
@@ -254,7 +307,6 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
                     category: reversed[i],
                     seats: seatsListState.seatsByCategory[reversed[i].id] ?? [],
                     color: _getCategoryColor(categories.length - 1 - i),
-                    isVip: i == reversed.length - 1,
                   ),
                   if (i < reversed.length - 1)
                     Container(height: 1, color: AppColors.greyLight),
@@ -304,8 +356,16 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
     required dynamic category,
     required List<dynamic> seats,
     required Color color,
-    required bool isVip,
   }) {
+    final rows = category.rows as int?;
+    final columns = category.columns as int?;
+    final totalQuota = category.totalQuota as int;
+    final totalCells = (rows != null && columns != null)
+        ? rows * columns
+        : seats.length;
+    final blockedCount = totalCells - seats.length;
+    final hasGrid = rows != null && columns != null && rows > 0 && columns > 0;
+
     return Column(
       children: [
         Container(
@@ -334,7 +394,7 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
                 ),
               ),
               Text(
-                '${_formatPrice(category.price)}  •  ${seats.length} seats',
+                '${_formatPrice(category.price)}  •  ${seats.length}/$totalQuota seats',
                 style: AppTextStyles.bodySmall.copyWith(
                   color: AppColors.grey,
                   fontSize: 11,
@@ -343,7 +403,15 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
             ],
           ),
         ),
-        if (seats.isEmpty)
+        if (!hasGrid)
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Text(
+              'No grid layout configured',
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey),
+            ),
+          )
+        else if (seats.isEmpty && blockedCount <= 0)
           Padding(
             padding: const EdgeInsets.all(20),
             child: Text(
@@ -351,83 +419,51 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
               style: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey),
             ),
           )
-        else if (isVip)
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            child: _buildArcSeats(seats, color),
-          )
         else
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            child: _buildStraightSeats(seats, color),
+            child: _buildGridSeats(
+              seats: seats,
+              rows: rows,
+              columns: columns,
+              totalQuota: totalQuota,
+              color: color,
+            ),
           ),
       ],
     );
   }
 
-  // ==================== Arc Seats (VIP) ====================
+  // ==================== Grid Seats ====================
 
-  Widget _buildArcSeats(List<dynamic> seats, Color color) {
-    final seatsPerRow = seats.length <= 10
-        ? seats.length
-        : seats.length <= 20
-        ? 10
-        : 15;
-    final totalRows = (seats.length / seatsPerRow).ceil();
+  Widget _buildGridSeats({
+    required List<dynamic> seats,
+    required int rows,
+    required int columns,
+    required int totalQuota,
+    required Color color,
+  }) {
+    final totalCells = rows * columns;
+    final blockedCount = totalCells - seats.length;
     final seatSize = 28.0;
-    final rowSpacing = 32.0;
-    final spacing = seatSize + 4;
-    final totalWidth = seatsPerRow * spacing;
+    final spacing = 4.0;
+    final totalWidth = columns * (seatSize + spacing);
+    final totalHeight = rows * (seatSize + spacing);
 
     return SizedBox(
-      height: 10 + totalRows * rowSpacing + 20,
+      height: totalHeight,
       width: totalWidth,
       child: CustomPaint(
-        size: Size(totalWidth, 10 + totalRows * rowSpacing + 20),
-        painter: _SeatsPainter(
-          seats: seats,
-          seatsPerRow: seatsPerRow,
-          totalRows: totalRows,
+        size: Size(totalWidth, totalHeight),
+        painter: _GridSeatsPainter(
+          rows: rows,
+          columns: columns,
           seatSize: seatSize,
-          rowSpacing: rowSpacing,
           spacing: spacing,
           color: color,
-          isArc: true,
-        ),
-      ),
-    );
-  }
-
-  // ==================== Straight Seats ====================
-
-  Widget _buildStraightSeats(List<dynamic> seats, Color color) {
-    final seatsPerRow = seats.length <= 10
-        ? seats.length
-        : seats.length <= 20
-        ? 10
-        : 15;
-    final totalRows = (seats.length / seatsPerRow).ceil();
-    final seatSize = 28.0;
-    final rowSpacing = 32.0;
-    final spacing = seatSize + 4;
-    final totalWidth = seatsPerRow * spacing;
-
-    return SizedBox(
-      height: 10 + totalRows * rowSpacing + 20,
-      width: totalWidth,
-      child: CustomPaint(
-        size: Size(totalWidth, 10 + totalRows * rowSpacing + 20),
-        painter: _SeatsPainter(
+          blockedCount: blockedCount,
           seats: seats,
-          seatsPerRow: seatsPerRow,
-          totalRows: totalRows,
-          seatSize: seatSize,
-          rowSpacing: rowSpacing,
-          spacing: spacing,
-          color: color,
-          isArc: false,
         ),
       ),
     );
@@ -454,14 +490,8 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
             ),
             const SizedBox(width: 20),
             _buildLegendItem(
-              color: AppColors.warning,
-              label: 'Held',
-              filled: true,
-            ),
-            const SizedBox(width: 20),
-            _buildLegendItem(
-              color: AppColors.danger,
-              label: 'Sold',
+              color: AppColors.grey,
+              label: 'Blocked',
               filled: true,
             ),
           ],
@@ -534,99 +564,103 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
   }
 }
 
-// ==================== Seats Painter ====================
+// ==================== Grid Seats Painter ====================
 
-class _SeatsPainter extends CustomPainter {
-  final List<dynamic> seats;
-  final int seatsPerRow;
-  final int totalRows;
+class _GridSeatsPainter extends CustomPainter {
+  final int rows;
+  final int columns;
   final double seatSize;
-  final double rowSpacing;
   final double spacing;
   final Color color;
-  final bool isArc;
+  final int blockedCount;
+  final List<dynamic> seats;
 
-  _SeatsPainter({
-    required this.seats,
-    required this.seatsPerRow,
-    required this.totalRows,
+  _GridSeatsPainter({
+    required this.rows,
+    required this.columns,
     required this.seatSize,
-    required this.rowSpacing,
     required this.spacing,
     required this.color,
-    required this.isArc,
+    required this.blockedCount,
+    required this.seats,
   });
-
-  double _arcY(int index, int total, double arcStrength) {
-    if (total <= 1) return 0;
-    final center = (total - 1) / 2.0;
-    final normalized = (index - center) / center;
-    return arcStrength * (1 - normalized * normalized);
-  }
-
-  String _seatNumber(String seatCode) {
-    final parts = seatCode.split('-');
-    return parts.last;
-  }
 
   @override
   void paint(Canvas canvas, Size size) {
-    final seatPaint = Paint()
-      ..color = color.withValues(alpha: 0.1)
+    final availablePaint = Paint()
+      ..color = color.withValues(alpha: 0.15)
       ..style = PaintingStyle.fill;
 
-    final borderPaint = Paint()
-      ..color = color.withValues(alpha: 0.4)
+    final availableBorderPaint = Paint()
+      ..color = color.withValues(alpha: 0.5)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+
+    final blockedPaint = Paint()
+      ..color = const Color(0xFFBDBDBD).withValues(alpha: 0.3)
+      ..style = PaintingStyle.fill;
+
+    final blockedBorderPaint = Paint()
+      ..color = const Color(0xFFBDBDBD).withValues(alpha: 0.5)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
 
     final textPainter = TextPainter(textDirection: ui.TextDirection.ltr);
 
-    for (var rowIdx = 0; rowIdx < totalRows; rowIdx++) {
-      final startIdx = rowIdx * seatsPerRow;
-      final endIdx = min(startIdx + seatsPerRow, seats.length);
-      final rowSeats = seats.sublist(startIdx, endIdx);
-      final rowCount = rowSeats.length;
-      final y = 10.0 + rowIdx * rowSpacing;
-      final centerX = (seatsPerRow - 1) * spacing / 2 + seatSize / 2;
-      final arcStrength = 8.0 + rowIdx * 3.0;
+    int seatIndex = 0;
 
-      for (var i = 0; i < rowCount; i++) {
-        final x = centerX + (i - (rowCount - 1) / 2) * spacing;
-        final seatY = isArc ? y + _arcY(i, rowCount, arcStrength) : y;
+    for (var row = 0; row < rows; row++) {
+      for (var col = 0; col < columns; col++) {
+        final x = col * (seatSize + spacing);
+        final y = row * (seatSize + spacing);
 
         final rect = RRect.fromRectAndRadius(
-          Rect.fromLTWH(x, seatY, seatSize, seatSize),
-          const Radius.circular(6),
+          Rect.fromLTWH(x, y, seatSize, seatSize),
+          const Radius.circular(5),
         );
 
-        canvas.drawRRect(rect, seatPaint);
-        canvas.drawRRect(rect, borderPaint);
+        final cellIndex = row * columns + col;
 
-        final number = _seatNumber(rowSeats[i].seatCode);
-        textPainter.text = TextSpan(
-          text: number,
-          style: TextStyle(
-            fontSize: 8,
-            fontWeight: FontWeight.w700,
-            color: color,
-            height: 1,
-          ),
-        );
-        textPainter.layout();
-        textPainter.paint(
-          canvas,
-          Offset(
-            x + (seatSize - textPainter.width) / 2,
-            seatY + (seatSize - textPainter.height) / 2,
-          ),
-        );
+        if (cellIndex < blockedCount) {
+          canvas.drawRRect(rect, blockedPaint);
+          canvas.drawRRect(rect, blockedBorderPaint);
+        } else {
+          canvas.drawRRect(rect, availablePaint);
+          canvas.drawRRect(rect, availableBorderPaint);
+
+          if (seatIndex < seats.length) {
+            final seatCode = seats[seatIndex].seatCode as String;
+            final parts = seatCode.split('-');
+            final number = parts.last;
+
+            textPainter.text = TextSpan(
+              text: number,
+              style: TextStyle(
+                fontSize: 8,
+                fontWeight: FontWeight.w700,
+                color: color,
+                height: 1,
+              ),
+            );
+            textPainter.layout();
+            textPainter.paint(
+              canvas,
+              Offset(
+                x + (seatSize - textPainter.width) / 2,
+                y + (seatSize - textPainter.height) / 2,
+              ),
+            );
+            seatIndex++;
+          }
+        }
       }
     }
   }
 
   @override
-  bool shouldRepaint(covariant _SeatsPainter oldDelegate) {
-    return oldDelegate.seats != seats || oldDelegate.color != color;
+  bool shouldRepaint(covariant _GridSeatsPainter oldDelegate) {
+    return oldDelegate.seats != seats ||
+        oldDelegate.color != color ||
+        oldDelegate.blockedCount != blockedCount;
   }
 }

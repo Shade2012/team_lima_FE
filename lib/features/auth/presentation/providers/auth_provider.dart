@@ -162,6 +162,11 @@ class AuthNotifier extends Notifier<AuthState> {
       );
       final response = await authRepository.login(request);
 
+      // Simpan token setelah login berhasil
+      if (response.token.isNotEmpty) {
+        await authRepository.saveToken(response.token);
+      }
+
       // Fetch user profile after successful login
       UserModel? profile;
       try {

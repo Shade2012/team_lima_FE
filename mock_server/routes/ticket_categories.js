@@ -99,7 +99,7 @@ module.exports = function (db) {
       });
     }
 
-    const calculatedQuota = totalQuota ? Number(totalQuota) : (rows && columns ? Number(rows) * Number(columns) : 100);
+    const calculatedQuota = totalQuota !== undefined ? Number(totalQuota) : (rows && columns ? Number(rows) * Number(columns) : 100);
 
     const newCategory = {
       id: generateUuid(),

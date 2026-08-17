@@ -6,6 +6,7 @@ import '../models/gate_operator_request.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../auth/data/models/user_model.dart';
+import '../../../event/data/models/event_model.dart';
 
 class GateRepository {
   final DioClient _dioClient = DioClient();
@@ -76,13 +77,70 @@ class GateRepository {
         data: request.toJson(),
       );
       final data = response.data['data'];
-      if (data is List) {
-        return data.map((e) => UserModel.fromJson(e)).toList();
+      if (data == null) {
+        return [];
       }
-      return [UserModel.fromJson(data)];
+      if (data is List) {
+        return data
+            .map((e) => UserModel.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+      if (data is Map<String, dynamic>) {
+        return [UserModel.fromJson(data)];
+      }
+      return [];
     } on DioException catch (e) {
       throw Exception(
         _extractErrorMessage(e, fallback: 'Failed to register gate operator'),
+      );
+    }
+  }
+
+  /// GET /gates/operator/assigned
+  Future<(Gate gate, Event event)?> getAssignedGate() async {
+    try {
+      final response = await _dioClient.dio.get(ApiConstants.assignedGate);
+      final data = response.data['data'] as Map<String, dynamic>;
+      if (data.isEmpty) return null;
+      final gate = Gate.fromJson(data);
+      final eventData = data['event'];
+      if (eventData == null || eventData is! Map<String, dynamic>) return null;
+      final event = Event.fromJson(eventData);
+      return (gate, event);
+    } on DioException catch (e) {
+      throw Exception(
+        _extractErrorMessage(e, fallback: 'Failed to fetch assigned gate'),
+      );
+    }
+  }
+
+  /// POST /scans
+  Future<String> scanTicket(String ticketId) async {
+    try {
+      final response = await _dioClient.dio.post(
+        ApiConstants.scans,
+        data: {'ticketId': ticketId},
+      );
+      return response.data['data'].toString();
+    } on DioException catch (e) {
+      throw Exception(
+        _extractErrorMessage(e, fallback: 'Failed to scan ticket'),
+      );
+    }
+  }
+
+  /// GET /scans
+  Future<Map<String, int>> getScanStats() async {
+    try {
+      final response = await _dioClient.dio.get(ApiConstants.scans);
+      final data = response.data['data'];
+      return {
+        'scanned': (data['scanned'] ?? 0) as int,
+        'total': (data['total'] ?? 0) as int,
+      };
+    } on DioException catch (e) {
+      throw Exception(
+        _extractErrorMessage(e, fallback: 'Failed to fetch scan stats'),
       );
     }
   }

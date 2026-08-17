@@ -1,16 +1,15 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:team_five_fe/core/theme/app_colors.dart';
 import 'package:team_five_fe/core/theme/app_text_styles.dart';
 import 'package:team_five_fe/features/event/data/models/event_model.dart';
+import 'package:team_five_fe/features/event/data/models/event_statistics_model.dart';
 import 'package:team_five_fe/features/event/presentation/providers/event_provider.dart';
 import 'package:team_five_fe/features/event/presentation/pages/organizer/edit_event_page.dart';
+import 'package:team_five_fe/features/event/presentation/pages/organizer/ticket_category_detail_page.dart';
 import 'package:team_five_fe/features/ticket_category/presentation/providers/ticket_category_provider.dart';
 import 'package:team_five_fe/features/ticket_category/presentation/pages/organizer/ticket_category_page.dart';
-import 'package:team_five_fe/features/ticket_category/presentation/pages/organizer/seat_preview_page.dart';
-import 'package:team_five_fe/features/seat/presentation/providers/seat_provider.dart';
 import 'package:team_five_fe/features/gate/presentation/providers/gate_provider.dart';
 import 'package:team_five_fe/features/gate/presentation/pages/organizer/gate_management_page.dart';
 
@@ -23,34 +22,20 @@ class EventDetailPage extends ConsumerStatefulWidget {
   ConsumerState<EventDetailPage> createState() => _EventDetailPageState();
 }
 
-class _EventDetailPageState extends ConsumerState<EventDetailPage>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  static const _categoryColors = [
-    AppColors.primary,
-    AppColors.pink,
-    AppColors.success,
-    AppColors.warning,
-  ];
-
+class _EventDetailPageState extends ConsumerState<EventDetailPage> {
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         ref.read(eventDetailProvider.notifier).loadEvent(widget.eventId);
+        ref
+            .read(eventStatisticsProvider.notifier)
+            .loadStatistics(widget.eventId);
         ref.read(categoriesProvider.notifier).setEventId(widget.eventId);
         ref.read(gatesProvider.notifier).setEventId(widget.eventId);
       }
     });
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
   }
 
   String _formatPrice(int price) {
@@ -62,22 +47,29 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage>
     return formatter.format(price);
   }
 
-  Color _getCategoryColor(int index) {
-    return _categoryColors[index % _categoryColors.length];
+  String _safeDateFormat(DateTime? date, {String pattern = 'MMM dd, yyyy'}) {
+    if (date == null) return '-';
+    return DateFormat(pattern).format(date);
+  }
+
+  String _safeString(String? value) {
+    if (value == null || value.trim().isEmpty) return '-';
+    return value;
   }
 
   @override
   Widget build(BuildContext context) {
     final detailState = ref.watch(eventDetailProvider);
+    final statsState = ref.watch(eventStatisticsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: _buildBody(detailState),
+      backgroundColor: const Color(0xFFFAFAFA),
+      body: _buildBody(detailState, statsState),
     );
   }
 
-  Widget _buildBody(EventDetailState state) {
-    if (state.isLoading) {
+  Widget _buildBody(EventDetailState state, EventStatisticsState statsState) {
+    if (state.isLoading || statsState.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -95,9 +87,14 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage>
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => ref
-                  .read(eventDetailProvider.notifier)
-                  .loadEvent(widget.eventId),
+              onPressed: () {
+                ref
+                    .read(eventDetailProvider.notifier)
+                    .loadEvent(widget.eventId);
+                ref
+                    .read(eventStatisticsProvider.notifier)
+                    .loadStatistics(widget.eventId);
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.white,
@@ -116,694 +113,884 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage>
       return const Center(child: Text('Event not found'));
     }
 
-    return _buildEventDetail(event);
+    return _buildEventDetail(event, statsState.statistics);
   }
 
-  // ==================== Event Detail with Tabs ====================
+  // ==================== Event Detail ====================
 
-  Widget _buildEventDetail(Event event) {
+  Widget _buildEventDetail(Event event, EventStatistics? statistics) {
     final now = DateTime.now();
     final isOnSale =
         now.isAfter(event.salesStartTime) && now.isBefore(event.salesEndTime);
     final isDraft = now.isBefore(event.salesStartTime);
-    final isSoldOut = now.isAfter(event.salesEndTime);
-    final initials = _getInitials(event.name);
+    final isEnded = now.isAfter(event.salesEndTime);
 
-    return NestedScrollView(
-      headerSliverBuilder: (context, innerBoxIsScrolled) => [
-        // Custom App Bar with Gradient
-        SliverAppBar(
-          expandedHeight: 200,
-          pinned: true,
-          backgroundColor: AppColors.primary,
-          leading: GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              margin: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.white.withValues(alpha: 0.2),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.arrow_back, color: AppColors.white),
-            ),
-          ),
-          actions: [
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => EditEventPage(
-                      eventId: event.id,
-                      eventName: event.name,
-                      isSeated: event.isSeated,
-                      salesStartTime: event.salesStartTime,
-                      salesEndTime: event.salesEndTime,
-                      eventDate: event.eventDate,
-                      refundEndDate: event.refundEndDate,
-                      refundPolicy: event.refundPolicy,
-                      refundPercentage: event.refundPercentage,
-                    ),
-                  ),
-                );
-              },
-              child: Container(
-                margin: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.white.withValues(alpha: 0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.edit, color: AppColors.white),
-              ),
-            ),
-          ],
-          flexibleSpace: FlexibleSpaceBar(
-            background: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [AppColors.primary, AppColors.pink],
-                ),
-              ),
-              child: Stack(
-                children: [
-                  Positioned(
-                    top: -30,
-                    right: -30,
-                    child: Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.white.withValues(alpha: 0.08),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: -40,
-                    left: -20,
-                    child: Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.white.withValues(alpha: 0.06),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: 60,
-                    right: 24,
-                    child: Icon(
-                      event.isSeated ? Icons.event_seat : Icons.mic,
-                      size: 48,
-                      color: AppColors.white.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 30),
-                      child: Text(
-                        initials,
-                        style: AppTextStyles.logo.copyWith(
-                          fontSize: 64,
-                          color: AppColors.white.withValues(alpha: 0.2),
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 20,
-                    left: 20,
-                    right: 20,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (!isDraft) _buildStatusBadge(isOnSale, isSoldOut),
-                        const SizedBox(height: 8),
-                        Text(
-                          event.name,
-                          style: AppTextStyles.title.copyWith(
-                            color: AppColors.white,
-                            fontSize: 20,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-
-        // Tab Bar
-        SliverPersistentHeader(
-          pinned: true,
-          delegate: _TabBarDelegate(
-            TabBar(
-              controller: _tabController,
-              labelColor: AppColors.primary,
-              unselectedLabelColor: AppColors.grey,
-              indicatorColor: AppColors.primary,
-              indicatorWeight: 3,
-              dividerColor: AppColors.greyLight,
-              labelStyle: AppTextStyles.bodyMedium.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-              unselectedLabelStyle: AppTextStyles.bodyMedium,
-              tabs: const [
-                Tab(text: 'Event'),
-                Tab(text: 'Ticket Category'),
-                Tab(text: 'Gate'),
+    return Column(
+      children: [
+        // Purple Header
+        _buildPurpleHeader(event, isOnSale, isDraft, isEnded),
+        // Scrollable Content
+        Expanded(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              children: [
+                // Action Buttons (Edit + Share)
+                _buildActionButtons(event),
+                const SizedBox(height: 16),
+                // Revenue Card
+                _buildRevenueCard(statistics),
+                const SizedBox(height: 16),
+                // Ticket Distribution
+                _buildTicketDistribution(statistics, event),
+                const SizedBox(height: 16),
+                // Sales Timeline
+                _buildSalesTimeline(event),
+                const SizedBox(height: 16),
+                // Refund Policy
+                _buildRefundPolicy(event),
+                const SizedBox(height: 16),
+                // Manage Buttons
+                _buildManageButtons(event),
+                const SizedBox(height: 32),
               ],
             ),
           ),
         ),
       ],
-      body: TabBarView(
-        controller: _tabController,
+    );
+  }
+
+  // ==================== Purple Header ====================
+
+  Widget _buildPurpleHeader(
+    Event event,
+    bool isOnSale,
+    bool isDraft,
+    bool isEnded,
+  ) {
+    String statusText;
+    Color statusColor;
+
+    if (isDraft) {
+      statusText = 'UPCOMING';
+      statusColor = AppColors.warning;
+    } else if (isEnded) {
+      statusText = 'ENDED';
+      statusColor = AppColors.grey;
+    } else {
+      statusText = 'ACTIVE';
+      statusColor = AppColors.success;
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 12,
+        left: 20,
+        right: 20,
+        bottom: 24,
+      ),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF6B0096), AppColors.primary],
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildDataEventTab(event),
-          _buildTicketCategoryTab(event),
-          _buildGateTab(event),
+          // Back Button
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.white.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.arrow_back,
+                color: AppColors.white,
+                size: 20,
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          // Status Badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+            decoration: BoxDecoration(
+              color: statusColor,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              statusText,
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 11,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Event Name
+          Text(
+            _safeString(event.name),
+            style: AppTextStyles.title.copyWith(
+              color: AppColors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 6),
+          // Date
+          Row(
+            children: [
+              const Icon(Icons.calendar_today, color: Colors.white70, size: 14),
+              const SizedBox(width: 6),
+              Text(
+                _safeDateFormat(event.eventDate),
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: Colors.white70,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
-  // ==================== Tab 1: Data Event ====================
 
-  Widget _buildDataEventTab(Event event) {
-    final dateFormat = DateFormat('dd MMM yyyy');
+  // ==================== Action Buttons ====================
 
-    return SingleChildScrollView(
+  Widget _buildActionButtons(Event event) {
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Column(
-        children: [
-          // Event Date + Event Type (side by side)
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: AppColors.greyLight, width: 1),
+      child: SizedBox(
+        width: double.infinity,
+        child: OutlinedButton.icon(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => EditEventPage(
+                  eventId: event.id,
+                  eventName: event.name,
+                  isSeated: event.isSeated,
+                  salesStartTime: event.salesStartTime,
+                  salesEndTime: event.salesEndTime,
+                  eventDate: event.eventDate,
+                  refundEndDate: event.refundEndDate,
+                  refundPolicy: event.refundPolicy,
+                  refundPercentage: event.refundPercentage,
+                ),
               ),
-            ),
-            child: IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Event Date
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Event Date',
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.grey,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          dateFormat.format(event.eventDate),
-                          style: AppTextStyles.bodyLarge.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          DateFormat('HH:mm').format(event.eventDate),
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.grey,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Divider
-                  Container(
-                    width: 1,
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    color: AppColors.greyLight,
-                  ),
-                  // Event Type
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Event Type',
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.grey,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: event.isSeated
-                                ? AppColors.primary.withValues(alpha: 0.1)
-                                : AppColors.grey.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            event.isSeated ? 'Seated' : 'Standing',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: event.isSeated
-                                  ? AppColors.primary
-                                  : AppColors.grey,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+            );
+          },
+          icon: const Icon(Icons.edit_outlined, size: 18),
+          label: Text(
+            'Edit Event',
+            style: AppTextStyles.button.copyWith(fontSize: 13),
+          ),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.primary,
+            side: const BorderSide(color: AppColors.primary),
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
             ),
           ),
+        ),
+      ),
+    );
+  }
 
-          // Sales Period
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: AppColors.greyLight, width: 1),
+  // ==================== Revenue Card ====================
+
+  Widget _buildRevenueCard(EventStatistics? statistics) {
+    final netRevenue = statistics?.netRevenue;
+    final grossRevenue = statistics?.grossRevenue;
+    final totalRefundAmount = statistics?.totalRefundAmount;
+    final totalRefundCount = statistics?.totalRefundCount;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.black.withValues(alpha: 0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Revenue',
+              style: AppTextStyles.bodyMedium.copyWith(
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
+                color: AppColors.black,
               ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Sales Period',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.grey,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  '${dateFormat.format(event.salesStartTime)} - ${dateFormat.format(event.salesEndTime)}',
-                  style: AppTextStyles.bodyLarge.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Refund Policy (if available)
-          if (event.refundEndDate != null ||
-              event.refundPercentage != null ||
-              (event.refundPolicy != null && event.refundPolicy!.isNotEmpty))
+            const SizedBox(height: 16),
+            // Net Revenue - Large & Bold
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              decoration: const BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: AppColors.greyLight, width: 1),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.primary.withValues(alpha: 0.1),
+                    AppColors.primary.withValues(alpha: 0.05),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.2),
                 ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Refund Policy',
+                    'Net Revenue',
                     style: AppTextStyles.bodySmall.copyWith(
                       color: AppColors.grey,
+                      fontSize: 12,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  if (event.refundEndDate != null)
-                    _buildRefundRow(
-                      'Refund Until',
-                      dateFormat.format(event.refundEndDate!),
+                  const SizedBox(height: 6),
+                  Text(
+                    netRevenue != null ? _formatPrice(netRevenue) : '-',
+                    style: AppTextStyles.title.copyWith(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.primary,
                     ),
-                  if (event.refundPercentage != null &&
-                      event.refundPercentage! > 0)
-                    _buildRefundRow(
-                      'Refund Percentage',
-                      '${event.refundPercentage}%',
-                    ),
-                  if (event.refundPolicy != null &&
-                      event.refundPolicy!.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      event.refundPolicy!,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.grey,
-                      ),
-                    ),
-                  ],
+                  ),
                 ],
               ),
             ),
-
-          const SizedBox(height: 24),
-
-          // Action Buttons
-          _buildActionButtons(event),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRefundRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Row(
-        children: [
-          Text(
-            '$label: ',
-            style: AppTextStyles.bodySmall.copyWith(color: AppColors.grey),
-          ),
-          Text(
-            value,
-            style: AppTextStyles.bodyMedium.copyWith(
-              fontWeight: FontWeight.w500,
+            const SizedBox(height: 12),
+            // Gross Revenue - Full Width
+            _buildRevenueStatMedium(
+              'Gross Revenue',
+              grossRevenue != null ? _formatPrice(grossRevenue) : '-',
+              AppColors.success,
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ==================== Tab 2: Ticket Category ====================
-
-  Widget _buildTicketCategoryTab(Event event) {
-    final categoriesState = ref.watch(categoriesProvider);
-    final seatsCountState = ref.watch(seatsCountProvider);
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: categoriesState.isLoading
-          ? const Center(
-              child: Padding(
-                padding: EdgeInsets.all(24),
-                child: CircularProgressIndicator(),
-              ),
-            )
-          : categoriesState.categories.isEmpty
-          ? _buildEmptyCategories(event)
-          : _buildCategoriesContent(
-              event: event,
-              categories: categoriesState.categories,
-              seatsCountState: seatsCountState,
-            ),
-    );
-  }
-
-  // ==================== Tab 3: Gate ====================
-
-  Widget _buildGateTab(Event event) {
-    final gatesState = ref.watch(gatesProvider);
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: gatesState.isLoading
-          ? const Center(
-              child: Padding(
-                padding: EdgeInsets.all(24),
-                child: CircularProgressIndicator(),
-              ),
-            )
-          : gatesState.gates.isEmpty
-          ? _buildEmptyGates(event)
-          : _buildGatesContent(event: event, gates: gatesState.gates),
-    );
-  }
-
-  Widget _buildEmptyGates(Event event) {
-    return Column(
-      children: [
-        const SizedBox(height: 40),
-        Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.08),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            Icons.door_front_door_outlined,
-            size: 32,
-            color: AppColors.primary.withValues(alpha: 0.5),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          'No Gates Yet',
-          style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Add gates to manage entry points for your event.',
-          style: AppTextStyles.bodySmall.copyWith(color: AppColors.grey),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton.icon(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => GateManagementPage(
-                    eventId: event.id,
-                    eventName: event.name,
-                  ),
-                ),
-              );
-            },
-            icon: const Icon(Icons.add, size: 18),
-            label: Text(
-              'Add Your First Gate',
-              style: AppTextStyles.button.copyWith(fontSize: 13),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.white,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 0,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildGatesContent({required Event event, required List gates}) {
-    return Column(
-      children: [
-        // Gates List
-        ...List.generate(gates.length, (index) {
-          final gate = gates[index];
-          return _buildGateItem(gate: gate);
-        }),
-        const SizedBox(height: 16),
-
-        // Manage gates button
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton.icon(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => GateManagementPage(
-                    eventId: widget.eventId,
-                    eventName: event.name,
-                  ),
-                ),
-              );
-            },
-            icon: const Icon(Icons.settings_outlined, size: 18),
-            label: Text(
-              'Manage Gates',
-              style: AppTextStyles.button.copyWith(fontSize: 13),
-            ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.primary,
-              side: const BorderSide(color: AppColors.primary),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildGateItem({required dynamic gate}) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.04),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(
-              Icons.door_front_door,
-              size: 18,
-              color: AppColors.primary,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(height: 8),
+            // Refund Amount & Total Refunds - Side by side
+            Row(
               children: [
-                Text(
-                  gate.name,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    fontWeight: FontWeight.w600,
+                Expanded(
+                  child: _buildRevenueStatMedium(
+                    'Refund Amount',
+                    totalRefundAmount != null
+                        ? _formatPrice(totalRefundAmount)
+                        : '-',
+                    AppColors.warning,
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  'ID: ${gate.id.substring(0, 8)}...',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.grey,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildRevenueStatMedium(
+                    'Total Refunds',
+                    totalRefundCount != null ? '$totalRefundCount' : '-',
+                    AppColors.danger,
                   ),
                 ),
               ],
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRevenueStatMedium(String label, String value, Color color) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.grey,
+              fontSize: 11,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: AppTextStyles.bodyMedium.copyWith(
+              fontWeight: FontWeight.w700,
+              fontSize: 15,
+              color: color,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildEmptyCategories(Event event) {
-    return Column(
-      children: [
-        const SizedBox(height: 40),
-        Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.08),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            Icons.confirmation_number_outlined,
-            size: 32,
-            color: AppColors.primary.withValues(alpha: 0.5),
-          ),
+  // ==================== Ticket Distribution ====================
+
+  Widget _buildTicketDistribution(EventStatistics? statistics, Event event) {
+    final categories = statistics?.categories;
+    final totalSold = statistics?.totalTicketsSold;
+    final totalQuota = statistics?.totalQuota;
+    final soldPercentage = statistics?.percentageSold;
+
+    final List<Color> categoryColors = [
+      AppColors.primary,
+      AppColors.warning,
+      AppColors.grey,
+      const Color(0xFFCD7F32),
+      AppColors.success,
+      AppColors.danger,
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.black.withValues(alpha: 0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        const SizedBox(height: 12),
-        Text(
-          'No Categories Yet',
-          style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Add ticket categories to start selling tickets.',
-          style: AppTextStyles.bodySmall.copyWith(color: AppColors.grey),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton.icon(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => TicketCategoryPage(
-                    eventId: event.id,
-                    eventName: event.name,
-                    isSeated: event.isSeated,
-                    eventDate: event.eventDate,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Ticket Distribution',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    color: AppColors.black,
                   ),
                 ),
-              );
-            },
-            icon: const Icon(Icons.add, size: 18),
-            label: Text(
-              'Add Category',
-              style: AppTextStyles.button.copyWith(fontSize: 13),
+                if (soldPercentage != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.danger.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${soldPercentage.toStringAsFixed(1)}% Sold Out',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.danger,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ),
+              ],
             ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.white,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+            const SizedBox(height: 8),
+            Text(
+              totalSold != null && totalQuota != null
+                  ? '$totalSold / $totalQuota tickets'
+                  : '-',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.grey,
+                fontSize: 12,
               ),
-              elevation: 0,
             ),
-          ),
+            const SizedBox(height: 20),
+            if (categories == null || categories.isEmpty)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Text(
+                    'No ticket categories yet',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.grey,
+                    ),
+                  ),
+                ),
+              )
+            else
+              ...categories.asMap().entries.map((entry) {
+                final index = entry.key;
+                final cat = entry.value;
+                final color = categoryColors[index % categoryColors.length];
+                return _buildCategoryBar(
+                  category: cat,
+                  color: color,
+                  eventName: event.name,
+                  eventDate: event.eventDate,
+                  isSeated: event.isSeated,
+                );
+              }),
+          ],
         ),
-      ],
+      ),
     );
   }
 
-  Widget _buildCategoriesContent({
-    required Event event,
-    required List categories,
-    required SeatsCountState seatsCountState,
+  Widget _buildCategoryBar({
+    required EventStatisticsCategory category,
+    required Color color,
+    required String eventName,
+    required DateTime eventDate,
+    required bool isSeated,
   }) {
-    return Column(
-      children: [
-        // Category List
-        ...List.generate(categories.length, (index) {
-          final category = categories[index];
-          final seatsCount = seatsCountState.counts[category.id];
-          final color = _getCategoryColor(index);
-          return _buildCategoryItem(
-            category: category,
-            seatsCount: seatsCount,
-            color: color,
-            isSeated: event.isSeated,
-          );
-        }),
-        const SizedBox(height: 16),
+    final totalQuota = category.totalQuota ?? 0;
+    final ticketsSold = category.ticketsSold ?? 0;
+    final progress = totalQuota > 0 ? ticketsSold / totalQuota : 0.0;
 
-        // Preview button (only for seated events)
-        if (event.isSeated) ...[
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => TicketCategoryDetailPage(
+              eventId: widget.eventId,
+              categoryId: category.categoryId ?? '',
+              categoryName: category.categoryName ?? '-',
+              eventName: eventName,
+              eventDate: eventDate,
+              isSeated: isSeated,
+            ),
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      category.categoryName ?? '-',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        color: AppColors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Text(
+                      '$ticketsSold / $totalQuota',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.grey,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(Icons.chevron_right, color: AppColors.grey, size: 18),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 8,
+                backgroundColor: color.withValues(alpha: 0.15),
+                valueColor: AlwaysStoppedAnimation<Color>(color),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ==================== Sales Timeline ====================
+
+  Widget _buildSalesTimeline(Event event) {
+    final now = DateTime.now();
+
+    final isBeforeSales = now.isBefore(event.salesStartTime);
+    final isDuringSales =
+        now.isAfter(event.salesStartTime) && now.isBefore(event.salesEndTime);
+    final isAfterSales = now.isAfter(event.salesEndTime);
+    final isBeforeEvent = now.isBefore(event.eventDate);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.black.withValues(alpha: 0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Sales Timeline',
+              style: AppTextStyles.bodyMedium.copyWith(
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
+                color: AppColors.black,
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Timeline
+            Row(
+              children: [
+                _buildTimelineDot(
+                  label: 'Sales Start',
+                  date: _safeDateFormat(
+                    event.salesStartTime,
+                    pattern: 'MMM dd',
+                  ),
+                  isActive: !isBeforeSales,
+                  isCurrent: isDuringSales,
+                ),
+                _buildTimelineLine(isActive: !isBeforeSales),
+                _buildTimelineDot(
+                  label: 'Sales End',
+                  date: _safeDateFormat(event.salesEndTime, pattern: 'MMM dd'),
+                  isActive: isAfterSales,
+                  isCurrent: isDuringSales,
+                ),
+                _buildTimelineLine(
+                  isActive: isAfterSales,
+                  isDotted: !isAfterSales,
+                ),
+                _buildTimelineDot(
+                  label: 'Event Day',
+                  date: _safeDateFormat(event.eventDate, pattern: 'MMM dd'),
+                  isActive: !isBeforeEvent,
+                  isEventDay: true,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimelineDot({
+    required String label,
+    required String date,
+    required bool isActive,
+    bool isCurrent = false,
+    bool isEventDay = false,
+  }) {
+    final Color dotColor;
+    if (!isActive && !isCurrent) {
+      dotColor = AppColors.greyLight;
+    } else if (isEventDay) {
+      dotColor = AppColors.danger;
+    } else if (isCurrent) {
+      dotColor = AppColors.primary;
+    } else {
+      dotColor = AppColors.success;
+    }
+
+    final bool showGlow = isActive || isCurrent;
+    final bool showBorder = isEventDay || isCurrent;
+
+    return Expanded(
+      child: Column(
+        children: [
+          Container(
+            width: 14,
+            height: 14,
+            decoration: BoxDecoration(
+              color: dotColor,
+              shape: BoxShape.circle,
+              border: showBorder
+                  ? Border.all(color: AppColors.white, width: 2)
+                  : null,
+              boxShadow: showGlow
+                  ? [
+                      BoxShadow(
+                        color: dotColor.withValues(alpha: 0.4),
+                        blurRadius: 8,
+                      ),
+                    ]
+                  : null,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: AppTextStyles.bodySmall.copyWith(
+              fontWeight: FontWeight.w700,
+              fontSize: 10,
+              color: showGlow ? dotColor : AppColors.grey,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            date,
+            style: AppTextStyles.bodySmall.copyWith(
+              fontSize: 9,
+              color: AppColors.grey,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimelineLine({bool isActive = false, bool isDotted = false}) {
+    final color = isActive ? AppColors.success : AppColors.greyLight;
+
+    if (isDotted) {
+      return Expanded(
+        child: Container(
+          height: 2,
+          margin: const EdgeInsets.only(bottom: 30),
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: color,
+                width: 2,
+                style: BorderStyle.solid,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Expanded(
+      child: Container(
+        height: 2,
+        margin: const EdgeInsets.only(bottom: 30),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(1),
+        ),
+      ),
+    );
+  }
+
+  // ==================== Refund Policy ====================
+
+  Widget _buildRefundPolicy(Event event) {
+    final policy = _safeString(event.refundPolicy);
+    final refundPercentage = event.refundPercentage;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFF9EC),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFFFE8B8)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.shield_outlined,
+                  color: Color(0xFFD97706),
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Refund Policy',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    color: const Color(0xFFB45309),
+                  ),
+                ),
+                const Spacer(),
+                if (refundPercentage != null && refundPercentage > 0)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.warning,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '$refundPercentage%',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              policy,
+              style: AppTextStyles.bodySmall.copyWith(
+                color: const Color(0xFF78350F),
+                fontSize: 12,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ==================== Manage Buttons ====================
+
+  Widget _buildManageButtons(Event event) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Management',
+            style: AppTextStyles.bodyMedium.copyWith(
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+              color: AppColors.black,
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Manage Ticket Category
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () async {
+                try {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => TicketCategoryPage(
+                        eventId: widget.eventId,
+                        eventName: event.name,
+                        isSeated: event.isSeated,
+                        eventDate: event.eventDate,
+                      ),
+                    ),
+                  );
+                  if (mounted) {
+                    ref
+                        .read(eventStatisticsProvider.notifier)
+                        .loadStatistics(widget.eventId);
+                    ref.read(categoriesProvider.notifier).loadCategories();
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error: ${e.toString()}'),
+                        backgroundColor: AppColors.danger,
+                      ),
+                    );
+                  }
+                }
+              },
+              icon: const Icon(Icons.confirmation_number_outlined, size: 20),
+              label: Text(
+                'Manage Ticket Category',
+                style: AppTextStyles.button.copyWith(fontSize: 14),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          // Manage Gates
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => SeatPreviewPage(
-                      eventId: widget.eventId,
-                      eventName: event.name,
-                      eventDate: event.eventDate,
+              onPressed: () async {
+                try {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => GateManagementPage(
+                        eventId: widget.eventId,
+                        eventName: event.name,
+                      ),
                     ),
-                  ),
-                );
+                  );
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error: ${e.toString()}'),
+                        backgroundColor: AppColors.danger,
+                      ),
+                    );
+                  }
+                }
               },
-              icon: const Icon(Icons.preview, size: 18),
+              icon: const Icon(Icons.door_front_door_outlined, size: 20),
               label: Text(
-                'Preview All Seats',
-                style: AppTextStyles.button.copyWith(fontSize: 13),
+                'Manage Gates',
+                style: AppTextStyles.button.copyWith(fontSize: 14),
               ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.primary,
@@ -815,328 +1002,8 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage>
               ),
             ),
           ),
-          const SizedBox(height: 12),
-        ],
-
-        // Manage categories button
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton.icon(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => TicketCategoryPage(
-                    eventId: widget.eventId,
-                    eventName: event.name,
-                    isSeated: event.isSeated,
-                    eventDate: event.eventDate,
-                  ),
-                ),
-              );
-            },
-            icon: const Icon(Icons.settings_outlined, size: 18),
-            label: Text(
-              'Manage Categories',
-              style: AppTextStyles.button.copyWith(fontSize: 13),
-            ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.primary,
-              side: const BorderSide(color: AppColors.primary),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ==================== Shared Widgets ====================
-
-  Widget _buildCategoryItem({
-    required dynamic category,
-    required int? seatsCount,
-    required Color color,
-    required bool isSeated,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.04),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.15)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(Icons.confirmation_number, size: 18, color: color),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  category.name,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  _formatPrice(category.price),
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              _buildStatChip(
-                icon: Icons.people_outline,
-                value: '${category.totalQuota}',
-                color: AppColors.warning,
-              ),
-              if (isSeated && seatsCount != null) ...[
-                const SizedBox(height: 4),
-                _buildStatChip(
-                  icon: Icons.event_seat,
-                  value: '$seatsCount',
-                  color: AppColors.success,
-                ),
-              ],
-            ],
-          ),
         ],
       ),
     );
   }
-
-  Widget _buildStatChip({
-    required IconData icon,
-    required String value,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 12, color: color),
-          const SizedBox(width: 4),
-          Text(
-            value,
-            style: AppTextStyles.bodySmall.copyWith(
-              fontWeight: FontWeight.w700,
-              color: color,
-              fontSize: 11,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatusBadge(bool isOnSale, bool isSoldOut) {
-    final label = isOnSale ? 'ON SALE' : 'SOLD OUT';
-    final color = isOnSale ? AppColors.success : AppColors.danger;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.15),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (isOnSale) ...[
-            Container(
-              width: 6,
-              height: 6,
-              decoration: const BoxDecoration(
-                color: AppColors.white,
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(width: 6),
-          ],
-          Text(
-            label,
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.white,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.5,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionButtons(Event event) {
-    return Row(
-      children: [
-        Expanded(
-          child: ElevatedButton.icon(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => EditEventPage(
-                    eventId: event.id,
-                    eventName: event.name,
-                    isSeated: event.isSeated,
-                    salesStartTime: event.salesStartTime,
-                    salesEndTime: event.salesEndTime,
-                    eventDate: event.eventDate,
-                    refundEndDate: event.refundEndDate,
-                    refundPolicy: event.refundPolicy,
-                    refundPercentage: event.refundPercentage,
-                  ),
-                ),
-              );
-            },
-            icon: const Icon(Icons.edit, size: 20),
-            label: Text('Edit', style: AppTextStyles.button),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              elevation: 0,
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: () => _showDeleteConfirmation(event),
-            icon: const Icon(Icons.delete_outline, size: 20),
-            label: Text('Delete', style: AppTextStyles.button),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.danger,
-              side: const BorderSide(color: AppColors.danger),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 16),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  String _getInitials(String name) {
-    final words = name.split(' ').where((w) => w.isNotEmpty).toList();
-    if (words.isEmpty) return '?';
-    if (words.length == 1) {
-      return words[0].substring(0, min(2, words[0].length)).toUpperCase();
-    }
-    return '${words[0][0]}${words[1][0]}'.toUpperCase();
-  }
-
-  void _showDeleteConfirmation(Event event) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Delete Event', style: AppTextStyles.title),
-        content: Text(
-          'Are you sure you want to delete "${event.name}"?',
-          style: AppTextStyles.bodyMedium,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey),
-            ),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              final success = await ref
-                  .read(myEventsProvider.notifier)
-                  .deleteEvent(event.id);
-              if (success && mounted) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Event deleted successfully!',
-                        style: AppTextStyles.snackbar,
-                      ),
-                      backgroundColor: AppColors.success,
-                    ),
-                  );
-                }
-                if (context.mounted) {
-                  Navigator.pop(context);
-                }
-              }
-            },
-            child: Text(
-              'Delete',
-              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.danger),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ==================== Tab Bar Delegate ====================
-
-class _TabBarDelegate extends SliverPersistentHeaderDelegate {
-  final TabBar tabBar;
-
-  _TabBarDelegate(this.tabBar);
-
-  @override
-  double get minExtent => tabBar.preferredSize.height;
-
-  @override
-  double get maxExtent => tabBar.preferredSize.height;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return Container(color: AppColors.background, child: tabBar);
-  }
-
-  @override
-  bool shouldRebuild(_TabBarDelegate oldDelegate) => false;
 }

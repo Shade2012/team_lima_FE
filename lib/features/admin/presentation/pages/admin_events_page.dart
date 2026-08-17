@@ -6,19 +6,17 @@ import 'package:team_five_fe/core/theme/app_colors.dart';
 import 'package:team_five_fe/core/theme/app_text_styles.dart';
 import 'package:team_five_fe/features/event/data/models/event_model.dart';
 import 'package:team_five_fe/features/event/presentation/providers/event_provider.dart';
-import 'package:team_five_fe/features/event/presentation/pages/organizer/create_event_page.dart';
-import 'package:team_five_fe/features/event/presentation/pages/organizer/event_detail_page.dart';
 
 enum EventFilter { active, upcoming, ended }
 
-class MyEventsPage extends ConsumerStatefulWidget {
-  const MyEventsPage({super.key});
+class AdminEventsPage extends ConsumerStatefulWidget {
+  const AdminEventsPage({super.key});
 
   @override
-  ConsumerState<MyEventsPage> createState() => _MyEventsPageState();
+  ConsumerState<AdminEventsPage> createState() => _AdminEventsPageState();
 }
 
-class _MyEventsPageState extends ConsumerState<MyEventsPage>
+class _AdminEventsPageState extends ConsumerState<AdminEventsPage>
     with SingleTickerProviderStateMixin {
   final _searchController = TextEditingController();
   String _searchQuery = '';
@@ -72,7 +70,7 @@ class _MyEventsPageState extends ConsumerState<MyEventsPage>
 
   @override
   Widget build(BuildContext context) {
-    final eventsState = ref.watch(myEventsProvider);
+    final eventsState = ref.watch(allEventsProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -87,7 +85,6 @@ class _MyEventsPageState extends ConsumerState<MyEventsPage>
           ],
         ),
       ),
-      floatingActionButton: _buildFab(),
     );
   }
 
@@ -96,14 +93,26 @@ class _MyEventsPageState extends ConsumerState<MyEventsPage>
   Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('My Events', style: AppTextStyles.title.copyWith(fontSize: 22)),
-          const SizedBox(height: 2),
-          Text(
-            'Manage your events',
-            style: AppTextStyles.bodySmall.copyWith(color: AppColors.grey),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'All Events',
+                  style: AppTextStyles.title.copyWith(fontSize: 22),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'View all events across organizers',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.grey,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -184,7 +193,7 @@ class _MyEventsPageState extends ConsumerState<MyEventsPage>
 
   // ==================== Event List ====================
 
-  Widget _buildEventList(MyEventsState state) {
+  Widget _buildEventList(AllEventsState state) {
     if (state.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -204,7 +213,7 @@ class _MyEventsPageState extends ConsumerState<MyEventsPage>
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () =>
-                  ref.read(myEventsProvider.notifier).loadMyEvents(),
+                  ref.read(allEventsProvider.notifier).loadAllEvents(),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.white,
@@ -226,7 +235,7 @@ class _MyEventsPageState extends ConsumerState<MyEventsPage>
     }
 
     return RefreshIndicator(
-      onRefresh: () => ref.read(myEventsProvider.notifier).loadMyEvents(),
+      onRefresh: () => ref.read(allEventsProvider.notifier).loadAllEvents(),
       child: ListView.builder(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 80),
         itemCount: filteredEvents.length,
@@ -304,51 +313,35 @@ class _MyEventsPageState extends ConsumerState<MyEventsPage>
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => EventDetailPage(eventId: event.id),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-          );
-        },
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.black.withValues(alpha: 0.04),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  _buildEventIcon(event, index, isOnSale, isDraft, isSoldOut),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildEventInfo(event, isOnSale, isDraft, isSoldOut),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              _buildDivider(),
-              const SizedBox(height: 12),
-              _buildEventFooter(
-                event,
-                isOnSale,
-                isDraft,
-                isSoldOut,
-                showActions: true,
-              ),
-            ],
-          ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                _buildEventIcon(event, index, isOnSale, isDraft, isSoldOut),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildEventInfo(event, isOnSale, isDraft, isSoldOut),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _buildDivider(),
+            const SizedBox(height: 12),
+            _buildEventFooter(event),
+          ],
         ),
       ),
     );
@@ -556,13 +549,7 @@ class _MyEventsPageState extends ConsumerState<MyEventsPage>
 
   // ==================== Event Footer ====================
 
-  Widget _buildEventFooter(
-    Event event,
-    bool isOnSale,
-    bool isDraft,
-    bool isSoldOut, {
-    bool showActions = false,
-  }) {
+  Widget _buildEventFooter(Event event) {
     return Row(
       children: [
         if (event.refundPercentage != null && event.refundPercentage! > 0) ...[
@@ -587,135 +574,7 @@ class _MyEventsPageState extends ConsumerState<MyEventsPage>
             ),
           ),
         ],
-        const Spacer(),
-        if (showActions) _buildActionButtons(event),
       ],
-    );
-  }
-
-  // ==================== Action Buttons ====================
-
-  Widget _buildActionButtons(Event event) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _buildIconButton(
-          icon: Icons.edit_outlined,
-          color: AppColors.primary,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => EventDetailPage(eventId: event.id),
-              ),
-            );
-          },
-        ),
-        const SizedBox(width: 6),
-        _buildIconButton(
-          icon: Icons.delete_outline,
-          color: AppColors.danger,
-          onTap: () => _showDeleteConfirmation(event),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildIconButton({
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 32,
-        height: 32,
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(icon, size: 16, color: color),
-      ),
-    );
-  }
-
-  // ==================== FAB ====================
-
-  Widget _buildFab() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: AppColors.primaryGradient,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.4),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const CreateEventPage()),
-          );
-        },
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        child: const Icon(Icons.add, color: AppColors.white, size: 28),
-      ),
-    );
-  }
-
-  // ==================== Delete Confirmation ====================
-
-  void _showDeleteConfirmation(Event event) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Delete Event', style: AppTextStyles.title),
-        content: Text(
-          'Are you sure you want to delete "${event.name}"?',
-          style: AppTextStyles.bodyMedium,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey),
-            ),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              final success = await ref
-                  .read(myEventsProvider.notifier)
-                  .deleteEvent(event.id);
-              if (success && mounted) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Event deleted successfully!',
-                        style: AppTextStyles.snackbar,
-                      ),
-                      backgroundColor: AppColors.success,
-                    ),
-                  );
-                }
-              }
-            },
-            child: Text(
-              'Delete',
-              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.danger),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

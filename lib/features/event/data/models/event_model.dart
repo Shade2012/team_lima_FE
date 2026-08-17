@@ -33,9 +33,16 @@ class Event {
       organizerId: json['organizerId']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
       isSeated: json['isSeated'] == true,
-      salesStartTime: DateTime.parse(json['salesStartTime'].toString()),
-      salesEndTime: DateTime.parse(json['salesEndTime'].toString()),
-      eventDate: DateTime.parse(json['eventDate'].toString()),
+      salesStartTime: json['salesStartTime'] != null
+          ? DateTime.tryParse(json['salesStartTime'].toString()) ??
+                DateTime.now()
+          : DateTime.now(),
+      salesEndTime: json['salesEndTime'] != null
+          ? DateTime.tryParse(json['salesEndTime'].toString()) ?? DateTime.now()
+          : DateTime.now(),
+      eventDate: json['eventDate'] != null
+          ? DateTime.tryParse(json['eventDate'].toString()) ?? DateTime.now()
+          : DateTime.now(),
       refundEndDate: json['refundEndDate'] != null
           ? DateTime.tryParse(json['refundEndDate'].toString())
           : null,

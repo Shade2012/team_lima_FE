@@ -43,15 +43,12 @@ class AuthRepository {
   /// POST /users/login
   Future<LoginResponse> login(LoginRequest request) async {
     try {
+      _dioClient.clearToken();
       final response = await _dioClient.dio.post(
         ApiConstants.login,
         data: request.toJson(),
       );
-      final loginResponse = LoginResponse.fromJson(response.data);
-      if (loginResponse.token.isNotEmpty) {
-        await saveToken(loginResponse.token);
-      }
-      return loginResponse;
+      return LoginResponse.fromJson(response.data);
     } on DioException catch (e) {
       throw Exception(_extractErrorMessage(e, fallback: 'Login failed'));
     }
@@ -60,6 +57,7 @@ class AuthRepository {
   /// POST /users/register
   Future<RegisterResponse> register(RegisterRequest request) async {
     try {
+      _dioClient.clearToken();
       final response = await _dioClient.dio.post(
         ApiConstants.register,
         data: request.toJson(),

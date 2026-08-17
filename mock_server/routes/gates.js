@@ -226,6 +226,9 @@ module.exports = function (db) {
     }
 
     const deleted = db.gates.splice(index, 1)[0];
+
+    db.users = db.users.filter(u => !(u.role === 'GATE_OPERATOR' && u.gateId === deleted.id));
+
     return res.status(200).json({
       message: 'Success',
       data: deleted

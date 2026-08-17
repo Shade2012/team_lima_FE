@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:team_five_fe/features/auth/presentation/providers/auth_provider.dart';
 import 'package:team_five_fe/features/auth/presentation/pages/login_page.dart';
-import 'package:team_five_fe/features/event/presentation/pages/organizer/my_events_page.dart';
+import 'package:team_five_fe/features/event/presentation/pages/organizer/organizer_main_screen.dart';
 import 'package:team_five_fe/features/customer/presentation/pages/customer_main_screen.dart';
+import 'package:team_five_fe/features/gate/presentation/pages/gate_operator/gate_operator_dashboard_page.dart';
+import 'package:team_five_fe/features/admin/presentation/pages/admin_main_screen.dart';
 
 class AuthWrapper extends ConsumerWidget {
   const AuthWrapper({super.key});
@@ -21,8 +23,17 @@ class AuthWrapper extends ConsumerWidget {
     }
 
     final user = authState.currentUser;
+
+    if (user?.role == 'ADMIN') {
+      return const AdminMainScreen();
+    }
+
     if (user?.role == 'ORGANIZER' || user?.role == 'EVENT_ORGANIZER') {
-      return const MyEventsPage();
+      return const OrganizerMainScreen();
+    }
+
+    if (user?.role == 'GATE_OPERATOR') {
+      return const GateOperatorDashboardPage();
     }
 
     return const CustomerMainScreen();
