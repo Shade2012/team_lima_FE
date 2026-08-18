@@ -410,7 +410,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Credit / Debit Card',
+                          'Credit or Debit Card',
                           style: AppTextStyles.bodyMedium.copyWith(
                             fontWeight: FontWeight.w700,
                             fontSize: 14,
@@ -925,7 +925,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                         const Icon(Icons.lock, size: 18, color: Colors.white),
                         const SizedBox(width: 8),
                         Text(
-                          'Complete Payment (${state.paymentMethod})',
+                          'Complete Payment',
                           style: AppTextStyles.button.copyWith(
                             color: Colors.white,
                             fontSize: 15,
