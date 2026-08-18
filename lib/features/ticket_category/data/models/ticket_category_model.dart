@@ -9,6 +9,7 @@ class TicketCategory {
   final int? columns;
   final int? availableQuota;
   final bool? isAvailable;
+  final List<String> blockedSeats;
 
   TicketCategory({
     required this.id,
@@ -21,6 +22,7 @@ class TicketCategory {
     this.columns,
     this.availableQuota,
     this.isAvailable,
+    this.blockedSeats = const [],
   });
 
   factory TicketCategory.fromJson(Map<String, dynamic> json) {
@@ -51,6 +53,9 @@ class TicketCategory {
           : (json['isAvailable'] != null
                 ? json['isAvailable'].toString().toLowerCase() == 'true'
                 : null),
+      blockedSeats: (json['blockedSeats'] is List)
+          ? (json['blockedSeats'] as List).map((e) => e.toString()).toList()
+          : [],
     );
   }
 
@@ -74,6 +79,9 @@ class TicketCategory {
     }
     if (isAvailable != null) {
       map['isAvailable'] = isAvailable;
+    }
+    if (blockedSeats.isNotEmpty) {
+      map['blockedSeats'] = blockedSeats;
     }
     return map;
   }

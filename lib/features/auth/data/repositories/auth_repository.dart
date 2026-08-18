@@ -127,7 +127,7 @@ class AuthRepository {
   }
 
   /// Helper to extract clean error message from NestJS HttpExceptionFilter response:
-  /// { "status_code": 400, "message": "..." or ["error1", "error2"] }
+  /// { "status_code": 400, "message": "..." or [{"field":"...","error":"..."}, ...] }
   String _extractErrorMessage(DioException e, {required String fallback}) {
     if (e.response?.data != null) {
       final data = e.response!.data;
@@ -136,6 +136,13 @@ class AuthRepository {
         if (message is String) {
           return message;
         } else if (message is List) {
+          // Handle: [{field: "email", error: "email must be an email"}, ...]
+          final errors = message.whereType<Map<String, dynamic>>().map((m) {
+            final error = m['error'];
+            return error?.toString() ?? m.toString();
+          }).toList();
+          if (errors.isNotEmpty) return errors.join('\n');
+          // Fallback: toString()
           return message.map((m) => m.toString()).join('\n');
         }
       }

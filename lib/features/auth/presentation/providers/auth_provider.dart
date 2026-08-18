@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/login_request.dart';
 import '../../data/models/login_response.dart';
@@ -171,7 +172,9 @@ class AuthNotifier extends Notifier<AuthState> {
       UserModel? profile;
       try {
         profile = await authRepository.getProfile();
-      } catch (_) {}
+      } catch (e) {
+        debugPrint('Failed to fetch profile after login: $e');
+      }
 
       state = state.copyWith(
         isLoading: false,

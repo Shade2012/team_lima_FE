@@ -54,4 +54,9 @@ class ApiConstants {
   static const String refunds = '/refunds';
   static String refundApprove(String id) => '/refunds/$id/approve';
   static String refundReject(String id) => '/refunds/$id/reject';
+
+  // Feature: SSE (Server-Sent Events)
+  static String sseSeats(String eventId) => '/sse/events/$eventId/seats';
+  static String sseDashboard(String eventId) =>
+      '/sse/events/$eventId/dashboard';
 }

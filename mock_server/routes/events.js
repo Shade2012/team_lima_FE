@@ -85,7 +85,7 @@ module.exports = function (db) {
       const catTickets = (db.tickets || []).filter(t => t.categoryId === cat.id);
       const ticketsSold = catTickets.filter(t => {
         const order = (db.orders || []).find(o => o.id === t.orderId);
-        return order && order.status === 'PAID';
+        return order && order.status === 'PAID' && t.status !== 'REFUND';
       }).length;
 
       const grossRevenue = ticketsSold * cat.price;

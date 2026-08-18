@@ -360,10 +360,7 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
     final rows = category.rows as int?;
     final columns = category.columns as int?;
     final totalQuota = category.totalQuota as int;
-    final totalCells = (rows != null && columns != null)
-        ? rows * columns
-        : seats.length;
-    final blockedCount = totalCells - seats.length;
+    final blockedSeats = category.blockedSeats as List<dynamic>? ?? [];
     final hasGrid = rows != null && columns != null && rows > 0 && columns > 0;
 
     return Column(
@@ -394,7 +391,7 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
                 ),
               ),
               Text(
-                '${_formatPrice(category.price)}  •  ${seats.length}/$totalQuota seats',
+                '${_formatPrice(category.price)}  •  ${seats.length}/$totalQuota seats${blockedSeats.isNotEmpty ? ' (${blockedSeats.length} blocked)' : ''}',
                 style: AppTextStyles.bodySmall.copyWith(
                   color: AppColors.grey,
                   fontSize: 11,
@@ -411,7 +408,7 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
               style: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey),
             ),
           )
-        else if (seats.isEmpty && blockedCount <= 0)
+        else if (seats.isEmpty && blockedSeats.isEmpty)
           Padding(
             padding: const EdgeInsets.all(20),
             child: Text(
@@ -429,6 +426,7 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
               columns: columns,
               totalQuota: totalQuota,
               color: color,
+              blockedSeats: blockedSeats,
             ),
           ),
       ],
@@ -443,9 +441,8 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
     required int columns,
     required int totalQuota,
     required Color color,
+    required List<dynamic> blockedSeats,
   }) {
-    final totalCells = rows * columns;
-    final blockedCount = totalCells - seats.length;
     final seatSize = 28.0;
     final spacing = 4.0;
     final totalWidth = columns * (seatSize + spacing);
@@ -462,7 +459,7 @@ class _SeatPreviewPageState extends ConsumerState<SeatPreviewPage> {
           seatSize: seatSize,
           spacing: spacing,
           color: color,
-          blockedCount: blockedCount,
+          blockedSeats: blockedSeats,
           seats: seats,
         ),
       ),
@@ -572,7 +569,7 @@ class _GridSeatsPainter extends CustomPainter {
   final double seatSize;
   final double spacing;
   final Color color;
-  final int blockedCount;
+  final List<dynamic> blockedSeats;
   final List<dynamic> seats;
 
   _GridSeatsPainter({
@@ -581,9 +578,14 @@ class _GridSeatsPainter extends CustomPainter {
     required this.seatSize,
     required this.spacing,
     required this.color,
-    required this.blockedCount,
+    required this.blockedSeats,
     required this.seats,
   });
+
+  String _getSeatLabel(int row, int col) {
+    final rowLetter = String.fromCharCode(65 + row);
+    return '$rowLetter-${col + 1}';
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -619,9 +621,10 @@ class _GridSeatsPainter extends CustomPainter {
           const Radius.circular(5),
         );
 
-        final cellIndex = row * columns + col;
+        final seatLabel = _getSeatLabel(row, col);
+        final isBlocked = blockedSeats.contains(seatLabel);
 
-        if (cellIndex < blockedCount) {
+        if (isBlocked) {
           canvas.drawRRect(rect, blockedPaint);
           canvas.drawRRect(rect, blockedBorderPaint);
         } else {
@@ -630,8 +633,10 @@ class _GridSeatsPainter extends CustomPainter {
 
           if (seatIndex < seats.length) {
             final seatCode = seats[seatIndex].seatCode as String;
-            final parts = seatCode.split('-');
-            final number = parts.last;
+            final prefixParts = seatCode.split('-');
+            final number = prefixParts.length >= 3
+                ? '${prefixParts[prefixParts.length - 2]}-${prefixParts.last}'
+                : prefixParts.last;
 
             textPainter.text = TextSpan(
               text: number,
@@ -661,6 +666,6 @@ class _GridSeatsPainter extends CustomPainter {
   bool shouldRepaint(covariant _GridSeatsPainter oldDelegate) {
     return oldDelegate.seats != seats ||
         oldDelegate.color != color ||
-        oldDelegate.blockedCount != blockedCount;
+        oldDelegate.blockedSeats != blockedSeats;
   }
 }
