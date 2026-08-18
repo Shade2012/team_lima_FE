@@ -9,6 +9,8 @@ import '../providers/customer_provider.dart';
 import '../widgets/top_up_dialog.dart';
 import 'ticket_detail_page.dart';
 import 'my_tickets_page.dart';
+import 'customer_refunds_page.dart';
+import 'customer_orders_page.dart';
 
 class CustomerProfilePage extends ConsumerWidget {
   const CustomerProfilePage({super.key});
@@ -432,6 +434,24 @@ class CustomerProfilePage extends ConsumerWidget {
 
   Widget _buildSettingsSection(BuildContext context, WidgetRef ref) {
     final settingsList = [
+      {
+        'icon': Icons.receipt_long_outlined,
+        'title': 'My Order History',
+        'isDanger': false,
+        'onTap': () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const CustomerOrdersPage()),
+            ),
+      },
+      {
+        'icon': Icons.assignment_return_outlined,
+        'title': 'My Refund Requests',
+        'isDanger': false,
+        'onTap': () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const CustomerRefundsPage()),
+            ),
+      },
       {
         'icon': Icons.credit_card_outlined,
         'title': 'Payment Methods',
