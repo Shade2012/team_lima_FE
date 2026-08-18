@@ -333,10 +333,10 @@ Server sudah dilengkapi data awal (_seed data_) dari file `mock_server/data/init
     "message": "Success",
     "data": {
       "seatsCreated": 98,
-      "totalQuota": 100,
-      "prefix": "VIP",
-      "firstSeatCode": "VIP-003",
-      "lastSeatCode": "VIP-100"
+      "totalQuota": 98,
+      "prefix": "VIP-",
+      "firstSeatCode": "VIP-A-1",
+      "lastSeatCode": "VIP-J-10"
     }
   }
   ```
@@ -344,7 +344,23 @@ Server sudah dilengkapi data awal (_seed data_) dari file `mock_server/data/init
 #### 2. Get Seats by Category (`GET /seats/category/:categoryId`)
 
 - **Auth**: Public
-- **Response 200 OK**: Array tempat duduk diurutkan berdasarkan `seatCode` ASC.
+- **Response 200 OK**: Array tempat duduk diurutkan berdasarkan `seatCode` ASC dengan status dinamis (`AVAILABLE`, `HELD`, `BOOKED`), `row`, dan `column`.
+  ```json
+  {
+    "message": "Success",
+    "data": [
+      {
+        "id": "019146a0-7d1e-7abc-9a12-seat00000001",
+        "categoryId": "019146a0-7d1e-7abc-9a12-category0001",
+        "seatCode": "VIP-A-1",
+        "row": "A",
+        "column": 1,
+        "status": "AVAILABLE",
+        "createdAt": "2026-08-12T10:00:00.000Z"
+      }
+    ]
+  }
+  ```
 
 ---
 

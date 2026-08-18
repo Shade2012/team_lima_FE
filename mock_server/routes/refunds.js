@@ -297,7 +297,8 @@ module.exports = function (db) {
 
     refund.status = 'APPROVED';
     refund.adminId = user.id;
-    refund.providerRefundId = 'ref_mock_' + Date.now();
+    const refundToken = Buffer.from(JSON.stringify({ refundId: refund.id, ticketId: refund.ticketId, timestamp: Date.now() })).toString('base64');
+    refund.providerRefundId = `REF-${refundToken}`;
     refund.processedAt = new Date().toISOString();
     refund.updatedAt = new Date().toISOString();
 

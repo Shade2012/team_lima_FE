@@ -25,13 +25,56 @@ function getUserFromToken(req, db) {
 module.exports = function (db) {
   // 1. GET /seats/category/:categoryId (Public)
   router.get('/category/:categoryId', (req, res) => {
+    const category = db.categories.find(c => c.id === req.params.categoryId);
+    if (!category) {
+      return res.status(404).json({
+        status_code: 404,
+        message: 'Category not found'
+      });
+    }
+
     const seats = db.seats
       .filter(s => s.categoryId === req.params.categoryId)
       .sort((a, b) => a.seatCode.localeCompare(b.seatCode, undefined, { numeric: true }));
 
+    const activeTickets = (db.tickets || []).filter(t =>
+      t.categoryId === req.params.categoryId &&
+      !['CANCELLED', 'EXPIRED', 'REFUND'].includes(t.status) &&
+      t.seatId
+    );
+
+    const activeSeatMap = new Map();
+    activeTickets.forEach(t => {
+      const order = (db.orders || []).find(o => o.id === t.orderId);
+      if (order) {
+        const isPaid = order.status === 'PAID';
+        const isPending = ['HELD', 'PAYMENT_PENDING'].includes(order.status) && new Date(order.expiresAt) > new Date();
+        if (isPaid || isPending) {
+          activeSeatMap.set(t.seatId, isPaid ? 'BOOKED' : 'HELD');
+        }
+      }
+    });
+
+    const formattedSeats = seats.map(seat => {
+      const parts = seat.seatCode.split('-');
+      const column = parseInt(parts.pop() || '0', 10);
+      const row = parts.pop() || '';
+      const status = activeSeatMap.get(seat.id) || 'AVAILABLE';
+
+      return {
+        id: seat.id,
+        categoryId: seat.categoryId,
+        seatCode: seat.seatCode,
+        row,
+        column,
+        status,
+        createdAt: seat.createdAt
+      };
+    });
+
     return res.status(200).json({
       message: 'Success',
-      data: seats
+      data: formattedSeats
     });
   });
 
@@ -41,7 +84,7 @@ module.exports = function (db) {
     if (!seat) {
       return res.status(404).json({
         status_code: 404,
-        message: 'Seat not found'
+        message: `Seat with id ${req.params.id} not found`
       });
     }
 
@@ -57,11 +100,11 @@ module.exports = function (db) {
     if (!user || user.role !== 'ORGANIZER') {
       return res.status(403).json({
         status_code: 403,
-        message: 'Forbidden: Only ORGANIZER can generate seats'
+        message: 'Forbidden: You do not have permission to manage seats for this event'
       });
     }
 
-    const { categoryId, prefix = 'SEAT' } = req.body;
+    const { categoryId, prefix: rawPrefix } = req.body || {};
     if (!categoryId) {
       return res.status(400).json({
         status_code: 400,
@@ -73,7 +116,7 @@ module.exports = function (db) {
     if (!category) {
       return res.status(404).json({
         status_code: 404,
-        message: 'Ticket category not found'
+        message: 'Category not found'
       });
     }
 
@@ -81,21 +124,21 @@ module.exports = function (db) {
     if (!event) {
       return res.status(404).json({
         status_code: 404,
-        message: 'Event associated with this category not found'
+        message: 'Event not found'
       });
     }
 
     if (event.organizerId !== user.id) {
       return res.status(403).json({
         status_code: 403,
-        message: 'Forbidden: You do not own the event associated with this category'
+        message: 'You do not have permission to manage seats for this event'
       });
     }
 
     if (!event.isSeated) {
       return res.status(400).json({
         status_code: 400,
-        message: 'Event is not a seated event (isSeated == false)'
+        message: 'Cannot create seats for a non-seated event'
       });
     }
 
@@ -105,43 +148,84 @@ module.exports = function (db) {
     if (remainingToCreate <= 0) {
       return res.status(400).json({
         status_code: 400,
-        message: `Seats for category quota (${category.totalQuota}) are already fully generated`
+        message: `All ${category.totalQuota} seats have already been created for this category`
       });
     }
 
-    const startIndex = existingSeats.length + 1;
-    const endIndex = category.totalQuota;
-    const createdSeats = [];
+    const prefix = rawPrefix ? `${rawPrefix}-` : (rawPrefix === '' ? '' : 'VIP-');
+    const columns = category.columns || 1;
+    const blockedSeats = category.blockedSeats || [];
 
-    for (let i = startIndex; i <= endIndex; i++) {
-      const seatNumStr = String(i).padStart(3, '0');
-      const seatCode = `${prefix}-${seatNumStr}`;
-      const seatObj = {
-        id: generateUuid(),
-        categoryId,
-        seatCode,
-        createdAt: new Date().toISOString()
-      };
-      db.seats.push(seatObj);
-      createdSeats.push(seatObj);
+    const seatData = [];
+    let createdCount = 0;
+    let gridIndex = 0;
+    let validSeatCounter = 0;
+
+    // Advance past existing seats
+    while (validSeatCounter < existingSeats.length) {
+      const rowIndex = Math.floor(gridIndex / columns);
+      const colIndex = (gridIndex % columns) + 1;
+
+      let rowStr = '';
+      let temp = rowIndex;
+      while (temp >= 0) {
+        rowStr = String.fromCharCode(65 + (temp % 26)) + rowStr;
+        temp = Math.floor(temp / 26) - 1;
+      }
+
+      const coreCode = `${rowStr}-${colIndex}`;
+      if (!blockedSeats.includes(coreCode)) {
+        validSeatCounter++;
+      }
+      gridIndex++;
     }
 
-    const firstSeatCode = `${prefix}-${String(startIndex).padStart(3, '0')}`;
-    const lastSeatCode = `${prefix}-${String(endIndex).padStart(3, '0')}`;
+    // Generate remaining seats
+    while (createdCount < remainingToCreate) {
+      const rowIndex = Math.floor(gridIndex / columns);
+      const colIndex = (gridIndex % columns) + 1;
+
+      let rowStr = '';
+      let temp = rowIndex;
+      while (temp >= 0) {
+        rowStr = String.fromCharCode(65 + (temp % 26)) + rowStr;
+        temp = Math.floor(temp / 26) - 1;
+      }
+
+      const coreCode = `${rowStr}-${colIndex}`;
+
+      if (!blockedSeats.includes(coreCode)) {
+        const seatObj = {
+          id: generateUuid(),
+          categoryId,
+          seatCode: `${prefix}${coreCode}`,
+          createdAt: new Date().toISOString()
+        };
+        db.seats.push(seatObj);
+        seatData.push(seatObj);
+        createdCount++;
+      }
+
+      gridIndex++;
+
+      if (category.rows && gridIndex > (category.rows * columns) * 2) {
+        break; // safety fallback
+      }
+    }
 
     return res.status(201).json({
       message: 'Success',
       data: {
-        seatsCreated: createdSeats.length,
+        seatsCreated: seatData.length,
         totalQuota: category.totalQuota,
         prefix,
-        firstSeatCode,
-        lastSeatCode
+        firstSeatCode: seatData[0] ? seatData[0].seatCode : '',
+        lastSeatCode: seatData[seatData.length - 1] ? seatData[seatData.length - 1].seatCode : ''
       }
     });
   });
 
-  // 3. DELETE /seats/category/:categoryId (Role: ORGANIZER - Only event owner)
+  // 4. DELETE /seats/category/:categoryId (Role: ORGANIZER - Only event owner)
   router.delete('/category/:categoryId', (req, res) => {
     const user = getUserFromToken(req, db);
     if (!user || user.role !== 'ORGANIZER') {
@@ -155,7 +239,7 @@ module.exports = function (db) {
     if (!category) {
       return res.status(404).json({
         status_code: 404,
-        message: 'Ticket category not found'
+        message: 'Category not found'
       });
     }
 
@@ -163,7 +247,7 @@ module.exports = function (db) {
     if (!event || event.organizerId !== user.id) {
       return res.status(403).json({
         status_code: 403,
-        message: 'Forbidden: You do not own the event associated with this category'
+        message: 'You do not have permission to delete seats for this event'
       });
     }
 

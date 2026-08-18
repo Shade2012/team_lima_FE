@@ -82,10 +82,18 @@ module.exports = function (db) {
     let totalRefundAmountSum = 0;
 
     const categoryStats = categories.map(cat => {
-      const ticketsSold = (db.tickets || []).filter(t => t.categoryId === cat.id).length;
+      const catTickets = (db.tickets || []).filter(t => t.categoryId === cat.id);
+      const ticketsSold = catTickets.filter(t => {
+        const order = (db.orders || []).find(o => o.id === t.orderId);
+        return order && order.status === 'PAID';
+      }).length;
+
       const grossRevenue = ticketsSold * cat.price;
-      const refundCount = 0;
-      const totalRefundAmount = 0;
+
+      const catTicketIds = catTickets.map(t => t.id);
+      const approvedRefunds = (db.refunds || []).filter(r => catTicketIds.includes(r.ticketId) && r.status === 'APPROVED');
+      const refundCount = approvedRefunds.length;
+      const totalRefundAmount = approvedRefunds.reduce((sum, r) => sum + r.amount, 0);
       const refundPercentage = ticketsSold > 0 ? Number(((refundCount / ticketsSold) * 100).toFixed(2)) : 0;
 
       totalQuotaSum += cat.totalQuota;
