@@ -155,6 +155,7 @@ Seluruh exception yang ditangkap oleh `HttpExceptionFilter` menghasilkan format:
   - `posIndex` (`number`, int >= 0, optional, default `0`): Indeks posisi urutan kategori untuk penataan layout stage UI.
   - `rows` (`number`, int >= 1, optional, nullable): Jumlah baris tempat duduk (khusus seated event).
   - `columns` (`number`, int >= 1, optional, nullable): Jumlah kolom tempat duduk (khusus seated event).
+  - `blockedSeats` (`string[]`, optional): Array koordinat kursi terblokir (misal: `["A-5", "A-6"]`).
 - **Response 201 Created** (`TicketCategoryResponseDto`):
   ```json
   {
@@ -164,10 +165,11 @@ Seluruh exception yang ditangkap oleh `HttpExceptionFilter` menghasilkan format:
       "eventId": "019146a0-7d1e-7abc-9a12-abcdef123456",
       "name": "VIP",
       "price": 1500000,
-      "totalQuota": 100,
+      "totalQuota": 98,
       "posIndex": 1,
       "rows": 10,
       "columns": 10,
+      "blockedSeats": ["A-5", "A-6"],
       "availableQuota": 98,
       "isAvailable": true,
       "createdAt": "2026-08-16T10:00:00.000Z",
@@ -179,18 +181,19 @@ Seluruh exception yang ditangkap oleh `HttpExceptionFilter` menghasilkan format:
   - `eventId` (`string`, UUID v7): Unique ID Event terkait.
   - `name` (`string`): Nama kategori tiket.
   - `price` (`number`): Harga per tiket (IDR).
-  - `totalQuota` (`number`): Total kapasitas kuota tiket.
+  - `totalQuota` (`number`): Total kapasitas kuota tiket (`rows * columns - blockedSeats.length` jika seated).
   - `posIndex` (`number`): Indeks urutan tata letak UI (stage layout position index).
   - `rows` (`number` | `null`): Jumlah baris kursi (jika seated event).
   - `columns` (`number` | `null`): Jumlah kolom kursi (jika seated event).
-  - `availableQuota` (`number`): Sisa kuota tiket yang belum terisi/terpesan (`totalQuota - soldTickets`).
+  - `blockedSeats` (`string[]`): Daftar koordinat terblokir.
+  - `availableQuota` (`number`): Sisa kuota tiket yang belum terisi/terpesan (`totalQuota - activeTickets`).
   - `isAvailable` (`boolean`): Indikator ketersediaan (`availableQuota > 0`).
   - `createdAt` (`string`, ISO 8601): Tanggal dan waktu pembuatan record.
   - `updatedAt` (`string`, ISO 8601): Tanggal dan waktu terakhir record diperbarui.
 
 #### 2. Get Ticket Categories by Event (`GET /ticket-categories/event/:eventId`)
 - **Auth**: Public
-- **Response 200 OK**: Array of `TicketCategoryResponseDto` diurutkan berdasarkan harga / `posIndex`.
+- **Response 200 OK**: Array of `TicketCategoryResponseDto` diurutkan berdasarkan `posIndex` ASC / `price` DESC.
 
 #### 3. Get Ticket Category Detail (`GET /ticket-categories/:id`)
 - **Auth**: Public
@@ -205,6 +208,7 @@ Seluruh exception yang ditangkap oleh `HttpExceptionFilter` menghasilkan format:
   - `posIndex` (`number`, optional)
   - `rows` (`number`, optional)
   - `columns` (`number`, optional)
+  - `blockedSeats` (`string[]`, optional)
 - **Response 200 OK**: Single `TicketCategoryResponseDto` ter-update.
 
 #### 5. Delete Ticket Category (`DELETE /ticket-categories/:id`)
@@ -217,26 +221,45 @@ Seluruh exception yang ditangkap oleh `HttpExceptionFilter` menghasilkan format:
 - **Auth**: Bearer Token (Role: `ORGANIZER`)
 - **Request Body** (`BulkCreateSeatDto`):
   - `categoryId` (`string`, UUID v7, required): ID Kategori Tiket.
-  - `prefix` (`string`, required): Prefix kode kursi (misal: `VIP`, `CAT1`).
+  - `prefix` (`string`, optional): Prefix kode kursi (misal: `VIP`).
 - **Response 201 Created** (`BulkCreateSeatResponseDto`):
   ```json
   {
     "message": "Success",
     "data": {
-      "seatsCreated": 100,
-      "totalQuota": 100,
-      "prefix": "VIP",
-      "firstSeatCode": "VIP-001",
-      "lastSeatCode": "VIP-100"
+      "seatsCreated": 98,
+      "totalQuota": 98,
+      "prefix": "VIP-",
+      "firstSeatCode": "VIP-A-1",
+      "lastSeatCode": "VIP-J-10"
     }
   }
   ```
 
 #### 7. Get Seats by Category (`GET /seats/category/:categoryId`), Detail (`GET /seats/:id`), Delete (`DELETE /seats/category/:categoryId`)
 - **Response 200 OK** (`SeatResponseDto`):
+  ```json
+  {
+    "message": "Success",
+    "data": [
+      {
+        "id": "019146a0-7d1e-7abc-9a12-seat00000001",
+        "categoryId": "019146a0-7d1e-7abc-9a12-category0001",
+        "seatCode": "VIP-A-1",
+        "row": "A",
+        "column": 1,
+        "status": "AVAILABLE",
+        "createdAt": "2026-08-16T10:00:00.000Z"
+      }
+    ]
+  }
+  ```
   - `id` (`string`, UUID v7): ID Tempat duduk.
   - `categoryId` (`string`, UUID v7): ID Kategori.
-  - `seatCode` (`string`): Kode fisik kursi (misal `VIP-001`).
+  - `seatCode` (`string`): Kode fisik kursi (misal `VIP-A-1`).
+  - `row` (`string`): Label baris kursi (misal `A`).
+  - `column` (`number`): Nomor kolom kursi (misal `1`).
+  - `status` (`string`): Enum `AVAILABLE` | `HELD` | `BOOKED`.
   - `createdAt` (`string`, ISO 8601): Waktu pembuatan.
 
 ---
