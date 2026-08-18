@@ -32,6 +32,7 @@ class SeatSelectionPage extends ConsumerStatefulWidget {
 class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
   bool _seatsLoaded = false;
   String? _selectedCategoryName;
+  String? _selectedCategoryId;
   String? _selectedSeatCode;
   String? _selectedSeatDisplayNum;
   double? _selectedPrice;
@@ -377,11 +378,13 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
                     if (isSelected) {
                       _selectedSeatCode = null;
                       _selectedCategoryName = null;
+                      _selectedCategoryId = null;
                       _selectedSeatDisplayNum = null;
                       _selectedPrice = null;
                     } else {
                       _selectedSeatCode = seat.seatCode;
                       _selectedCategoryName = category.name;
+                      _selectedCategoryId = category.id;
                       _selectedSeatDisplayNum = numStr;
                       _selectedPrice = category.price.toDouble();
                     }
@@ -575,11 +578,12 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
                       context,
                       MaterialPageRoute(
                         builder: (_) => CheckoutPage(
+                          eventId: widget.eventId,
+                          categoryId: _selectedCategoryId ?? widget.categoryId,
+                          seatCode: _selectedSeatCode,
                           eventName: widget.eventName,
                           eventCategory: '$categoryLabel ($seatNumLabel)',
-                          price: priceToDisplay > 10000
-                              ? 150.0
-                              : priceToDisplay,
+                          price: priceToDisplay,
                           location: 'Main Stage Pavilion',
                         ),
                       ),
