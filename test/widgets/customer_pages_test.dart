@@ -44,7 +44,7 @@ void main() {
         expect(find.text('VELOCE'), findsOneWidget);
         expect(find.text('Explore'), findsWidgets);
         expect(find.text('Tickets'), findsOneWidget);
-        expect(find.text('Saved'), findsOneWidget);
+        expect(find.text('Orders'), findsOneWidget);
         expect(find.text('Profile'), findsOneWidget);
       },
     );
@@ -96,7 +96,7 @@ void main() {
         expect(find.text('S  T  A  G  E'), findsOneWidget);
         expect(find.text('Available'), findsOneWidget);
         expect(find.text('Held'), findsOneWidget);
-        expect(find.text('Sold'), findsOneWidget);
+        expect(find.text('Booked'), findsOneWidget);
         expect(find.text('Confirm & Checkout'), findsOneWidget);
       },
     );
