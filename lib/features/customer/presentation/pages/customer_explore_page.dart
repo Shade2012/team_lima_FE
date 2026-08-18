@@ -15,8 +15,6 @@ class CustomerExplorePage extends ConsumerWidget {
     final exploreState = ref.watch(customerExploreProvider);
     final exploreNotifier = ref.read(customerExploreProvider.notifier);
 
-    final categories = ['All Events', 'Electronic', 'Live Bands', 'Acoustic'];
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -35,15 +33,7 @@ class CustomerExplorePage extends ConsumerWidget {
                     const SizedBox(height: 12),
                     // Customer Wallet Card Section
                     _buildWalletCard(context, ref),
-                    const SizedBox(height: 16),
                     const SizedBox(height: 20),
-                    // Category Filter Pills
-                    _buildCategoryFilter(
-                      categories,
-                      exploreState.selectedCategory,
-                      exploreNotifier,
-                    ),
-                    const SizedBox(height: 24),
                     // "For You" Section
                     _buildForYouSection(
                       context,
@@ -149,54 +139,7 @@ class CustomerExplorePage extends ConsumerWidget {
     );
   }
 
-  // ==================== Category Filter Pills ====================
 
-  Widget _buildCategoryFilter(
-    List<String> categories,
-    String selectedCategory,
-    CustomerExploreNotifier notifier,
-  ) {
-    return SizedBox(
-      height: 42,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: categories.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 10),
-        itemBuilder: (context, index) {
-          final category = categories[index];
-          final isSelected = category == selectedCategory;
-
-          return GestureDetector(
-            onTap: () => notifier.setSelectedCategory(category),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : const Color(0xFFF2F2F7),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: isSelected
-                      ? AppColors.primary
-                      : const Color(0xFFE5E5EA),
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  category,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: isSelected ? Colors.white : AppColors.black,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
 
   // ==================== "For You" Section ====================
 
