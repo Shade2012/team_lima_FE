@@ -252,16 +252,18 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                   padding: const EdgeInsets.all(14),
                   child: Row(
                     children: [
-                      Radio<String>(
-                        value: 'E_WALLET',
-                        groupValue: state.paymentMethod,
-                        onChanged: (val) {
-                          if (val != null) notifier.setPaymentMethod(val);
-                        },
-                        fillColor: WidgetStateProperty.resolveWith(
-                          (states) => states.contains(WidgetState.selected)
-                              ? AppColors.primary
-                              : null,
+                      Container(
+                        width: 20,
+                        height: 20,
+                        margin: const EdgeInsets.only(right: 10),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: state.paymentMethod == 'E_WALLET'
+                                ? AppColors.primary
+                                : Colors.grey.shade400,
+                            width: state.paymentMethod == 'E_WALLET' ? 6 : 2,
+                          ),
                         ),
                       ),
                       const Icon(
@@ -386,16 +388,18 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                   padding: const EdgeInsets.all(14),
                   child: Row(
                     children: [
-                      Radio<String>(
-                        value: 'CREDIT_CARD',
-                        groupValue: state.paymentMethod,
-                        onChanged: (val) {
-                          if (val != null) notifier.setPaymentMethod(val);
-                        },
-                        fillColor: WidgetStateProperty.resolveWith(
-                          (states) => states.contains(WidgetState.selected)
-                              ? AppColors.primary
-                              : null,
+                      Container(
+                        width: 20,
+                        height: 20,
+                        margin: const EdgeInsets.only(right: 10),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: state.paymentMethod == 'CREDIT_CARD'
+                                ? AppColors.primary
+                                : Colors.grey.shade400,
+                            width: state.paymentMethod == 'CREDIT_CARD' ? 6 : 2,
+                          ),
                         ),
                       ),
                       const Icon(
@@ -517,16 +521,16 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         ),
         child: Row(
           children: [
-            Radio<String>(
-              value: value,
-              groupValue: groupValue,
-              onChanged: (val) {
-                if (val != null) onSelect();
-              },
-              fillColor: WidgetStateProperty.resolveWith(
-                (states) => states.contains(WidgetState.selected)
-                    ? AppColors.primary
-                    : null,
+            Container(
+              width: 20,
+              height: 20,
+              margin: const EdgeInsets.only(right: 10),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected ? AppColors.primary : Colors.grey.shade400,
+                  width: isSelected ? 6 : 2,
+                ),
               ),
             ),
             Icon(
