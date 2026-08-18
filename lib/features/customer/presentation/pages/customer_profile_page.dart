@@ -556,7 +556,7 @@ class CustomerProfilePage extends ConsumerWidget {
   void _showLogoutDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Logout',
@@ -568,7 +568,7 @@ class CustomerProfilePage extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: Text(
               'Cancel',
               style: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey),
@@ -576,9 +576,9 @@ class CustomerProfilePage extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () async {
-              Navigator.pop(context);
-              await ref.read(authProvider.notifier).logout();
-              if (context.mounted) {
+              Navigator.pop(dialogContext);
+              final success = await ref.read(authProvider.notifier).logout();
+              if (context.mounted && success) {
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (_) => const AuthWrapper()),
