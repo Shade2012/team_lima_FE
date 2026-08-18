@@ -139,8 +139,6 @@ class CustomerExplorePage extends ConsumerWidget {
     );
   }
 
-
-
   // ==================== "For You" Section ====================
 
   Widget _buildForYouSection(

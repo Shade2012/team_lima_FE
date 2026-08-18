@@ -38,15 +38,27 @@ class CustomerTicketRepository {
 
   CustomerTicket _parseTicket(Map<String, dynamic> json) {
     final category = json['category'] as Map<String, dynamic>?;
-    final event = category?['event'] as Map<String, dynamic>? ?? json['event'] as Map<String, dynamic>?;
+    final event =
+        category?['event'] as Map<String, dynamic>? ??
+        json['event'] as Map<String, dynamic>?;
     final seat = json['seat'] as Map<String, dynamic>?;
 
     final id = json['id']?.toString() ?? '';
-    final seatCode = seat?['seatCode']?.toString() ?? json['ticketCode']?.toString() ?? id.substring(0, id.length > 8 ? 8 : id.length);
-    final eventName = event?['name']?.toString() ?? json['eventName']?.toString() ?? 'Event';
-    final categoryName = category?['name']?.toString() ?? json['categoryName']?.toString() ?? 'General';
-    final eventDateStr = event?['eventDate']?.toString() ?? json['eventDate']?.toString();
-    final eventDate = eventDateStr != null ? (DateTime.tryParse(eventDateStr) ?? DateTime.now()) : DateTime.now();
+    final seatCode =
+        seat?['seatCode']?.toString() ??
+        json['ticketCode']?.toString() ??
+        id.substring(0, id.length > 8 ? 8 : id.length);
+    final eventName =
+        event?['name']?.toString() ?? json['eventName']?.toString() ?? 'Event';
+    final categoryName =
+        category?['name']?.toString() ??
+        json['categoryName']?.toString() ??
+        'General';
+    final eventDateStr =
+        event?['eventDate']?.toString() ?? json['eventDate']?.toString();
+    final eventDate = eventDateStr != null
+        ? (DateTime.tryParse(eventDateStr) ?? DateTime.now())
+        : DateTime.now();
     final status = json['status']?.toString() ?? 'AVAILABLE';
     final price = category?['price'] is num
         ? (category!['price'] as num).toDouble()

@@ -614,11 +614,16 @@ class TicketDetailPage extends ConsumerWidget {
               controller: reasonController,
               decoration: InputDecoration(
                 hintText: 'Enter reason for refund (e.g. Schedule conflict)',
-                hintStyle: AppTextStyles.bodySmall.copyWith(color: AppColors.grey),
+                hintStyle: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.grey,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
               ),
               maxLines: 2,
             ),
@@ -635,11 +640,15 @@ class TicketDetailPage extends ConsumerWidget {
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.danger,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             onPressed: () async {
               final reason = reasonController.text.trim();
-              final finalReason = reason.isNotEmpty ? reason : 'Requested by customer';
+              final finalReason = reason.isNotEmpty
+                  ? reason
+                  : 'Requested by customer';
               Navigator.pop(dialogContext);
               final success = await ref
                   .read(customerRefundsProvider.notifier)
@@ -657,7 +666,9 @@ class TicketDetailPage extends ConsumerWidget {
                   final error = ref.read(customerRefundsProvider).error;
                   ScaffoldMessenger.of(pageContext).showSnackBar(
                     SnackBar(
-                      content: Text(error ?? 'Failed to submit refund request.'),
+                      content: Text(
+                        error ?? 'Failed to submit refund request.',
+                      ),
                       backgroundColor: AppColors.danger,
                     ),
                   );
@@ -666,7 +677,10 @@ class TicketDetailPage extends ConsumerWidget {
             },
             child: const Text(
               'Confirm Refund',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],

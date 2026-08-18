@@ -213,10 +213,7 @@ class _CustomerProfilePageState extends ConsumerState<CustomerProfilePage> {
           const SizedBox(height: 12),
           // Customer Role Badge Pill
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 6,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
@@ -532,18 +529,18 @@ class _CustomerProfilePageState extends ConsumerState<CustomerProfilePage> {
         'title': 'My Order History',
         'isDanger': false,
         'onTap': () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const CustomerOrdersPage()),
-            ),
+          context,
+          MaterialPageRoute(builder: (_) => const CustomerOrdersPage()),
+        ),
       },
       {
         'icon': Icons.assignment_return_outlined,
         'title': 'My Refund Requests',
         'isDanger': false,
         'onTap': () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const CustomerRefundsPage()),
-            ),
+          context,
+          MaterialPageRoute(builder: (_) => const CustomerRefundsPage()),
+        ),
       },
       {
         'icon': Icons.edit_outlined,
@@ -883,7 +880,9 @@ class _CustomerProfilePageState extends ConsumerState<CustomerProfilePage> {
           TextButton(
             onPressed: () async {
               Navigator.pop(dialogContext);
-              final success = await ref.read(authProvider.notifier).deleteAccount();
+              final success = await ref
+                  .read(authProvider.notifier)
+                  .deleteAccount();
               if (!mounted) return;
               if (success) {
                 ScaffoldMessenger.of(context).showSnackBar(

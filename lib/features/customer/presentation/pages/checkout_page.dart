@@ -567,8 +567,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     );
   }
 
-
-
   // ==================== Order Summary Section ====================
 
   Widget _buildOrderSummary(

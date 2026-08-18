@@ -33,27 +33,28 @@ class CustomerRefundsPage extends ConsumerWidget {
         centerTitle: false,
       ),
       body: RefreshIndicator(
-        onRefresh: () => ref.read(customerRefundsProvider.notifier).loadRefunds(),
+        onRefresh: () =>
+            ref.read(customerRefundsProvider.notifier).loadRefunds(),
         color: AppColors.primary,
         child: refundsState.isLoading
             ? const Center(child: CircularProgressIndicator())
             : refundsState.refunds.isEmpty
-                ? _buildEmptyState(context)
-                : ListView.separated(
-                    physics: const AlwaysScrollableScrollPhysics(
-                      parent: BouncingScrollPhysics(),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 16,
-                    ),
-                    itemCount: refundsState.refunds.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final refund = refundsState.refunds[index];
-                      return _buildRefundCard(refund, formatter);
-                    },
-                  ),
+            ? _buildEmptyState(context)
+            : ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                itemCount: refundsState.refunds.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final refund = refundsState.refunds[index];
+                  return _buildRefundCard(refund, formatter);
+                },
+              ),
       ),
     );
   }
@@ -202,9 +203,7 @@ class CustomerRefundsPage extends ConsumerWidget {
             children: [
               Text(
                 'Refund Amount',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.grey,
-                ),
+                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey),
               ),
               Text(
                 refund.amount != null

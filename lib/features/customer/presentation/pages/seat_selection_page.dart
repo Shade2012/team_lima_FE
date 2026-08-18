@@ -90,7 +90,9 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
     int colIndex,
     int totalSeatIndex,
   ) {
-    final blockList = category.blockedSeats.map((s) => s.toUpperCase()).toList();
+    final blockList = category.blockedSeats
+        .map((s) => s.toUpperCase())
+        .toList();
     final coord1 = '$rowLabel-$colIndex'.toUpperCase();
     final coord2 = '$rowLabel$colIndex'.toUpperCase();
     final coord3 = '${category.name}-$rowLabel-$colIndex'.toUpperCase();
@@ -106,11 +108,7 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
     return false;
   }
 
-  Seat? _findSeatByPosition(
-    List<Seat> seats,
-    String rowLabel,
-    int colIndex,
-  ) {
+  Seat? _findSeatByPosition(List<Seat> seats, String rowLabel, int colIndex) {
     for (final s in seats) {
       if (s.row?.toUpperCase() == rowLabel.toUpperCase() &&
           s.column == colIndex) {
@@ -325,7 +323,9 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
         : (category.totalQuota > 0 ? (category.totalQuota / 10).ceil() : 3);
     final colsCount = (category.columns != null && category.columns! > 0)
         ? category.columns!
-        : (category.totalQuota > 0 ? (category.totalQuota / rowsCount).ceil() : 10);
+        : (category.totalQuota > 0
+              ? (category.totalQuota / rowsCount).ceil()
+              : 10);
 
     final totalGridSeats = rowsCount * colsCount;
 
@@ -429,14 +429,19 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
                   );
 
                   // 2. Check API status for Held or Booked
-                  final apiSeat = _findSeatByPosition(seats, rowLabel, colIndex);
+                  final apiSeat = _findSeatByPosition(
+                    seats,
+                    rowLabel,
+                    colIndex,
+                  );
                   final isHeld = !isBlocked && apiSeat?.status == 'HELD';
                   final isBooked = !isBlocked && apiSeat?.status == 'BOOKED';
 
                   // 3. Selectable check
                   final isAvailable = !isBlocked && !isHeld && !isBooked;
 
-                  final isSelected = _selectedSeatCode == fullSeatCode ||
+                  final isSelected =
+                      _selectedSeatCode == fullSeatCode ||
                       _selectedSeatCode == shortSeatCode ||
                       (_selectedCategoryName == category.name &&
                           _selectedSeatDisplayNum == shortSeatCode);
@@ -469,23 +474,23 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
                         color: isSelected
                             ? color
                             : isBlocked
-                                ? const Color(0xFFE5E5EA)
-                                : isHeld
-                                    ? AppColors.warning.withValues(alpha: 0.15)
-                                    : isBooked
-                                        ? AppColors.danger.withValues(alpha: 0.15)
-                                        : color.withValues(alpha: 0.08),
+                            ? const Color(0xFFE5E5EA)
+                            : isHeld
+                            ? AppColors.warning.withValues(alpha: 0.15)
+                            : isBooked
+                            ? AppColors.danger.withValues(alpha: 0.15)
+                            : color.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(
                           color: isSelected
                               ? color
                               : isBlocked
-                                  ? const Color(0xFFD1D1D6)
-                                  : isHeld
-                                      ? AppColors.warning
-                                      : isBooked
-                                          ? AppColors.danger
-                                          : color.withValues(alpha: 0.4),
+                              ? const Color(0xFFD1D1D6)
+                              : isHeld
+                              ? AppColors.warning
+                              : isBooked
+                              ? AppColors.danger
+                              : color.withValues(alpha: 0.4),
                           width: isSelected ? 2 : 1,
                         ),
                         boxShadow: isSelected
@@ -513,10 +518,10 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
                                   color: isSelected
                                       ? AppColors.white
                                       : isHeld
-                                          ? AppColors.warning
-                                          : isBooked
-                                              ? AppColors.danger
-                                              : color,
+                                      ? AppColors.warning
+                                      : isBooked
+                                      ? AppColors.danger
+                                      : color,
                                   height: 1,
                                 ),
                               ),

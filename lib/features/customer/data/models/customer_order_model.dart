@@ -36,7 +36,8 @@ class CustomerOrderModel {
   final String? eventName;
   final DateTime? eventDate;
   final double totalAmount;
-  final String status; // HELD | PAYMENT_PENDING | PAID | CANCELLED | FULL_REFUND | PARTIAL_REFUND
+  final String
+  status; // HELD | PAYMENT_PENDING | PAID | CANCELLED | FULL_REFUND | PARTIAL_REFUND
   final DateTime? expiresAt;
   final DateTime? createdAt;
   final List<CustomerOrderItem> tickets;

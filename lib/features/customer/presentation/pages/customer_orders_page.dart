@@ -38,22 +38,22 @@ class CustomerOrdersPage extends ConsumerWidget {
         child: ordersState.isLoading
             ? const Center(child: CircularProgressIndicator())
             : ordersState.orders.isEmpty
-                ? _buildEmptyState(context, ref)
-                : ListView.separated(
-                    physics: const AlwaysScrollableScrollPhysics(
-                      parent: BouncingScrollPhysics(),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 16,
-                    ),
-                    itemCount: ordersState.orders.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final order = ordersState.orders[index];
-                      return _buildOrderCard(context, order, formatter);
-                    },
-                  ),
+            ? _buildEmptyState(context, ref)
+            : ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                itemCount: ordersState.orders.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final order = ordersState.orders[index];
+                  return _buildOrderCard(context, order, formatter);
+                },
+              ),
       ),
     );
   }
@@ -212,7 +212,10 @@ class CustomerOrdersPage extends ConsumerWidget {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Order Details', style: AppTextStyles.title.copyWith(fontSize: 18)),
+            Text(
+              'Order Details',
+              style: AppTextStyles.title.copyWith(fontSize: 18),
+            ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
@@ -250,7 +253,10 @@ class CustomerOrdersPage extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               if (order.tickets.isEmpty)
-                Text('Standard Admission Ticket', style: AppTextStyles.bodyMedium)
+                Text(
+                  'Standard Admission Ticket',
+                  style: AppTextStyles.bodyMedium,
+                )
               else
                 ...order.tickets.map(
                   (t) => Padding(
@@ -277,7 +283,10 @@ class CustomerOrdersPage extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Total Amount', style: AppTextStyles.title.copyWith(fontSize: 15)),
+                  Text(
+                    'Total Amount',
+                    style: AppTextStyles.title.copyWith(fontSize: 15),
+                  ),
                   Text(
                     formatter.format(order.totalAmount),
                     style: AppTextStyles.title.copyWith(
@@ -335,17 +344,37 @@ class CustomerOrdersPage extends ConsumerWidget {
   _OrderStatusConfig _getStatusConfig(String status) {
     switch (status.toUpperCase()) {
       case 'PAID':
-        return _OrderStatusConfig('PAID', const Color(0xFFE6F4EA), const Color(0xFF137333));
+        return _OrderStatusConfig(
+          'PAID',
+          const Color(0xFFE6F4EA),
+          const Color(0xFF137333),
+        );
       case 'HELD':
       case 'PAYMENT_PENDING':
-        return _OrderStatusConfig('PENDING', const Color(0xFFFEF7E0), const Color(0xFFB06000));
+        return _OrderStatusConfig(
+          'PENDING',
+          const Color(0xFFFEF7E0),
+          const Color(0xFFB06000),
+        );
       case 'CANCELLED':
-        return _OrderStatusConfig('CANCELLED', const Color(0xFFFCE8E6), const Color(0xFFC5221F));
+        return _OrderStatusConfig(
+          'CANCELLED',
+          const Color(0xFFFCE8E6),
+          const Color(0xFFC5221F),
+        );
       case 'FULL_REFUND':
       case 'PARTIAL_REFUND':
-        return _OrderStatusConfig(status, const Color(0xFFE8F0FE), const Color(0xFF1A73E8));
+        return _OrderStatusConfig(
+          status,
+          const Color(0xFFE8F0FE),
+          const Color(0xFF1A73E8),
+        );
       default:
-        return _OrderStatusConfig(status, const Color(0xFFF1F3F4), const Color(0xFF5F6368));
+        return _OrderStatusConfig(
+          status,
+          const Color(0xFFF1F3F4),
+          const Color(0xFF5F6368),
+        );
     }
   }
 }

@@ -13,15 +13,21 @@ final orderRepositoryProvider = Provider<OrderRepository>((ref) {
   return OrderRepository();
 });
 
-final customerTicketRepositoryProvider = Provider<CustomerTicketRepository>((ref) {
+final customerTicketRepositoryProvider = Provider<CustomerTicketRepository>((
+  ref,
+) {
   return CustomerTicketRepository();
 });
 
-final customerOrderRepositoryProvider = Provider<CustomerOrderRepository>((ref) {
+final customerOrderRepositoryProvider = Provider<CustomerOrderRepository>((
+  ref,
+) {
   return CustomerOrderRepository();
 });
 
-final customerRefundRepositoryProvider = Provider<CustomerRefundRepository>((ref) {
+final customerRefundRepositoryProvider = Provider<CustomerRefundRepository>((
+  ref,
+) {
   return CustomerRefundRepository();
 });
 
@@ -416,7 +422,10 @@ class CustomerRefundsNotifier extends Notifier<CustomerRefundsState> {
     state = state.copyWith(isSubmitting: true, error: null);
     try {
       final repo = ref.read(customerRefundRepositoryProvider);
-      final newRefund = await repo.requestRefund(ticketId: ticketId, reason: reason);
+      final newRefund = await repo.requestRefund(
+        ticketId: ticketId,
+        reason: reason,
+      );
       state = state.copyWith(
         refunds: [newRefund, ...state.refunds],
         isSubmitting: false,
