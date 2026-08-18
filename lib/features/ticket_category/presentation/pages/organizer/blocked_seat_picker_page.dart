@@ -132,7 +132,11 @@ class _BlockedSeatPickerPageState extends State<BlockedSeatPickerPage> {
               const SizedBox(width: 8),
               _buildStatChip('Available', '$availableCount', AppColors.success),
               const SizedBox(width: 8),
-              _buildStatChip('Blocked', '$blockedCount/$_maxBlocked', AppColors.danger),
+              _buildStatChip(
+                'Blocked',
+                '$blockedCount/$_maxBlocked',
+                AppColors.danger,
+              ),
             ],
           ),
           if (_maxBlocked > 0) ...[
@@ -267,7 +271,9 @@ class _BlockedSeatPickerPageState extends State<BlockedSeatPickerPage> {
                             style: TextStyle(
                               fontSize: 9,
                               fontWeight: FontWeight.w600,
-                              color: isBlocked ? AppColors.danger : AppColors.primary,
+                              color: isBlocked
+                                  ? AppColors.danger
+                                  : AppColors.primary,
                             ),
                           ),
                         ),

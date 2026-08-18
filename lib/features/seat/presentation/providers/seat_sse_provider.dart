@@ -5,9 +5,9 @@ final seatSseRepositoryProvider = Provider<SeatSseRepository>((ref) {
   return SeatSseRepository();
 });
 
-final seatSseProvider =
-    StreamProvider.autoDispose.family<SeatUpdateEvent, String>((ref, eventId) {
-  final repository = ref.read(seatSseRepositoryProvider);
-  ref.onDispose(() => repository.disconnect());
-  return repository.watchSeats(eventId);
-});
+final seatSseProvider = StreamProvider.autoDispose
+    .family<SeatUpdateEvent, String>((ref, eventId) {
+      final repository = ref.read(seatSseRepositoryProvider);
+      ref.onDispose(() => repository.disconnect());
+      return repository.watchSeats(eventId);
+    });

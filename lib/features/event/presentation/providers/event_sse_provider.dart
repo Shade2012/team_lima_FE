@@ -7,7 +7,7 @@ final eventSseRepositoryProvider = Provider<EventSseRepository>((ref) {
 
 final dashboardSseProvider = StreamProvider.autoDispose
     .family<DashboardUpdateEvent, String>((ref, eventId) {
-  final repository = ref.read(eventSseRepositoryProvider);
-  ref.onDispose(() => repository.disconnect());
-  return repository.watchDashboard(eventId);
-});
+      final repository = ref.read(eventSseRepositoryProvider);
+      ref.onDispose(() => repository.disconnect());
+      return repository.watchDashboard(eventId);
+    });

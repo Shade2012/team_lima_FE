@@ -176,7 +176,8 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage>
   }
 
   Widget _buildBody(EventDetailState state, EventStatisticsState statsState) {
-    if (state.isLoading || (statsState.isLoading && statsState.statistics == null)) {
+    if (state.isLoading ||
+        (statsState.isLoading && statsState.statistics == null)) {
       return const Center(child: CircularProgressIndicator());
     }
 

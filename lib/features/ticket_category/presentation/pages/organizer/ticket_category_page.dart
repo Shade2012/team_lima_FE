@@ -55,18 +55,18 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
     final categoriesState = ref.watch(categoriesProvider);
     final seatsCountState = ref.watch(seatsCountProvider);
 
-    print('=== TicketCategoryPage build ===');
-    print('isLoading: ${categoriesState.isLoading}');
-    print('categories count: ${categoriesState.categories.length}');
-    print('error: ${categoriesState.error}');
-    print('seatsCount: ${seatsCountState.counts}');
+    //print('=== TicketCategoryPage build ===');
+    //print('isLoading: ${categoriesState.isLoading}');
+    //print('categories count: ${categoriesState.categories.length}');
+    //print('error: ${categoriesState.error}');
+    //print('seatsCount: ${seatsCountState.counts}');
 
     // Load seats count when categories are loaded
     if (!categoriesState.isLoading && categoriesState.categories.isNotEmpty) {
       for (final cat in categoriesState.categories) {
         final catId = cat.id.toString();
         if (!seatsCountState.counts.containsKey(catId)) {
-          print('Loading seats count for: $catId');
+          debugPrint('Loading seats count for: $catId');
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
               ref.read(seatsCountProvider.notifier).loadSeatsCount(catId);
@@ -122,7 +122,7 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                         final category = categoriesState.categories[index];
                         final categoryId = category.id.toString();
                         final seatsCount = seatsCountState.counts[categoryId];
-                        print(
+                        debugPrint(
                           'Building card for: ${category.name} (id: $categoryId)',
                         );
                         return Padding(
@@ -130,8 +130,8 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                           child: _buildCategoryCard(category, seatsCount),
                         );
                       } catch (e, stack) {
-                        print('Error building card at index $index: $e');
-                        print('Stack: $stack');
+                        debugPrint('Error building card at index $index: $e');
+                        debugPrint('Stack: $stack');
                         return const SizedBox();
                       }
                     },
@@ -399,8 +399,8 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
         ),
       );
     } catch (e, stack) {
-      print('Error in _buildCategoryCard: $e');
-      print('Stack: $stack');
+      debugPrint('Error in _buildCategoryCard: $e');
+      debugPrint('Stack: $stack');
       return Container(
         padding: const EdgeInsets.all(16),
         child: Text('Error: $e', style: TextStyle(color: Colors.red)),
@@ -1088,10 +1088,8 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                           }
                           final q = int.tryParse(value);
                           if (q == null || q <= 0) return 'Must be at least 1';
-                          final r =
-                              int.tryParse(rowsController.text) ?? 0;
-                          final c =
-                              int.tryParse(columnsController.text) ?? 0;
+                          final r = int.tryParse(rowsController.text) ?? 0;
+                          final c = int.tryParse(columnsController.text) ?? 0;
                           if (r > 0 && c > 0 && q > (r * c)) {
                             return 'Quota cannot exceed total seats (${r * c})';
                           }
@@ -1101,12 +1099,9 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                       const SizedBox(height: 8),
                       Builder(
                         builder: (context) {
-                          final r =
-                              int.tryParse(rowsController.text) ?? 0;
-                          final c =
-                              int.tryParse(columnsController.text) ?? 0;
-                          final q =
-                              int.tryParse(quotaController.text) ?? 0;
+                          final r = int.tryParse(rowsController.text) ?? 0;
+                          final c = int.tryParse(columnsController.text) ?? 0;
+                          final q = int.tryParse(quotaController.text) ?? 0;
                           final totalSeats = r * c;
                           if (totalSeats > 0 && q > 0 && q < totalSeats) {
                             final blockedCount = totalSeats - q;
@@ -1129,10 +1124,8 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                       const SizedBox(height: 12),
                       GestureDetector(
                         onTap: () async {
-                          final r =
-                              int.tryParse(rowsController.text) ?? 0;
-                          final c =
-                              int.tryParse(columnsController.text) ?? 0;
+                          final r = int.tryParse(rowsController.text) ?? 0;
+                          final c = int.tryParse(columnsController.text) ?? 0;
                           if (r <= 0 || c <= 0) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -1144,26 +1137,22 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                             );
                             return;
                           }
-                          final result =
-                              await Navigator.push<List<String>>(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => BlockedSeatPickerPage(
-                                    rows: r,
-                                    columns: c,
-                                    totalQuota:
-                                        int.tryParse(
-                                          quotaController.text.trim(),
-                                        ) ??
-                                        (r * c),
-                                    initialBlockedSeats: blockedSeats,
-                                    categoryName:
-                                        nameController.text.isNotEmpty
-                                            ? nameController.text
-                                            : 'Category',
-                                  ),
-                                ),
-                              );
+                          final result = await Navigator.push<List<String>>(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => BlockedSeatPickerPage(
+                                rows: r,
+                                columns: c,
+                                totalQuota:
+                                    int.tryParse(quotaController.text.trim()) ??
+                                    (r * c),
+                                initialBlockedSeats: blockedSeats,
+                                categoryName: nameController.text.isNotEmpty
+                                    ? nameController.text
+                                    : 'Category',
+                              ),
+                            ),
+                          );
                           if (result != null) {
                             setStateModal(() {
                               blockedSeats = result;
@@ -1201,30 +1190,27 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       blockedSeats.isNotEmpty
                                           ? '${blockedSeats.length} blocked seats selected'
                                           : 'Select Blocked Seats',
-                                      style:
-                                          AppTextStyles.bodyMedium.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                            color: blockedSeats.isNotEmpty
-                                                ? AppColors.danger
-                                                : AppColors.primary,
-                                          ),
+                                      style: AppTextStyles.bodyMedium.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: blockedSeats.isNotEmpty
+                                            ? AppColors.danger
+                                            : AppColors.primary,
+                                      ),
                                     ),
                                     Text(
                                       blockedSeats.isNotEmpty
                                           ? 'Tap to modify blocked seats'
                                           : 'Choose seats to block',
-                                      style:
-                                          AppTextStyles.bodySmall.copyWith(
-                                            color: AppColors.grey,
-                                            fontSize: 11,
-                                          ),
+                                      style: AppTextStyles.bodySmall.copyWith(
+                                        color: AppColors.grey,
+                                        fontSize: 11,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -1270,9 +1256,7 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                           child: OutlinedButton(
                             onPressed: () => Navigator.pop(context),
                             style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 14,
-                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -1313,9 +1297,7 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
 
                               final request = UpdateTicketCategoryRequest(
                                 name: nameController.text.trim(),
-                                price: int.parse(
-                                  priceController.text.trim(),
-                                ),
+                                price: int.parse(priceController.text.trim()),
                                 totalQuota: totalQuota,
                                 rows: rows,
                                 columns: columns,
@@ -1326,10 +1308,7 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
 
                               final success = await ref
                                   .read(categoriesProvider.notifier)
-                                  .updateCategory(
-                                    category.id,
-                                    request,
-                                  );
+                                  .updateCategory(category.id, request);
 
                               if (!context.mounted) return;
                               if (success) {
@@ -1361,18 +1340,13 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
                               foregroundColor: AppColors.white,
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 14,
-                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               elevation: 0,
                             ),
-                            child: Text(
-                              'Save',
-                              style: AppTextStyles.button,
-                            ),
+                            child: Text('Save', style: AppTextStyles.button),
                           ),
                         ),
                       ],

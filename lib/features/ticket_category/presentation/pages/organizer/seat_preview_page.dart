@@ -624,40 +624,40 @@ class _GridSeatsPainter extends CustomPainter {
         final seatLabel = _getSeatLabel(row, col);
         final isBlocked = blockedSeats.contains(seatLabel);
 
-          if (isBlocked) {
-            canvas.drawRRect(rect, blockedPaint);
-            canvas.drawRRect(rect, blockedBorderPaint);
-          } else {
-            canvas.drawRRect(rect, availablePaint);
-            canvas.drawRRect(rect, availableBorderPaint);
+        if (isBlocked) {
+          canvas.drawRRect(rect, blockedPaint);
+          canvas.drawRRect(rect, blockedBorderPaint);
+        } else {
+          canvas.drawRRect(rect, availablePaint);
+          canvas.drawRRect(rect, availableBorderPaint);
 
-            if (seatIndex < seats.length) {
-              final seatCode = seats[seatIndex].seatCode as String;
-              final prefixParts = seatCode.split('-');
-              final number = prefixParts.length >= 3
-                  ? '${prefixParts[prefixParts.length - 2]}-${prefixParts.last}'
-                  : prefixParts.last;
+          if (seatIndex < seats.length) {
+            final seatCode = seats[seatIndex].seatCode as String;
+            final prefixParts = seatCode.split('-');
+            final number = prefixParts.length >= 3
+                ? '${prefixParts[prefixParts.length - 2]}-${prefixParts.last}'
+                : prefixParts.last;
 
-              textPainter.text = TextSpan(
-                text: number,
-                style: TextStyle(
-                  fontSize: 8,
-                  fontWeight: FontWeight.w700,
-                  color: color,
-                  height: 1,
-                ),
-              );
-              textPainter.layout();
-              textPainter.paint(
-                canvas,
-                Offset(
-                  x + (seatSize - textPainter.width) / 2,
-                  y + (seatSize - textPainter.height) / 2,
-                ),
-              );
-              seatIndex++;
-            }
+            textPainter.text = TextSpan(
+              text: number,
+              style: TextStyle(
+                fontSize: 8,
+                fontWeight: FontWeight.w700,
+                color: color,
+                height: 1,
+              ),
+            );
+            textPainter.layout();
+            textPainter.paint(
+              canvas,
+              Offset(
+                x + (seatSize - textPainter.width) / 2,
+                y + (seatSize - textPainter.height) / 2,
+              ),
+            );
+            seatIndex++;
           }
+        }
       }
     }
   }

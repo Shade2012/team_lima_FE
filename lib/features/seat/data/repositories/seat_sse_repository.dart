@@ -19,8 +19,9 @@ class SeatUpdateEvent {
   factory SeatUpdateEvent.fromJson(Map<String, dynamic> json) {
     return SeatUpdateEvent(
       categoryId: json['categoryId'] ?? '',
-      seats:
-          (json['seats'] as List? ?? []).map((s) => Seat.fromJson(s)).toList(),
+      seats: (json['seats'] as List? ?? [])
+          .map((s) => Seat.fromJson(s))
+          .toList(),
       action: json['action'] ?? 'update',
     );
   }
