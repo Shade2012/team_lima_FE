@@ -46,7 +46,7 @@ void main() {
     );
 
     testWidgets(
-      'Unhappy Path: Tap Sign In with empty fields displays error snackbar',
+      'Unhappy Path: Tap Sign In with empty fields displays validation errors',
       (WidgetTester tester) async {
         await tester.pumpWidget(createWidgetUnderTest());
         await tester.pumpAndSettle();
@@ -55,8 +55,11 @@ void main() {
         await tester.tap(signInButton);
         await tester.pumpAndSettle();
 
-        expect(find.byType(SnackBar), findsOneWidget);
-        expect(find.text('Email and password are required'), findsOneWidget);
+        // Form validators show error text below each field
+        expect(find.text('Email is required'), findsOneWidget);
+        expect(find.text('Password is required'), findsOneWidget);
+        // No SnackBar should appear since validation blocks login
+        expect(find.byType(SnackBar), findsNothing);
       },
     );
   });
