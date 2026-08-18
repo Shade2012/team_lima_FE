@@ -36,29 +36,35 @@ void main() {
         expect(container.read(customerWalletProvider).balance, 100000.0);
       });
 
-      test('Happy Path: deduct decreases wallet balance when funds are sufficient', () {
-        final container = ProviderContainer();
-        addTearDown(container.dispose);
+      test(
+        'Happy Path: deduct decreases wallet balance when funds are sufficient',
+        () {
+          final container = ProviderContainer();
+          addTearDown(container.dispose);
 
-        final notifier = container.read(customerWalletProvider.notifier);
-        notifier.topUp(150000.0);
-        final success = notifier.deduct(50000.0, 'Ticket Purchase');
+          final notifier = container.read(customerWalletProvider.notifier);
+          notifier.topUp(150000.0);
+          final success = notifier.deduct(50000.0, 'Ticket Purchase');
 
-        expect(success, true);
-        expect(container.read(customerWalletProvider).balance, 100000.0);
-      });
+          expect(success, true);
+          expect(container.read(customerWalletProvider).balance, 100000.0);
+        },
+      );
 
-      test('Unhappy Path: topUp with zero or negative amount does not alter balance', () {
-        final container = ProviderContainer();
-        addTearDown(container.dispose);
+      test(
+        'Unhappy Path: topUp with zero or negative amount does not alter balance',
+        () {
+          final container = ProviderContainer();
+          addTearDown(container.dispose);
 
-        final notifier = container.read(customerWalletProvider.notifier);
-        notifier.topUp(-50000.0);
-        expect(container.read(customerWalletProvider).balance, 0.0);
+          final notifier = container.read(customerWalletProvider.notifier);
+          notifier.topUp(-50000.0);
+          expect(container.read(customerWalletProvider).balance, 0.0);
 
-        notifier.topUp(0.0);
-        expect(container.read(customerWalletProvider).balance, 0.0);
-      });
+          notifier.topUp(0.0);
+          expect(container.read(customerWalletProvider).balance, 0.0);
+        },
+      );
 
       test('Unhappy Path: deduct fails when balance is insufficient', () {
         final container = ProviderContainer();
@@ -125,38 +131,44 @@ void main() {
         expect(state.discount, 15.0);
       });
 
-      test('Unhappy Path: applyPromoCode with invalid code returns false and sets error', () {
-        final container = ProviderContainer();
-        addTearDown(container.dispose);
+      test(
+        'Unhappy Path: applyPromoCode with invalid code returns false and sets error',
+        () {
+          final container = ProviderContainer();
+          addTearDown(container.dispose);
 
-        final notifier = container.read(checkoutProvider.notifier);
+          final notifier = container.read(checkoutProvider.notifier);
 
-        notifier.setPromoCode('INVALID_CODE');
-        final success = notifier.applyPromoCode();
+          notifier.setPromoCode('INVALID_CODE');
+          final success = notifier.applyPromoCode();
 
-        expect(success, false);
-        final state = container.read(checkoutProvider);
-        expect(state.isPromoApplied, false);
-        expect(state.error, 'Invalid promo code');
-      });
+          expect(success, false);
+          final state = container.read(checkoutProvider);
+          expect(state.isPromoApplied, false);
+          expect(state.error, 'Invalid promo code');
+        },
+      );
 
-      test('Unhappy Path: completePayment with E_WALLET fails when wallet balance is insufficient', () async {
-        final container = ProviderContainer();
-        addTearDown(container.dispose);
+      test(
+        'Unhappy Path: completePayment with E_WALLET fails when wallet balance is insufficient',
+        () async {
+          final container = ProviderContainer();
+          addTearDown(container.dispose);
 
-        final checkoutNotifier = container.read(checkoutProvider.notifier);
-        checkoutNotifier.setPaymentMethod('E_WALLET');
+          final checkoutNotifier = container.read(checkoutProvider.notifier);
+          checkoutNotifier.setPaymentMethod('E_WALLET');
 
-        // Wallet balance is 0.0, payment requires total > 0
-        final ticket = await checkoutNotifier.completePayment(
-          eventName: 'Festival Concert',
-          attendeeName: 'Alex Chen',
-        );
+          // Wallet balance is 0.0, payment requires total > 0
+          final ticket = await checkoutNotifier.completePayment(
+            eventName: 'Festival Concert',
+            attendeeName: 'Alex Chen',
+          );
 
-        expect(ticket, isNull);
-        final checkoutState = container.read(checkoutProvider);
-        expect(checkoutState.error, contains('Insufficient Wallet Balance'));
-      });
+          expect(ticket, isNull);
+          final checkoutState = container.read(checkoutProvider);
+          expect(checkoutState.error, contains('Insufficient Wallet Balance'));
+        },
+      );
     });
   });
 }
