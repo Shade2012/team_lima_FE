@@ -275,7 +275,8 @@ final customerTicketsProvider =
 // ==================== Checkout State ====================
 
 class CheckoutState {
-  final String paymentMethod; // 'E_WALLET', 'CREDIT_CARD', 'BANK_TRANSFER', 'QRIS'
+  final String
+  paymentMethod; // 'E_WALLET', 'CREDIT_CARD', 'BANK_TRANSFER', 'QRIS'
   final String cardNumber;
   final String expiryDate;
   final String cvc;
@@ -454,7 +455,8 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
       }
 
       // 2. Call POST /mock-pg/simulate-payment
-      final trxId = orderResponse.providerTrxId ??
+      final trxId =
+          orderResponse.providerTrxId ??
           'TRX-MOCK-${DateTime.now().millisecondsSinceEpoch}';
       try {
         await orderRepo.simulatePayment(
@@ -467,10 +469,9 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
 
       // 3. Deduct wallet if paid via E_WALLET
       if (state.paymentMethod == 'E_WALLET') {
-        ref.read(customerWalletProvider.notifier).deduct(
-              totalAmount,
-              'Ticket Purchase: $eventName',
-            );
+        ref
+            .read(customerWalletProvider.notifier)
+            .deduct(totalAmount, 'Ticket Purchase: $eventName');
       }
 
       final displayCategory = categoryName ?? 'VIP PASS';

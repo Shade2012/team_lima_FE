@@ -6,11 +6,7 @@ class OrderSeatRequest {
   final String? seatId;
   final int quantity;
 
-  OrderSeatRequest({
-    required this.categoryId,
-    this.seatId,
-    this.quantity = 1,
-  });
+  OrderSeatRequest({required this.categoryId, this.seatId, this.quantity = 1});
 
   Map<String, dynamic> toJson() {
     return {
@@ -71,9 +67,7 @@ class OrderRepository {
     try {
       final response = await _dioClient.dio.post(
         '/orders/event/$eventId',
-        data: {
-          'seats': seats.map((s) => s.toJson()).toList(),
-        },
+        data: {'seats': seats.map((s) => s.toJson()).toList()},
       );
       final data = response.data['data'];
       return CreateOrderResponse.fromJson(data);
@@ -92,10 +86,7 @@ class OrderRepository {
     try {
       final response = await _dioClient.dio.post(
         '/mock-pg/simulate-payment',
-        data: {
-          'providerTrxId': providerTrxId,
-          'paymentMethod': paymentMethod,
-        },
+        data: {'providerTrxId': providerTrxId, 'paymentMethod': paymentMethod},
       );
       return response.data['data'] == true;
     } on DioException catch (e) {

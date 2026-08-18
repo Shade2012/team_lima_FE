@@ -226,8 +226,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     CustomerWalletState walletState,
     CustomerWalletNotifier walletNotifier,
   ) {
-    final isWalletInsufficient = state.paymentMethod == 'E_WALLET' &&
-        walletState.balance < state.total;
+    final isWalletInsufficient =
+        state.paymentMethod == 'E_WALLET' && walletState.balance < state.total;
 
     return Column(
       children: [
@@ -300,11 +300,15 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                       ElevatedButton(
                         onPressed: () => TopUpDialog.show(context),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                          backgroundColor: AppColors.primary.withValues(
+                            alpha: 0.1,
+                          ),
                           foregroundColor: AppColors.primary,
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 6),
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
                           minimumSize: Size.zero,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           shape: RoundedRectangleBorder(
@@ -326,12 +330,15 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
               if (state.paymentMethod == 'E_WALLET' && isWalletInsufficient)
                 Container(
                   width: double.infinity,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
                   decoration: const BoxDecoration(
                     color: Color(0xFFFFF0F0),
-                    borderRadius:
-                        BorderRadius.vertical(bottom: Radius.circular(16)),
+                    borderRadius: BorderRadius.vertical(
+                      bottom: Radius.circular(16),
+                    ),
                   ),
                   child: Row(
                     children: [
@@ -619,7 +626,9 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     CustomerWalletState walletState,
     CustomerWalletNotifier walletNotifier,
   ) {
-    final seatLabel = widget.seatCode != null ? ' (Seat ${widget.seatCode})' : '';
+    final seatLabel = widget.seatCode != null
+        ? ' (Seat ${widget.seatCode})'
+        : '';
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -737,10 +746,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             _formatCurrency(state.admissionPrice),
           ),
           const SizedBox(height: 8),
-          _buildSummaryLine(
-            'Service Fee',
-            _formatCurrency(state.serviceFee),
-          ),
+          _buildSummaryLine('Service Fee', _formatCurrency(state.serviceFee)),
           const SizedBox(height: 8),
           _buildSummaryLine(
             'Taxes & Processing',
@@ -869,7 +875,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => TicketDetailPage(ticket: newTicket),
+                              builder: (_) =>
+                                  TicketDetailPage(ticket: newTicket),
                             ),
                           );
                         } else if (state.error != null) {

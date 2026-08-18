@@ -6,7 +6,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../providers/customer_provider.dart';
 
 /// Reusable Top Up Dialog for Veloce E-Wallet.
-/// 
+///
 /// Designed for easy refactoring:
 /// When backend Top-Up API endpoint becomes available, simply pass [onTopUp] callback
 /// or update [CustomerWalletNotifier.topUp] to invoke backend repository.
@@ -91,7 +91,9 @@ class _TopUpDialogState extends ConsumerState<TopUpDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Top up failed: ${e.toString().replaceAll('Exception: ', '')}'),
+            content: Text(
+              'Top up failed: ${e.toString().replaceAll('Exception: ', '')}',
+            ),
             backgroundColor: AppColors.danger,
           ),
         );
@@ -149,14 +151,20 @@ class _TopUpDialogState extends ConsumerState<TopUpDialog> {
                   color: AppColors.primary,
                 ),
                 hintText: '50.000',
-                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                  borderSide: const BorderSide(
+                    color: AppColors.primary,
+                    width: 2,
+                  ),
                 ),
               ),
             ),
