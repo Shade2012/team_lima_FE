@@ -23,25 +23,48 @@ function getUserFromToken(req, db) {
 }
 
 function formatCategoryResponse(c, db) {
-  const soldTicketsCount = (db.tickets || []).filter(t => t.categoryId === c.id && ['AVAILABLE', 'SEATED'].includes(t.status)).length;
+  const soldTicketsCount = (db.tickets || []).filter(t => {
+    if (t.categoryId !== c.id || ['CANCELLED', 'EXPIRED', 'REFUND'].includes(t.status)) return false;
+    const order = (db.orders || []).find(o => o.id === t.orderId);
+    if (!order) return false;
+    if (order.status === 'PAID') return true;
+    if (['HELD', 'PAYMENT_PENDING'].includes(order.status) && new Date(order.expiresAt) > new Date()) return true;
+    return false;
+  }).length;
+
   const availableQuota = Math.max(0, (c.totalQuota || 0) - soldTicketsCount);
   return {
-    ...c,
+    id: c.id,
+    eventId: c.eventId,
+    name: c.name,
+    price: c.price,
+    totalQuota: c.totalQuota,
     posIndex: c.posIndex || 0,
     rows: c.rows !== undefined ? c.rows : null,
     columns: c.columns !== undefined ? c.columns : null,
+    blockedSeats: c.blockedSeats || [],
     availableQuota,
-    isAvailable: availableQuota > 0
+    isAvailable: availableQuota > 0,
+    createdAt: c.createdAt,
+    updatedAt: c.updatedAt
   };
 }
 
 module.exports = function (db) {
   // 1. GET /ticket-categories/event/:eventId (Public)
   router.get('/event/:eventId', (req, res) => {
+    const event = db.events.find(e => e.id === req.params.eventId);
+    if (!event) {
+      return res.status(404).json({
+        status_code: 404,
+        message: `Event with id ${req.params.eventId} not found`
+      });
+    }
+
     const categories = db.categories
       .filter(c => c.eventId === req.params.eventId)
       .map(c => formatCategoryResponse(c, db))
-      .sort((a, b) => b.price - a.price);
+      .sort((a, b) => (a.posIndex - b.posIndex) || (b.price - a.price));
 
     return res.status(200).json({
       message: 'Success',
@@ -55,7 +78,7 @@ module.exports = function (db) {
     if (!category) {
       return res.status(404).json({
         status_code: 404,
-        message: 'Ticket category not found'
+        message: `Ticket category with id ${req.params.id} not found`
       });
     }
 
@@ -71,11 +94,11 @@ module.exports = function (db) {
     if (!user || user.role !== 'ORGANIZER') {
       return res.status(403).json({
         status_code: 403,
-        message: 'Forbidden: Only ORGANIZER can create ticket categories'
+        message: 'Forbidden: You do not have permission to add categories to this event'
       });
     }
 
-    const { eventId, name, price, totalQuota, posIndex, rows, columns } = req.body;
+    const { eventId, name, price, totalQuota, posIndex, rows, columns, blockedSeats } = req.body || {};
 
     if (!eventId || !name || price === undefined) {
       return res.status(400).json({
@@ -88,28 +111,46 @@ module.exports = function (db) {
     if (!event) {
       return res.status(404).json({
         status_code: 404,
-        message: 'Event not found'
+        message: `Event with id ${eventId} not found`
       });
     }
 
     if (event.organizerId !== user.id) {
       return res.status(403).json({
         status_code: 403,
-        message: 'Forbidden: You do not own this event'
+        message: 'You do not have permission to add categories to this event'
       });
     }
 
-    const calculatedQuota = totalQuota !== undefined ? Number(totalQuota) : (rows && columns ? Number(rows) * Number(columns) : 100);
+    let calculatedQuota = totalQuota;
+    if (event.isSeated) {
+      if (!rows || !columns) {
+        return res.status(400).json({
+          status_code: 400,
+          message: 'Seated events must provide rows and columns for category'
+        });
+      }
+      const blockedCount = Array.isArray(blockedSeats) ? blockedSeats.length : 0;
+      calculatedQuota = (Number(rows) * Number(columns)) - blockedCount;
+    } else {
+      if (!totalQuota) {
+        return res.status(400).json({
+          status_code: 400,
+          message: 'Non-seated events must provide totalQuota for category'
+        });
+      }
+    }
 
     const newCategory = {
       id: generateUuid(),
       eventId,
       name,
       price: Number(price),
-      totalQuota: calculatedQuota,
+      totalQuota: Number(calculatedQuota),
       posIndex: posIndex !== undefined ? Number(posIndex) : 0,
-      rows: rows !== undefined ? Number(rows) : null,
-      columns: columns !== undefined ? Number(columns) : null,
+      rows: event.isSeated ? Number(rows) : null,
+      columns: event.isSeated ? Number(columns) : null,
+      blockedSeats: event.isSeated ? (Array.isArray(blockedSeats) ? blockedSeats : []) : [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -135,7 +176,7 @@ module.exports = function (db) {
     if (!category) {
       return res.status(404).json({
         status_code: 404,
-        message: 'Ticket category not found'
+        message: `Ticket category with id ${req.params.id} not found`
       });
     }
 
@@ -143,17 +184,38 @@ module.exports = function (db) {
     if (!event || event.organizerId !== user.id) {
       return res.status(403).json({
         status_code: 403,
-        message: 'Forbidden: You do not own this event'
+        message: 'You do not have permission to update this category'
       });
     }
 
-    const { name, price, totalQuota, posIndex, rows, columns } = req.body;
+    const { name, price, totalQuota, posIndex, rows, columns, blockedSeats } = req.body || {};
+
+    if (totalQuota !== undefined && Number(totalQuota) < category.totalQuota) {
+      if (event.isSeated) {
+        const existingSeatsCount = (db.seats || []).filter(s => s.categoryId === category.id).length;
+        if (Number(totalQuota) < existingSeatsCount) {
+          return res.status(400).json({
+            status_code: 400,
+            message: `Cannot reduce totalQuota to ${totalQuota}. There are already ${existingSeatsCount} seats generated.`
+          });
+        }
+      }
+      const activeTicketCount = (db.tickets || []).filter(t => t.categoryId === category.id && !['CANCELLED', 'EXPIRED', 'REFUND'].includes(t.status)).length;
+      if (Number(totalQuota) < activeTicketCount) {
+        return res.status(400).json({
+          status_code: 400,
+          message: `Cannot reduce totalQuota to ${totalQuota}. There are ${activeTicketCount} active ticket(s) in this category.`
+        });
+      }
+    }
+
     if (name !== undefined) category.name = name;
     if (price !== undefined) category.price = Number(price);
     if (totalQuota !== undefined) category.totalQuota = Number(totalQuota);
     if (posIndex !== undefined) category.posIndex = Number(posIndex);
     if (rows !== undefined) category.rows = Number(rows);
     if (columns !== undefined) category.columns = Number(columns);
+    if (blockedSeats !== undefined) category.blockedSeats = Array.isArray(blockedSeats) ? blockedSeats : [];
     category.updatedAt = new Date().toISOString();
 
     return res.status(200).json({
@@ -176,7 +238,7 @@ module.exports = function (db) {
     if (index === -1) {
       return res.status(404).json({
         status_code: 404,
-        message: 'Ticket category not found'
+        message: `Ticket category with id ${req.params.id} not found`
       });
     }
 
@@ -185,7 +247,23 @@ module.exports = function (db) {
     if (!event || event.organizerId !== user.id) {
       return res.status(403).json({
         status_code: 403,
-        message: 'Forbidden: You do not own this event'
+        message: 'You do not have permission to delete this category'
+      });
+    }
+
+    const existingSeatsCount = (db.seats || []).filter(s => s.categoryId === category.id).length;
+    if (existingSeatsCount > 0) {
+      return res.status(400).json({
+        status_code: 400,
+        message: `Cannot delete category because it has ${existingSeatsCount} seats generated. Please delete the seats first.`
+      });
+    }
+
+    const activeTicketCount = (db.tickets || []).filter(t => t.categoryId === category.id && !['CANCELLED', 'EXPIRED', 'REFUND'].includes(t.status)).length;
+    if (activeTicketCount > 0) {
+      return res.status(400).json({
+        status_code: 400,
+        message: `Cannot delete category because it has ${activeTicketCount} active ticket(s). Refund or cancel them first.`
       });
     }
 
