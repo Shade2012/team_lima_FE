@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -6,12 +7,17 @@ import 'package:team_five_fe/core/theme/app_text_styles.dart';
 import 'package:team_five_fe/features/event/data/models/event_model.dart';
 import 'package:team_five_fe/features/event/data/models/event_statistics_model.dart';
 import 'package:team_five_fe/features/event/presentation/providers/event_provider.dart';
+import 'package:team_five_fe/features/event/presentation/providers/event_sse_provider.dart';
+import 'package:team_five_fe/features/event/data/repositories/event_sse_repository.dart';
 import 'package:team_five_fe/features/event/presentation/pages/organizer/edit_event_page.dart';
 import 'package:team_five_fe/features/event/presentation/pages/organizer/ticket_category_detail_page.dart';
 import 'package:team_five_fe/features/ticket_category/presentation/providers/ticket_category_provider.dart';
 import 'package:team_five_fe/features/ticket_category/presentation/pages/organizer/ticket_category_page.dart';
 import 'package:team_five_fe/features/gate/presentation/providers/gate_provider.dart';
 import 'package:team_five_fe/features/gate/presentation/pages/organizer/gate_management_page.dart';
+import 'package:team_five_fe/features/seat/presentation/providers/seat_sse_provider.dart';
+import 'package:team_five_fe/features/seat/data/repositories/seat_sse_repository.dart';
+import 'package:team_five_fe/features/seat/presentation/providers/seat_provider.dart';
 
 class EventDetailPage extends ConsumerStatefulWidget {
   final String eventId;
@@ -22,10 +28,43 @@ class EventDetailPage extends ConsumerStatefulWidget {
   ConsumerState<EventDetailPage> createState() => _EventDetailPageState();
 }
 
-class _EventDetailPageState extends ConsumerState<EventDetailPage> {
+class _EventDetailPageState extends ConsumerState<EventDetailPage>
+    with WidgetsBindingObserver {
+  StreamSubscription<SeatUpdateEvent>? _seatSubscription;
+  StreamSubscription<DashboardUpdateEvent>? _dashboardSubscription;
+  ProviderSubscription<AsyncValue<SeatUpdateEvent>>? _seatListener;
+  ProviderSubscription<AsyncValue<DashboardUpdateEvent>>? _dashboardListener;
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
+    _seatListener = ref.listenManual<AsyncValue<SeatUpdateEvent>>(
+      seatSseProvider(widget.eventId),
+      (previous, next) {
+        next.whenData((update) {
+          if (update.categoryId.isNotEmpty) {
+            ref
+                .read(seatsCountProvider.notifier)
+                .loadSeatsCount(update.categoryId);
+            ref.read(seatsListProvider.notifier).loadSeats(update.categoryId);
+          }
+        });
+      },
+    );
+
+    _dashboardListener = ref.listenManual<AsyncValue<DashboardUpdateEvent>>(
+      dashboardSseProvider(widget.eventId),
+      (previous, next) {
+        next.whenData((update) {
+          ref
+              .read(eventStatisticsProvider.notifier)
+              .loadStatistics(widget.eventId);
+        });
+      },
+    );
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         ref.read(eventDetailProvider.notifier).loadEvent(widget.eventId);
@@ -34,8 +73,50 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
             .loadStatistics(widget.eventId);
         ref.read(categoriesProvider.notifier).setEventId(widget.eventId);
         ref.read(gatesProvider.notifier).setEventId(widget.eventId);
+        _startSeatSse();
+        _startDashboardSse();
       }
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!mounted) return;
+    if (state == AppLifecycleState.resumed) {
+      _startSeatSse();
+      _startDashboardSse();
+    } else if (state == AppLifecycleState.paused) {
+      _seatSubscription?.cancel();
+      _seatSubscription = null;
+      _dashboardSubscription?.cancel();
+      _dashboardSubscription = null;
+    }
+  }
+
+  void _startSeatSse() {
+    _seatSubscription?.cancel();
+    _seatSubscription = ref
+        .read(seatSseProvider(widget.eventId).future)
+        .asStream()
+        .listen((_) {});
+  }
+
+  void _startDashboardSse() {
+    _dashboardSubscription?.cancel();
+    _dashboardSubscription = ref
+        .read(dashboardSseProvider(widget.eventId).future)
+        .asStream()
+        .listen((_) {});
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _seatListener?.close();
+    _dashboardListener?.close();
+    _seatSubscription?.cancel();
+    _dashboardSubscription?.cancel();
+    super.dispose();
   }
 
   String _formatPrice(int price) {
@@ -62,6 +143,32 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
     final detailState = ref.watch(eventDetailProvider);
     final statsState = ref.watch(eventStatisticsProvider);
 
+    // Show statistics error as snackbar
+    if (statsState.error != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Statistics: ${statsState.error}',
+                style: AppTextStyles.snackbar,
+              ),
+              backgroundColor: AppColors.danger,
+              action: SnackBarAction(
+                label: 'Retry',
+                textColor: AppColors.white,
+                onPressed: () {
+                  ref
+                      .read(eventStatisticsProvider.notifier)
+                      .loadStatistics(widget.eventId);
+                },
+              ),
+            ),
+          );
+        }
+      });
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       body: _buildBody(detailState, statsState),
@@ -69,7 +176,7 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
   }
 
   Widget _buildBody(EventDetailState state, EventStatisticsState statsState) {
-    if (state.isLoading || statsState.isLoading) {
+    if (state.isLoading || (statsState.isLoading && statsState.statistics == null)) {
       return const Center(child: CircularProgressIndicator());
     }
 

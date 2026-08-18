@@ -297,18 +297,26 @@ final updateEventProvider =
 class EventStatisticsState {
   final EventStatistics? statistics;
   final bool isLoading;
+  final bool isRefreshing;
   final String? error;
 
-  EventStatisticsState({this.statistics, this.isLoading = false, this.error});
+  EventStatisticsState({
+    this.statistics,
+    this.isLoading = false,
+    this.isRefreshing = false,
+    this.error,
+  });
 
   EventStatisticsState copyWith({
     EventStatistics? statistics,
     bool? isLoading,
+    bool? isRefreshing,
     String? error,
   }) {
     return EventStatisticsState(
       statistics: statistics ?? this.statistics,
       isLoading: isLoading ?? this.isLoading,
+      isRefreshing: isRefreshing ?? this.isRefreshing,
       error: error,
     );
   }
@@ -321,14 +329,23 @@ class EventStatisticsNotifier extends Notifier<EventStatisticsState> {
   }
 
   Future<void> loadStatistics(String eventId) async {
-    state = state.copyWith(isLoading: true, error: null);
+    if (state.statistics != null) {
+      state = state.copyWith(isRefreshing: true, error: null);
+    } else {
+      state = EventStatisticsState(isLoading: true);
+    }
     try {
       final repository = ref.read(eventRepositoryProvider);
       final statistics = await repository.getEventStatistics(eventId);
-      state = state.copyWith(statistics: statistics, isLoading: false);
+      state = state.copyWith(
+        statistics: statistics,
+        isLoading: false,
+        isRefreshing: false,
+      );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
+        isRefreshing: false,
         error: e.toString().replaceAll('Exception: ', ''),
       );
     }

@@ -6,7 +6,10 @@ import 'package:team_five_fe/core/theme/app_text_styles.dart';
 import 'package:team_five_fe/core/widgets/custom_text_field.dart';
 import 'package:team_five_fe/features/auth/presentation/providers/auth_provider.dart';
 import 'package:team_five_fe/features/auth/presentation/pages/signup_page.dart';
+import 'package:team_five_fe/features/admin/presentation/pages/admin_main_screen.dart';
+import 'package:team_five_fe/features/customer/presentation/pages/customer_main_screen.dart';
 import 'package:team_five_fe/features/event/presentation/pages/organizer/organizer_main_screen.dart';
+import 'package:team_five_fe/features/gate/presentation/pages/gate_operator/gate_operator_dashboard_page.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -109,6 +112,39 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       _buildEmailField(authState, authNotifier),
                       const SizedBox(height: 16),
                       _buildPasswordField(authState, authNotifier),
+                      if (authState.error != null) ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.danger.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: AppColors.danger.withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.error_outline,
+                                color: AppColors.danger,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  authState.error!,
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: AppColors.danger,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 8),
                       _buildForgotPassword(),
                       const SizedBox(height: 24),
@@ -134,7 +170,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       hintText: 'Email Address',
       prefixIcon: Icons.email_outlined,
       keyboardType: TextInputType.emailAddress,
-      onChanged: (value) => notifier.setEmail(value),
+      onChanged: (value) {
+        notifier.setEmail(value);
+        if (state.error != null) notifier.clearError();
+      },
+      validator: (value) {
+        if (value == null || value.isEmpty) return 'Email is required';
+        if (!value.contains('@') || !value.contains('.')) {
+          return 'Invalid email format';
+        }
+        return null;
+      },
     );
   }
 
@@ -153,7 +199,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         ),
         onPressed: () => notifier.togglePasswordVisibility(),
       ),
-      onChanged: (value) => notifier.setPassword(value),
+      onChanged: (value) {
+        notifier.setPassword(value);
+        if (state.error != null) notifier.clearError();
+      },
+      validator: (value) {
+        if (value == null || value.isEmpty) return 'Password is required';
+        if (value.length < 6) return 'Password must be at least 6 characters';
+        return null;
+      },
     );
   }
 
@@ -243,11 +297,32 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   void _navigateByRole(String? role) {
     if (!mounted) return;
-    if (role == 'ORGANIZER' || role == 'EVENT_ORGANIZER') {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const OrganizerMainScreen()),
-      );
+    switch (role) {
+      case 'ORGANIZER':
+      case 'EVENT_ORGANIZER':
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const OrganizerMainScreen()),
+        );
+        break;
+      case 'ADMIN':
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const AdminMainScreen()),
+        );
+        break;
+      case 'GATE_OPERATOR':
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const GateOperatorDashboardPage()),
+        );
+        break;
+      default:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const CustomerMainScreen()),
+        );
+        break;
     }
   }
 

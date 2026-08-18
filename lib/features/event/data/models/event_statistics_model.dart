@@ -29,20 +29,27 @@ class EventStatistics {
     return EventStatistics(
       eventId: json['eventId']?.toString(),
       eventName: json['eventName']?.toString(),
-      totalQuota: json['totalQuota'] as int?,
-      totalTicketsSold: json['totalTicketsSold'] as int?,
-      grossRevenue: json['grossRevenue'] as int?,
-      totalRefundCount: json['totalRefundCount'] as int?,
-      totalRefundAmount: json['totalRefundAmount'] as int?,
-      netRevenue: json['netRevenue'] as int?,
+      totalQuota: _parseInt(json['totalQuota']),
+      totalTicketsSold: _parseInt(json['totalTicketsSold']),
+      grossRevenue: _parseInt(json['grossRevenue']),
+      totalRefundCount: _parseInt(json['totalRefundCount']),
+      totalRefundAmount: _parseInt(json['totalRefundAmount']),
+      netRevenue: _parseInt(json['netRevenue']),
       percentageSold: (json['percentageSold'] as num?)?.toDouble(),
-      refundPercentage: json['refundPercentage'] as int?,
+      refundPercentage: _parseInt(json['refundPercentage']),
       categories: (json['categories'] as List<dynamic>?)
           ?.map(
             (e) => EventStatisticsCategory.fromJson(e as Map<String, dynamic>),
           )
           .toList(),
     );
+  }
+
+  static int? _parseInt(dynamic value) {
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 }
 
@@ -73,13 +80,20 @@ class EventStatisticsCategory {
     return EventStatisticsCategory(
       categoryId: json['categoryId']?.toString(),
       categoryName: json['categoryName']?.toString(),
-      price: json['price'] as int?,
-      totalQuota: json['totalQuota'] as int?,
-      ticketsSold: json['ticketsSold'] as int?,
-      grossRevenue: json['grossRevenue'] as int?,
-      refundCount: json['refundCount'] as int?,
-      totalRefundAmount: json['totalRefundAmount'] as int?,
-      refundPercentage: json['refundPercentage'] as int?,
+      price: _parseInt(json['price']),
+      totalQuota: _parseInt(json['totalQuota']),
+      ticketsSold: _parseInt(json['ticketsSold']),
+      grossRevenue: _parseInt(json['grossRevenue']),
+      refundCount: _parseInt(json['refundCount']),
+      totalRefundAmount: _parseInt(json['totalRefundAmount']),
+      refundPercentage: _parseInt(json['refundPercentage']),
     );
+  }
+
+  static int? _parseInt(dynamic value) {
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 }

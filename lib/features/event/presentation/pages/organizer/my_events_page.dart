@@ -577,15 +577,7 @@ class _MyEventsPageState extends ConsumerState<MyEventsPage>
             ),
           ),
         ] else ...[
-          Icon(Icons.event, size: 12, color: AppColors.grey),
-          const SizedBox(width: 4),
-          Text(
-            'Event #${event.id.substring(0, min(8, event.id.length))}',
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.grey,
-              fontSize: 11,
-            ),
-          ),
+          SizedBox(width: 4),
         ],
         const Spacer(),
         if (showActions) _buildActionButtons(event),

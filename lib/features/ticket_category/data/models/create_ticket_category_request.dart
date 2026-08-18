@@ -6,6 +6,7 @@ class CreateTicketCategoryRequest {
   final int posIndex;
   final int? rows;
   final int? columns;
+  final List<String>? blockedSeats;
 
   CreateTicketCategoryRequest({
     required this.eventId,
@@ -15,6 +16,7 @@ class CreateTicketCategoryRequest {
     this.posIndex = 0,
     this.rows,
     this.columns,
+    this.blockedSeats,
   });
 
   Map<String, dynamic> toJson() {
@@ -32,6 +34,9 @@ class CreateTicketCategoryRequest {
     }
     if (columns != null) {
       map['columns'] = columns;
+    }
+    if (blockedSeats != null && blockedSeats!.isNotEmpty) {
+      map['blockedSeats'] = blockedSeats;
     }
     return map;
   }

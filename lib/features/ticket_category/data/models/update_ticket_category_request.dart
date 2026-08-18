@@ -5,6 +5,7 @@ class UpdateTicketCategoryRequest {
   final int? posIndex;
   final int? rows;
   final int? columns;
+  final List<String>? blockedSeats;
 
   UpdateTicketCategoryRequest({
     this.name,
@@ -13,6 +14,7 @@ class UpdateTicketCategoryRequest {
     this.posIndex,
     this.rows,
     this.columns,
+    this.blockedSeats,
   });
 
   Map<String, dynamic> toJson() {
@@ -23,6 +25,9 @@ class UpdateTicketCategoryRequest {
     if (posIndex != null) map['posIndex'] = posIndex;
     if (rows != null) map['rows'] = rows;
     if (columns != null) map['columns'] = columns;
+    if (blockedSeats != null && blockedSeats!.isNotEmpty) {
+      map['blockedSeats'] = blockedSeats;
+    }
     return map;
   }
 }
