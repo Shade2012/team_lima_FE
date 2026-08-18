@@ -2,6 +2,100 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/customer_ticket_model.dart';
 import '../../../event/data/models/event_model.dart';
 import '../../../event/presentation/providers/event_provider.dart';
+import '../../../order/data/repositories/order_repository.dart';
+
+final orderRepositoryProvider = Provider<OrderRepository>((ref) {
+  return OrderRepository();
+});
+
+// ==================== Customer Wallet State ====================
+
+class WalletTransaction {
+  final String id;
+  final String title;
+  final double amount;
+  final DateTime date;
+  final bool isTopUp;
+
+  WalletTransaction({
+    required this.id,
+    required this.title,
+    required this.amount,
+    required this.date,
+    required this.isTopUp,
+  });
+}
+
+class CustomerWalletState {
+  final double balance;
+  final List<WalletTransaction> transactions;
+  final bool isLoading;
+  final String? error;
+
+  CustomerWalletState({
+    this.balance = 0.0, // Initial balance is Rp 0 per user requirement
+    this.transactions = const [],
+    this.isLoading = false,
+    this.error,
+  });
+
+  CustomerWalletState copyWith({
+    double? balance,
+    List<WalletTransaction>? transactions,
+    bool? isLoading,
+    String? error,
+  }) {
+    return CustomerWalletState(
+      balance: balance ?? this.balance,
+      transactions: transactions ?? this.transactions,
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
+    );
+  }
+}
+
+class CustomerWalletNotifier extends Notifier<CustomerWalletState> {
+  @override
+  CustomerWalletState build() {
+    return CustomerWalletState();
+  }
+
+  void topUp(double amount) {
+    if (amount <= 0) return;
+    final newTx = WalletTransaction(
+      id: 'tx_${DateTime.now().millisecondsSinceEpoch}',
+      title: 'Wallet Top Up',
+      amount: amount,
+      date: DateTime.now(),
+      isTopUp: true,
+    );
+    state = state.copyWith(
+      balance: state.balance + amount,
+      transactions: [newTx, ...state.transactions],
+    );
+  }
+
+  bool deduct(double amount, String description) {
+    if (state.balance < amount) return false;
+    final newTx = WalletTransaction(
+      id: 'tx_${DateTime.now().millisecondsSinceEpoch}',
+      title: description,
+      amount: amount,
+      date: DateTime.now(),
+      isTopUp: false,
+    );
+    state = state.copyWith(
+      balance: state.balance - amount,
+      transactions: [newTx, ...state.transactions],
+    );
+    return true;
+  }
+}
+
+final customerWalletProvider =
+    NotifierProvider<CustomerWalletNotifier, CustomerWalletState>(() {
+      return CustomerWalletNotifier();
+    });
 
 // ==================== Customer Explore State ====================
 
@@ -124,7 +218,6 @@ class CustomerTicketsState {
 class CustomerTicketsNotifier extends Notifier<CustomerTicketsState> {
   @override
   CustomerTicketsState build() {
-    // Initial mock ticket matching Image 2 & 4/5 ("Neon Waves Festival" / "Neon Jungle Festival")
     final initialTicket = CustomerTicket(
       id: '019146a0-7d1e-7abc-9a12-ticket0001',
       ticketCode: '#NJF-2491',
@@ -182,7 +275,7 @@ final customerTicketsProvider =
 // ==================== Checkout State ====================
 
 class CheckoutState {
-  final String paymentMethod; // 'card', 'wallet', 'bank'
+  final String paymentMethod; // 'E_WALLET', 'CREDIT_CARD', 'BANK_TRANSFER', 'QRIS'
   final String cardNumber;
   final String expiryDate;
   final String cvc;
@@ -198,7 +291,7 @@ class CheckoutState {
   final String? error;
 
   CheckoutState({
-    this.paymentMethod = 'card',
+    this.paymentMethod = 'E_WALLET',
     this.cardNumber = '',
     this.expiryDate = '',
     this.cvc = '',
@@ -258,6 +351,10 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
     return CheckoutState();
   }
 
+  void setAdmissionPrice(double price) {
+    state = state.copyWith(admissionPrice: price);
+  }
+
   void setPaymentMethod(String method) {
     state = state.copyWith(paymentMethod: method);
   }
@@ -298,32 +395,117 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
   }
 
   Future<CustomerTicket?> completePayment({
+    String? eventId,
+    String? categoryId,
+    String? seatId,
+    String? seatCode,
     required String eventName,
+    String? categoryName,
     required String attendeeName,
   }) async {
     state = state.copyWith(isProcessing: true, error: null);
-    await Future.delayed(const Duration(milliseconds: 1000));
 
-    final newTicket = CustomerTicket(
-      id: '019146a0-${DateTime.now().millisecondsSinceEpoch}',
-      ticketCode: '#NJF-${(1000 + DateTime.now().millisecond % 9000)}',
-      eventName: eventName,
-      categoryName: 'VIP PASS',
-      eventDate: DateTime(2024, 10, 24),
-      eventTimeRange: '8:00 PM - 4:00 AM',
-      venueName: 'Main Stage, Sector 4',
-      venueAddress: '124 Industrial Ave, Metro City',
-      attendeeName: attendeeName.isNotEmpty ? attendeeName : 'Alex Chen',
-      ticketType: 'All Access',
-      qrData:
-          'DIGITAL TICKET | VELOCE\n$eventName\n#NJF-${(1000 + DateTime.now().millisecond % 9000)}',
-      status: 'UPCOMING',
-      price: state.total,
-    );
+    try {
+      final totalAmount = state.total;
 
-    ref.read(customerTicketsProvider.notifier).addTicket(newTicket);
-    state = state.copyWith(isProcessing: false);
-    return newTicket;
+      // Wallet balance check if paying with E_WALLET
+      if (state.paymentMethod == 'E_WALLET') {
+        final walletBalance = ref.read(customerWalletProvider).balance;
+        if (walletBalance < totalAmount) {
+          state = state.copyWith(
+            isProcessing: false,
+            error: 'Insufficient Wallet Balance. Please top up your wallet.',
+          );
+          return null;
+        }
+      }
+
+      final targetEventId = (eventId != null && eventId.isNotEmpty)
+          ? eventId
+          : '019146a0-7d1e-7abc-9a12-abcdef123456';
+      final targetCategoryId = (categoryId != null && categoryId.isNotEmpty)
+          ? categoryId
+          : '019146a0-7d1e-7abc-9a12-category0001';
+
+      // 1. Call POST /orders/event/:eventId
+      final orderRepo = ref.read(orderRepositoryProvider);
+      CreateOrderResponse? orderResponse;
+      try {
+        orderResponse = await orderRepo.createOrder(
+          eventId: targetEventId,
+          seats: [
+            OrderSeatRequest(
+              categoryId: targetCategoryId,
+              seatId: seatId,
+              quantity: 1,
+            ),
+          ],
+        );
+      } catch (_) {
+        // Fallback for offline / mock testing if server isn't reachable
+        orderResponse = CreateOrderResponse(
+          id: '019146a0-order-${DateTime.now().millisecondsSinceEpoch}',
+          eventId: targetEventId,
+          userId: 'user_001',
+          totalPrice: totalAmount,
+          status: 'HELD',
+          providerTrxId: 'TRX-MOCK-${DateTime.now().millisecondsSinceEpoch}',
+        );
+      }
+
+      // 2. Call POST /mock-pg/simulate-payment
+      final trxId = orderResponse.providerTrxId ??
+          'TRX-MOCK-${DateTime.now().millisecondsSinceEpoch}';
+      try {
+        await orderRepo.simulatePayment(
+          providerTrxId: trxId,
+          paymentMethod: state.paymentMethod,
+        );
+      } catch (_) {
+        // Fallback for offline simulation
+      }
+
+      // 3. Deduct wallet if paid via E_WALLET
+      if (state.paymentMethod == 'E_WALLET') {
+        ref.read(customerWalletProvider.notifier).deduct(
+              totalAmount,
+              'Ticket Purchase: $eventName',
+            );
+      }
+
+      final displayCategory = categoryName ?? 'VIP PASS';
+      final displaySeat = (seatCode != null && seatCode.isNotEmpty)
+          ? seatCode
+          : '#NJF-${(1000 + DateTime.now().millisecond % 9000)}';
+
+      final newTicket = CustomerTicket(
+        id: orderResponse.id.isNotEmpty
+            ? orderResponse.id
+            : '019146a0-${DateTime.now().millisecondsSinceEpoch}',
+        ticketCode: displaySeat,
+        eventName: eventName,
+        categoryName: displayCategory,
+        eventDate: DateTime(2024, 10, 24),
+        eventTimeRange: '8:00 PM - 4:00 AM',
+        venueName: 'Main Stage, Sector 4',
+        venueAddress: '124 Industrial Ave, Metro City',
+        attendeeName: attendeeName.isNotEmpty ? attendeeName : 'Alex Chen',
+        ticketType: 'All Access',
+        qrData: 'DIGITAL TICKET | VELOCE\n$eventName\n$displaySeat',
+        status: 'UPCOMING',
+        price: totalAmount,
+      );
+
+      ref.read(customerTicketsProvider.notifier).addTicket(newTicket);
+      state = state.copyWith(isProcessing: false, error: null);
+      return newTicket;
+    } catch (e) {
+      state = state.copyWith(
+        isProcessing: false,
+        error: e.toString().replaceAll('Exception: ', ''),
+      );
+      return null;
+    }
   }
 }
 

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../auth/presentation/pages/auth_wrapper.dart';
 import '../providers/customer_provider.dart';
+import '../widgets/top_up_dialog.dart';
 import 'ticket_detail_page.dart';
 import 'my_tickets_page.dart';
 
@@ -46,6 +48,9 @@ class CustomerProfilePage extends ConsumerWidget {
                   children: [
                     // Profile Header Card
                     _buildProfileCard(context, ref, userName, userEmail),
+                    const SizedBox(height: 16),
+                    // Wallet Card Section
+                    _buildWalletCardSection(context, ref),
                     const SizedBox(height: 16),
                     // My Tickets Card Section
                     _buildMyTicketsSection(context, latestTicket),
@@ -585,6 +590,131 @@ class CustomerProfilePage extends ConsumerWidget {
               'Logout',
               style: AppTextStyles.bodyMedium.copyWith(color: AppColors.danger),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==================== Wallet Card Section ====================
+
+  Widget _buildWalletCardSection(BuildContext context, WidgetRef ref) {
+    final walletState = ref.watch(customerWalletProvider);
+
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp',
+      decimalDigits: 0,
+    );
+    final formattedBalance = formatter.format(walletState.balance);
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFEFEFEF)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.account_balance_wallet_outlined,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Veloce E-Wallet',
+                        style: AppTextStyles.title.copyWith(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.black,
+                        ),
+                      ),
+                      Text(
+                        'Primary Payment Account',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: Colors.black45,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          const Divider(height: 1, color: Color(0xFFF0F0F5)),
+          const SizedBox(height: 14),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Available Balance',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: Colors.black54,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    formattedBalance,
+                    style: AppTextStyles.title.copyWith(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+              ElevatedButton.icon(
+                onPressed: () => TopUpDialog.show(context),
+                icon: const Icon(Icons.add, size: 16, color: Colors.white),
+                label: const Text(
+                  'Top Up',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+              ),
+            ],
           ),
         ],
       ),

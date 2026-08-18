@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/customer_provider.dart';
+import '../widgets/top_up_dialog.dart';
 import 'ticket_detail_page.dart';
 
 class CheckoutPage extends ConsumerStatefulWidget {
+  final String? eventId;
+  final String? categoryId;
+  final String? seatId;
+  final String? seatCode;
   final String eventName;
   final String eventCategory;
   final double price;
@@ -14,6 +20,10 @@ class CheckoutPage extends ConsumerStatefulWidget {
 
   const CheckoutPage({
     super.key,
+    this.eventId,
+    this.categoryId,
+    this.seatId,
+    this.seatCode,
     this.eventName = 'Neon Jungle Festival',
     this.eventCategory = 'LIVE EVENT',
     this.price = 150.0,
@@ -32,6 +42,14 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   final _promoController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(checkoutProvider.notifier).setAdmissionPrice(widget.price);
+    });
+  }
+
+  @override
   void dispose() {
     _cardNumberController.dispose();
     _expiryController.dispose();
@@ -41,10 +59,24 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     super.dispose();
   }
 
+  String _formatCurrency(double amount) {
+    if (amount > 10000) {
+      final formatter = NumberFormat.currency(
+        locale: 'id_ID',
+        symbol: 'Rp',
+        decimalDigits: 0,
+      );
+      return formatter.format(amount);
+    }
+    return '\$${amount.toStringAsFixed(2)}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final checkoutState = ref.watch(checkoutProvider);
     final checkoutNotifier = ref.read(checkoutProvider.notifier);
+    final walletState = ref.watch(customerWalletProvider);
+    final walletNotifier = ref.read(customerWalletProvider.notifier);
     final authState = ref.watch(authProvider);
 
     final attendeeName = authState.currentUser?.username.isNotEmpty == true
@@ -98,7 +130,12 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    _buildPaymentMethods(checkoutState, checkoutNotifier),
+                    _buildPaymentMethods(
+                      checkoutState,
+                      checkoutNotifier,
+                      walletState,
+                      walletNotifier,
+                    ),
 
                     const SizedBox(height: 24),
                     // Billing Details Section
@@ -120,6 +157,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                       checkoutState,
                       checkoutNotifier,
                       attendeeName,
+                      walletState,
+                      walletNotifier,
                     ),
                     const SizedBox(height: 32),
                   ],
@@ -181,209 +220,252 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     );
   }
 
-  Widget _buildPaymentMethods(CheckoutState state, CheckoutNotifier notifier) {
-    return RadioGroup<String>(
-      groupValue: state.paymentMethod,
-      onChanged: (val) {
-        if (val != null) notifier.setPaymentMethod(val);
-      },
-      child: Column(
-        children: [
-          // 1. Credit or Debit Card Option Box
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: state.paymentMethod == 'card'
-                    ? AppColors.primary
-                    : const Color(0xFFE5E5EA),
-                width: state.paymentMethod == 'card' ? 2 : 1,
-              ),
-            ),
-            child: Column(
-              children: [
-                // Header Radio Tile
-                InkWell(
-                  onTap: () => notifier.setPaymentMethod('card'),
-                  borderRadius: BorderRadius.circular(16),
-                  child: Padding(
-                    padding: const EdgeInsets.all(14),
-                    child: Row(
-                      children: [
-                        Radio<String>(
-                          value: 'card',
-                          fillColor: WidgetStateProperty.resolveWith(
-                            (states) => states.contains(WidgetState.selected)
-                                ? AppColors.primary
-                                : null,
-                          ),
-                        ),
-                        const Icon(
-                          Icons.credit_card,
-                          color: AppColors.primary,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Credit or Debit Card',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                        // Card Brands Badges
-                        _buildBrandBadge('VISA'),
-                        const SizedBox(width: 4),
-                        _buildBrandBadge('MC'),
-                      ],
-                    ),
-                  ),
-                ),
-                // Expanded Form Inputs (when card is selected)
-                if (state.paymentMethod == 'card')
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Divider(height: 1, color: Color(0xFFF0F0F5)),
-                        const SizedBox(height: 12),
-                        // Card Number Label & Field
-                        Text(
-                          'CARD NUMBER',
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: Colors.black54,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 10,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        TextField(
-                          controller: _cardNumberController,
-                          keyboardType: TextInputType.number,
-                          style: AppTextStyles.bodyMedium,
-                          decoration: _buildInputDecoration(
-                            hintText: '0000 0000 0000 0000',
-                            suffixIcon: Icons.credit_card_outlined,
-                          ),
-                          onChanged: (val) => notifier.setCardNumber(val),
-                        ),
-                        const SizedBox(height: 12),
+  Widget _buildPaymentMethods(
+    CheckoutState state,
+    CheckoutNotifier notifier,
+    CustomerWalletState walletState,
+    CustomerWalletNotifier walletNotifier,
+  ) {
+    final isWalletInsufficient = state.paymentMethod == 'E_WALLET' &&
+        walletState.balance < state.total;
 
-                        // Expiry & CVC Row
-                        Row(
+    return Column(
+      children: [
+        // 1. E_WALLET (Veloce e-Wallet Option)
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: state.paymentMethod == 'E_WALLET'
+                  ? AppColors.primary
+                  : const Color(0xFFE5E5EA),
+              width: state.paymentMethod == 'E_WALLET' ? 2 : 1,
+            ),
+          ),
+          child: Column(
+            children: [
+              InkWell(
+                onTap: () => notifier.setPaymentMethod('E_WALLET'),
+                borderRadius: BorderRadius.circular(16),
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Row(
+                    children: [
+                      Radio<String>(
+                        value: 'E_WALLET',
+                        groupValue: state.paymentMethod,
+                        onChanged: (val) {
+                          if (val != null) notifier.setPaymentMethod(val);
+                        },
+                        fillColor: WidgetStateProperty.resolveWith(
+                          (states) => states.contains(WidgetState.selected)
+                              ? AppColors.primary
+                              : null,
+                        ),
+                      ),
+                      const Icon(
+                        Icons.account_balance_wallet,
+                        color: AppColors.primary,
+                        size: 22,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'EXPIRY DATE',
-                                    style: AppTextStyles.bodySmall.copyWith(
-                                      color: Colors.black54,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 10,
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  TextField(
-                                    controller: _expiryController,
-                                    keyboardType: TextInputType.datetime,
-                                    style: AppTextStyles.bodyMedium,
-                                    decoration: _buildInputDecoration(
-                                      hintText: 'MM/YY',
-                                    ),
-                                    onChanged: (val) =>
-                                        notifier.setExpiryDate(val),
-                                  ),
-                                ],
+                            Text(
+                              'Veloce Wallet (E-Wallet)',
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
                               ),
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'CVC',
-                                    style: AppTextStyles.bodySmall.copyWith(
-                                      color: Colors.black54,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 10,
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  TextField(
-                                    controller: _cvcController,
-                                    keyboardType: TextInputType.number,
-                                    obscureText: true,
-                                    style: AppTextStyles.bodyMedium,
-                                    decoration: _buildInputDecoration(
-                                      hintText: '123',
-                                      suffixIcon: Icons.info_outline,
-                                    ),
-                                    onChanged: (val) => notifier.setCvc(val),
-                                  ),
-                                ],
+                            const SizedBox(height: 2),
+                            Text(
+                              'Balance: ${_formatCurrency(walletState.balance)}',
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: isWalletInsufficient
+                                    ? AppColors.danger
+                                    : AppColors.grey,
+                                fontWeight: isWalletInsufficient
+                                    ? FontWeight.w700
+                                    : FontWeight.normal,
+                                fontSize: 11,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
-
-                        // Cardholder Name
-                        Text(
-                          'CARDHOLDER NAME',
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: Colors.black54,
+                      ),
+                      ElevatedButton(
+                        onPressed: () => TopUpDialog.show(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                          foregroundColor: AppColors.primary,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 6),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          '+ Top Up',
+                          style: TextStyle(
+                            fontSize: 11,
                             fontWeight: FontWeight.w700,
-                            fontSize: 10,
-                            letterSpacing: 0.5,
                           ),
                         ),
-                        const SizedBox(height: 6),
-                        TextField(
-                          controller: _cardHolderController,
-                          style: AppTextStyles.bodyMedium,
-                          decoration: _buildInputDecoration(
-                            hintText: 'Name on card',
-                          ),
-                          onChanged: (val) => notifier.setCardHolderName(val),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-              ],
+                ),
+              ),
+              if (state.paymentMethod == 'E_WALLET' && isWalletInsufficient)
+                Container(
+                  width: double.infinity,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFFF0F0),
+                    borderRadius:
+                        BorderRadius.vertical(bottom: Radius.circular(16)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.warning_amber_rounded,
+                        color: AppColors.danger,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'Insufficient wallet balance. Tap Top Up to add funds.',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.danger,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+
+        // 2. CREDIT_CARD Option Box
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: state.paymentMethod == 'CREDIT_CARD'
+                  ? AppColors.primary
+                  : const Color(0xFFE5E5EA),
+              width: state.paymentMethod == 'CREDIT_CARD' ? 2 : 1,
             ),
           ),
-          const SizedBox(height: 10),
-
-          // 2. Digital Wallet Option Box
-          _buildPaymentOptionBox(
-            title: 'Digital Wallet',
-            value: 'wallet',
-            groupValue: state.paymentMethod,
-            icon: Icons.account_balance_wallet_outlined,
-            onSelect: () => notifier.setPaymentMethod('wallet'),
+          child: Column(
+            children: [
+              InkWell(
+                onTap: () => notifier.setPaymentMethod('CREDIT_CARD'),
+                borderRadius: BorderRadius.circular(16),
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Row(
+                    children: [
+                      Radio<String>(
+                        value: 'CREDIT_CARD',
+                        groupValue: state.paymentMethod,
+                        onChanged: (val) {
+                          if (val != null) notifier.setPaymentMethod(val);
+                        },
+                        fillColor: WidgetStateProperty.resolveWith(
+                          (states) => states.contains(WidgetState.selected)
+                              ? AppColors.primary
+                              : null,
+                        ),
+                      ),
+                      const Icon(
+                        Icons.credit_card,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Credit / Debit Card',
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                      _buildBrandBadge('VISA'),
+                      const SizedBox(width: 4),
+                      _buildBrandBadge('MC'),
+                    ],
+                  ),
+                ),
+              ),
+              if (state.paymentMethod == 'CREDIT_CARD')
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Divider(height: 1, color: Color(0xFFF0F0F5)),
+                      const SizedBox(height: 12),
+                      Text(
+                        'CARD NUMBER',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: Colors.black54,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 10,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      TextField(
+                        controller: _cardNumberController,
+                        keyboardType: TextInputType.number,
+                        decoration: _buildInputDecoration(
+                          hintText: '4000 0000 0000 0000',
+                          suffixIcon: Icons.credit_card_outlined,
+                        ),
+                        onChanged: (val) => notifier.setCardNumber(val),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
           ),
-          const SizedBox(height: 10),
+        ),
+        const SizedBox(height: 10),
 
-          // 3. Bank Transfer Option Box
-          _buildPaymentOptionBox(
-            title: 'Bank Transfer',
-            value: 'bank',
-            groupValue: state.paymentMethod,
-            icon: Icons.account_balance_outlined,
-            onSelect: () => notifier.setPaymentMethod('bank'),
-          ),
-        ],
-      ),
+        // 3. BANK_TRANSFER Option Box
+        _buildPaymentOptionBox(
+          title: 'Bank Transfer (Virtual Account)',
+          value: 'BANK_TRANSFER',
+          groupValue: state.paymentMethod,
+          icon: Icons.account_balance_outlined,
+          onSelect: () => notifier.setPaymentMethod('BANK_TRANSFER'),
+        ),
+        const SizedBox(height: 10),
+
+        // 4. QRIS Option Box
+        _buildPaymentOptionBox(
+          title: 'QRIS Instant Scan',
+          value: 'QRIS',
+          groupValue: state.paymentMethod,
+          icon: Icons.qr_code_scanner_outlined,
+          onSelect: () => notifier.setPaymentMethod('QRIS'),
+        ),
+      ],
     );
   }
 
@@ -430,6 +512,10 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
           children: [
             Radio<String>(
               value: value,
+              groupValue: groupValue,
+              onChanged: (val) {
+                if (val != null) onSelect();
+              },
               fillColor: WidgetStateProperty.resolveWith(
                 (states) => states.contains(WidgetState.selected)
                     ? AppColors.primary
@@ -442,11 +528,13 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
               size: 20,
             ),
             const SizedBox(width: 8),
-            Text(
-              title,
-              style: AppTextStyles.bodyMedium.copyWith(
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
+            Expanded(
+              child: Text(
+                title,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
               ),
             ),
           ],
@@ -528,7 +616,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     CheckoutState state,
     CheckoutNotifier notifier,
     String attendeeName,
+    CustomerWalletState walletState,
+    CustomerWalletNotifier walletNotifier,
   ) {
+    final seatLabel = widget.seatCode != null ? ' (Seat ${widget.seatCode})' : '';
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -565,7 +657,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             ),
             child: Row(
               children: [
-                // Thumbnail Box
                 Container(
                   width: 70,
                   height: 70,
@@ -589,7 +680,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.eventCategory,
+                        '${widget.eventCategory}$seatLabel',
                         style: AppTextStyles.bodySmall.copyWith(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w800,
@@ -609,24 +700,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.calendar_today_outlined,
-                            size: 12,
-                            color: Colors.black54,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Oct 24, 2024',
-                            style: AppTextStyles.bodySmall.copyWith(
-                              color: Colors.black54,
-                              fontSize: 11,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 2),
                       Row(
                         children: [
                           const Icon(
@@ -660,24 +733,24 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
 
           // Price Breakdown
           _buildSummaryLine(
-            '1x VIP Admission',
-            '\$${widget.price.toStringAsFixed(2)}',
+            '1x Ticket Admission',
+            _formatCurrency(state.admissionPrice),
           ),
           const SizedBox(height: 8),
           _buildSummaryLine(
             'Service Fee',
-            '\$${state.serviceFee.toStringAsFixed(2)}',
+            _formatCurrency(state.serviceFee),
           ),
           const SizedBox(height: 8),
           _buildSummaryLine(
             'Taxes & Processing',
-            '\$${state.taxesAndProcessing.toStringAsFixed(2)}',
+            _formatCurrency(state.taxesAndProcessing),
           ),
           if (state.isPromoApplied) ...[
             const SizedBox(height: 8),
             _buildSummaryLine(
               'Promo Discount (VELOCE10)',
-              '-\$${state.discount.toStringAsFixed(2)}',
+              '-${_formatCurrency(state.discount)}',
               isDiscount: true,
             ),
           ],
@@ -703,7 +776,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                   child: TextField(
                     controller: _promoController,
                     decoration: const InputDecoration(
-                      hintText: 'Promo Code',
+                      hintText: 'Promo Code (VELOCE10)',
                       hintStyle: TextStyle(color: Colors.black38, fontSize: 13),
                       border: InputBorder.none,
                     ),
@@ -757,27 +830,13 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                   color: AppColors.black,
                 ),
               ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Text(
-                    'USD ',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black54,
-                    ),
-                  ),
-                  Text(
-                    '\$${state.total.toStringAsFixed(2)}',
-                    style: AppTextStyles.title.copyWith(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ],
+              Text(
+                _formatCurrency(state.total),
+                style: AppTextStyles.title.copyWith(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.primary,
+                ),
               ),
             ],
           ),
@@ -791,22 +850,44 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                   ? null
                   : () async {
                       final newTicket = await notifier.completePayment(
+                        eventId: widget.eventId,
+                        categoryId: widget.categoryId,
+                        seatId: widget.seatId,
+                        seatCode: widget.seatCode,
                         eventName: widget.eventName,
+                        categoryName: widget.eventCategory,
                         attendeeName: attendeeName,
                       );
-                      if (context.mounted && newTicket != null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Payment completed successfully!'),
-                            backgroundColor: AppColors.success,
-                          ),
-                        );
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => TicketDetailPage(ticket: newTicket),
-                          ),
-                        );
+                      if (context.mounted) {
+                        if (newTicket != null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Payment completed successfully!'),
+                              backgroundColor: AppColors.success,
+                            ),
+                          );
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => TicketDetailPage(ticket: newTicket),
+                            ),
+                          );
+                        } else if (state.error != null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(state.error!),
+                              backgroundColor: AppColors.danger,
+                              action: state.paymentMethod == 'E_WALLET'
+                                  ? SnackBarAction(
+                                      label: 'TOP UP',
+                                      textColor: Colors.white,
+                                      onPressed: () =>
+                                          TopUpDialog.show(context),
+                                    )
+                                  : null,
+                            ),
+                          );
+                        }
                       }
                     },
               style: ElevatedButton.styleFrom(
@@ -833,7 +914,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                         const Icon(Icons.lock, size: 18, color: Colors.white),
                         const SizedBox(width: 8),
                         Text(
-                          'Complete Payment',
+                          'Complete Payment (${state.paymentMethod})',
                           style: AppTextStyles.button.copyWith(
                             color: Colors.white,
                             fontSize: 15,
@@ -844,7 +925,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             ),
           ),
           const SizedBox(height: 12),
-          // Subtext
           Center(
             child: Text(
               'Transactions are 100% secure and encrypted.',
