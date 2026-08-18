@@ -90,8 +90,9 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            gateOperatorDashboardProvider
-                .overrideWith(() => MockGateOperatorDashboardNotifier()),
+            gateOperatorDashboardProvider.overrideWith(
+              () => MockGateOperatorDashboardNotifier(),
+            ),
           ],
           child: const MaterialApp(home: GateOperatorDashboardPage()),
         ),
@@ -102,13 +103,15 @@ void main() {
       expect(find.text('Gate Operator'), findsOneWidget);
     });
 
-    testWidgets('GateOperatorDashboardPage renders tab bar with Active and Upcoming',
+    testWidgets(
+      'GateOperatorDashboardPage renders tab bar with Active and Upcoming',
       (tester) async {
         await tester.pumpWidget(
           ProviderScope(
             overrides: [
-              gateOperatorDashboardProvider
-                  .overrideWith(() => MockGateOperatorDashboardNotifier()),
+              gateOperatorDashboardProvider.overrideWith(
+                () => MockGateOperatorDashboardNotifier(),
+              ),
             ],
             child: const MaterialApp(home: GateOperatorDashboardPage()),
           ),
@@ -118,7 +121,8 @@ void main() {
 
         expect(find.text('Active'), findsOneWidget);
         expect(find.text('Upcoming'), findsOneWidget);
-      });
+      },
+    );
 
     testWidgets('GateOperatorDashboardPage shows scan progress card', (
       tester,
@@ -126,8 +130,9 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            gateOperatorDashboardProvider
-                .overrideWith(() => MockGateOperatorDashboardNotifier()),
+            gateOperatorDashboardProvider.overrideWith(
+              () => MockGateOperatorDashboardNotifier(),
+            ),
           ],
           child: const MaterialApp(home: GateOperatorDashboardPage()),
         ),
@@ -148,8 +153,9 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            gateOperatorDashboardProvider
-                .overrideWith(() => MockGateOperatorDashboardNotifier()),
+            gateOperatorDashboardProvider.overrideWith(
+              () => MockGateOperatorDashboardNotifier(),
+            ),
           ],
           child: const MaterialApp(home: GateOperatorDashboardPage()),
         ),
@@ -161,30 +167,34 @@ void main() {
       expect(find.text('Select to Scan'), findsOneWidget);
     });
 
-    testWidgets('GateOperatorDashboardPage shows empty state when no events',
+    testWidgets('GateOperatorDashboardPage shows empty state when no events', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            gateOperatorDashboardProvider.overrideWith(
+              () => EmptyGateOperatorDashboardNotifier(),
+            ),
+          ],
+          child: const MaterialApp(home: GateOperatorDashboardPage()),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('No active events'), findsOneWidget);
+    });
+
+    testWidgets(
+      'GateOperatorDashboardPage shows error state with retry button',
       (tester) async {
         await tester.pumpWidget(
           ProviderScope(
             overrides: [
-              gateOperatorDashboardProvider
-                  .overrideWith(() => EmptyGateOperatorDashboardNotifier()),
-            ],
-            child: const MaterialApp(home: GateOperatorDashboardPage()),
-          ),
-        );
-
-        await tester.pumpAndSettle();
-
-        expect(find.text('No active events'), findsOneWidget);
-      });
-
-    testWidgets('GateOperatorDashboardPage shows error state with retry button',
-      (tester) async {
-        await tester.pumpWidget(
-          ProviderScope(
-            overrides: [
-              gateOperatorDashboardProvider
-                  .overrideWith(() => ErrorGateOperatorDashboardNotifier()),
+              gateOperatorDashboardProvider.overrideWith(
+                () => ErrorGateOperatorDashboardNotifier(),
+              ),
             ],
             child: const MaterialApp(home: GateOperatorDashboardPage()),
           ),
@@ -193,30 +203,36 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-            find.text('Anda belum ditugaskan ke Gate manapun'), findsOneWidget);
+          find.text('Anda belum ditugaskan ke Gate manapun'),
+          findsOneWidget,
+        );
         expect(find.text('Retry'), findsOneWidget);
-      });
+      },
+    );
 
-    testWidgets('GateOperatorDashboardPage select event shows Scan Tickets button',
+    testWidgets(
+      'GateOperatorDashboardPage select event shows Scan Tickets button',
       (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            gateOperatorDashboardProvider
-                .overrideWith(() => MockGateOperatorDashboardNotifier()),
-          ],
-          child: const MaterialApp(home: GateOperatorDashboardPage()),
-        ),
-      );
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              gateOperatorDashboardProvider.overrideWith(
+                () => MockGateOperatorDashboardNotifier(),
+              ),
+            ],
+            child: const MaterialApp(home: GateOperatorDashboardPage()),
+          ),
+        );
 
-      await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
 
-      // Tap Select to Scan to select the event
-      await tester.tap(find.text('Select to Scan'));
-      await tester.pumpAndSettle();
+        // Tap Select to Scan to select the event
+        await tester.tap(find.text('Select to Scan'));
+        await tester.pumpAndSettle();
 
-      // Should now show Scan Tickets button
-      expect(find.text('Scan Tickets'), findsOneWidget);
-    });
+        // Should now show Scan Tickets button
+        expect(find.text('Scan Tickets'), findsOneWidget);
+      },
+    );
   });
 }

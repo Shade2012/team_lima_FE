@@ -11,32 +11,32 @@ import 'package:team_five_fe/features/event/data/models/event_model.dart';
 class MockRefundListNotifier extends RefundListNotifier {
   @override
   RefundListState build() {
-    return RefundListState(refunds: [
-      RefundRequest(
-        id: 'refund-1',
-        customerName: 'John Doe',
-        amount: 150000,
-        status: 'PENDING',
-        createdAt: DateTime.now().subtract(const Duration(hours: 2)),
-        ticket: RefundTicket(
-          category: RefundCategory(
-            event: RefundEvent(name: 'Neon Festival'),
+    return RefundListState(
+      refunds: [
+        RefundRequest(
+          id: 'refund-1',
+          customerName: 'John Doe',
+          amount: 150000,
+          status: 'PENDING',
+          createdAt: DateTime.now().subtract(const Duration(hours: 2)),
+          ticket: RefundTicket(
+            category: RefundCategory(event: RefundEvent(name: 'Neon Festival')),
           ),
         ),
-      ),
-      RefundRequest(
-        id: 'refund-2',
-        customerName: 'Jane Smith',
-        amount: 200000,
-        status: 'PENDING',
-        createdAt: DateTime.now().subtract(const Duration(days: 1)),
-        ticket: RefundTicket(
-          category: RefundCategory(
-            event: RefundEvent(name: 'Sonic Resonance'),
+        RefundRequest(
+          id: 'refund-2',
+          customerName: 'Jane Smith',
+          amount: 200000,
+          status: 'PENDING',
+          createdAt: DateTime.now().subtract(const Duration(days: 1)),
+          ticket: RefundTicket(
+            category: RefundCategory(
+              event: RefundEvent(name: 'Sonic Resonance'),
+            ),
           ),
         ),
-      ),
-    ]);
+      ],
+    );
   }
 
   @override
@@ -68,17 +68,19 @@ class EmptyRefundListNotifier extends RefundListNotifier {
 class MockAllEventsNotifier extends AllEventsNotifier {
   @override
   AllEventsState build() {
-    return AllEventsState(events: [
-      Event(
-        id: 'evt-1',
-        organizerId: 'org-1',
-        name: 'Test Event',
-        isSeated: true,
-        salesStartTime: DateTime.now().subtract(const Duration(days: 10)),
-        salesEndTime: DateTime.now().add(const Duration(days: 20)),
-        eventDate: DateTime.now().add(const Duration(days: 30)),
-      ),
-    ]);
+    return AllEventsState(
+      events: [
+        Event(
+          id: 'evt-1',
+          organizerId: 'org-1',
+          name: 'Test Event',
+          isSeated: true,
+          salesStartTime: DateTime.now().subtract(const Duration(days: 10)),
+          salesEndTime: DateTime.now().add(const Duration(days: 20)),
+          eventDate: DateTime.now().add(const Duration(days: 30)),
+        ),
+      ],
+    );
   }
 
   @override
@@ -160,8 +162,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Refund Requests'), findsOneWidget);
-      expect(find.text('Approve or reject customer refund requests'),
-          findsOneWidget);
+      expect(
+        find.text('Approve or reject customer refund requests'),
+        findsOneWidget,
+      );
       expect(find.byType(TextField), findsOneWidget);
     });
 
@@ -183,7 +187,8 @@ void main() {
       expect(find.text('Sonic Resonance'), findsOneWidget);
     });
 
-    testWidgets('AdminRefundRequestPage shows empty state when no pending requests',
+    testWidgets(
+      'AdminRefundRequestPage shows empty state when no pending requests',
       (tester) async {
         await tester.pumpWidget(
           ProviderScope(
@@ -197,9 +202,12 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('No pending requests'), findsOneWidget);
-        expect(find.text('All refund requests have been processed.'),
-            findsOneWidget);
-      });
+        expect(
+          find.text('All refund requests have been processed.'),
+          findsOneWidget,
+        );
+      },
+    );
 
     testWidgets('AdminRefundRequestPage shows Approve and Reject buttons', (
       tester,

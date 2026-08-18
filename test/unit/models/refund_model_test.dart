@@ -174,10 +174,7 @@ void main() {
     });
 
     test('Unhappy Path: Should handle null nested fields', () {
-      final json = <String, dynamic>{
-        'id': 'ticket-002',
-        'status': 'CANCELLED',
-      };
+      final json = <String, dynamic>{'id': 'ticket-002', 'status': 'CANCELLED'};
 
       final ticket = RefundTicket.fromJson(json);
 

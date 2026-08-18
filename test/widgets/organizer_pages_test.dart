@@ -11,27 +11,29 @@ import 'package:team_five_fe/features/admin/data/models/refund_model.dart';
 class MockMyEventsNotifier extends MyEventsNotifier {
   @override
   MyEventsState build() {
-    return MyEventsState(events: [
-      Event(
-        id: 'evt-1',
-        organizerId: 'org-1',
-        name: 'Active Festival',
-        isSeated: true,
-        salesStartTime: DateTime.now().subtract(const Duration(days: 10)),
-        salesEndTime: DateTime.now().add(const Duration(days: 20)),
-        eventDate: DateTime.now().add(const Duration(days: 30)),
-        refundPercentage: 100,
-      ),
-      Event(
-        id: 'evt-2',
-        organizerId: 'org-1',
-        name: 'Upcoming Concert',
-        isSeated: false,
-        salesStartTime: DateTime.now().add(const Duration(days: 5)),
-        salesEndTime: DateTime.now().add(const Duration(days: 25)),
-        eventDate: DateTime.now().add(const Duration(days: 35)),
-      ),
-    ]);
+    return MyEventsState(
+      events: [
+        Event(
+          id: 'evt-1',
+          organizerId: 'org-1',
+          name: 'Active Festival',
+          isSeated: true,
+          salesStartTime: DateTime.now().subtract(const Duration(days: 10)),
+          salesEndTime: DateTime.now().add(const Duration(days: 20)),
+          eventDate: DateTime.now().add(const Duration(days: 30)),
+          refundPercentage: 100,
+        ),
+        Event(
+          id: 'evt-2',
+          organizerId: 'org-1',
+          name: 'Upcoming Concert',
+          isSeated: false,
+          salesStartTime: DateTime.now().add(const Duration(days: 5)),
+          salesEndTime: DateTime.now().add(const Duration(days: 25)),
+          eventDate: DateTime.now().add(const Duration(days: 35)),
+        ),
+      ],
+    );
   }
 
   @override
@@ -56,20 +58,20 @@ class EmptyMyEventsNotifier extends MyEventsNotifier {
 class MockRefundListNotifier extends RefundListNotifier {
   @override
   RefundListState build() {
-    return RefundListState(refunds: [
-      RefundRequest(
-        id: 'refund-1',
-        customerName: 'John Doe',
-        amount: 150000,
-        status: 'PENDING',
-        createdAt: DateTime.now().subtract(const Duration(hours: 2)),
-        ticket: RefundTicket(
-          category: RefundCategory(
-            event: RefundEvent(name: 'Neon Festival'),
+    return RefundListState(
+      refunds: [
+        RefundRequest(
+          id: 'refund-1',
+          customerName: 'John Doe',
+          amount: 150000,
+          status: 'PENDING',
+          createdAt: DateTime.now().subtract(const Duration(hours: 2)),
+          ticket: RefundTicket(
+            category: RefundCategory(event: RefundEvent(name: 'Neon Festival')),
           ),
         ),
-      ),
-    ]);
+      ],
+    );
   }
 
   @override
@@ -78,7 +80,8 @@ class MockRefundListNotifier extends RefundListNotifier {
 
 void main() {
   group('Organizer Pages Widget Tests', () {
-    testWidgets('OrganizerMainScreen renders bottom navigation with correct tabs',
+    testWidgets(
+      'OrganizerMainScreen renders bottom navigation with correct tabs',
       (tester) async {
         await tester.pumpWidget(
           ProviderScope(
@@ -95,7 +98,8 @@ void main() {
         expect(find.text('Events'), findsOneWidget);
         expect(find.text('Refunds'), findsOneWidget);
         expect(find.text('Profile'), findsOneWidget);
-      });
+      },
+    );
 
     testWidgets('OrganizerMainScreen starts on Events tab', (tester) async {
       await tester.pumpWidget(
@@ -113,7 +117,9 @@ void main() {
       expect(find.text('My Events'), findsOneWidget);
     });
 
-    testWidgets('OrganizerMainScreen can switch to Refunds tab', (tester) async {
+    testWidgets('OrganizerMainScreen can switch to Refunds tab', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -186,7 +192,9 @@ void main() {
       expect(find.text('Active Festival'), findsOneWidget);
     });
 
-    testWidgets('MyEventsPage shows empty state when no events', (tester) async {
+    testWidgets('MyEventsPage shows empty state when no events', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [

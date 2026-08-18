@@ -197,9 +197,7 @@ void main() {
     });
 
     test('EventStatisticsState copyWith preserves statistics', () {
-      final state = EventStatisticsState(
-        isLoading: false,
-      );
+      final state = EventStatisticsState(isLoading: false);
 
       final updated = state.copyWith(isLoading: true);
 

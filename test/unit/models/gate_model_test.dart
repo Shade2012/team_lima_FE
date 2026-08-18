@@ -61,10 +61,7 @@ void main() {
     });
 
     test('Unhappy Path: Should handle empty scans and operators', () {
-      final json = <String, dynamic>{
-        'id': 'gate-003',
-        'name': 'Empty Gate',
-      };
+      final json = <String, dynamic>{'id': 'gate-003', 'name': 'Empty Gate'};
 
       final gate = Gate.fromJson(json);
 

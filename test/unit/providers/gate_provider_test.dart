@@ -17,7 +17,10 @@ class MockScannerNotifier extends ScannerNotifier {
 
     // Simulate successful scan
     if (qrData == 'VALID_TICKET') {
-      final result = ScanResult(isValid: true, message: 'Ticket scanned successfully');
+      final result = ScanResult(
+        isValid: true,
+        message: 'Ticket scanned successfully',
+      );
       state = state.copyWith(isProcessing: false, currentResult: result);
     } else {
       final result = ScanResult(isValid: false, errorMessage: 'Invalid ticket');
@@ -36,11 +39,7 @@ class MockGateOperatorDashboardNotifier extends GateOperatorDashboardNotifier {
   Future<void> loadAssignedGate() async {
     state = state.copyWith(isLoading: true, error: null);
 
-    final gate = Gate(
-      id: 'gate-001',
-      name: 'North Gate',
-      eventId: 'event-001',
-    );
+    final gate = Gate(id: 'gate-001', name: 'North Gate', eventId: 'event-001');
 
     final event = Event(
       id: 'event-001',
@@ -121,10 +120,7 @@ void main() {
 
     test('ScanResult stores isValid, message, and errorMessage', () {
       final successResult = ScanResult(isValid: true, message: 'OK');
-      final errorResult = ScanResult(
-        isValid: false,
-        errorMessage: 'Invalid',
-      );
+      final errorResult = ScanResult(isValid: false, errorMessage: 'Invalid');
 
       expect(successResult.isValid, true);
       expect(successResult.message, 'OK');
@@ -190,10 +186,7 @@ void main() {
     });
 
     test('scanProgress returns 0 when totalScans is 0', () {
-      final state = GateOperatorDashboardState(
-        scannedCount: 0,
-        totalScans: 0,
-      );
+      final state = GateOperatorDashboardState(scannedCount: 0, totalScans: 0);
 
       expect(state.scanProgress, 0.0);
     });
@@ -273,25 +266,30 @@ void main() {
       expect(original.isSelected, false);
     });
 
-    test('GateOperatorDashboardNotifier selectEvent toggles selection', () async {
-      final container2 = ProviderContainer(
-        overrides: [
-          gateOperatorDashboardProvider.overrideWith(
-            () => MockGateOperatorDashboardNotifier(),
-          ),
-        ],
-      );
-      addTearDown(container2.dispose);
+    test(
+      'GateOperatorDashboardNotifier selectEvent toggles selection',
+      () async {
+        final container2 = ProviderContainer(
+          overrides: [
+            gateOperatorDashboardProvider.overrideWith(
+              () => MockGateOperatorDashboardNotifier(),
+            ),
+          ],
+        );
+        addTearDown(container2.dispose);
 
-      final notifier = container2.read(gateOperatorDashboardProvider.notifier);
+        final notifier = container2.read(
+          gateOperatorDashboardProvider.notifier,
+        );
 
-      // Load events first
-      await notifier.loadAssignedGate();
+        // Load events first
+        await notifier.loadAssignedGate();
 
-      notifier.selectEvent('gate-001');
+        notifier.selectEvent('gate-001');
 
-      final state = container2.read(gateOperatorDashboardProvider);
-      expect(state.events.first.isSelected, true);
-    });
+        final state = container2.read(gateOperatorDashboardProvider);
+        expect(state.events.first.isSelected, true);
+      },
+    );
   });
 }

@@ -121,25 +121,28 @@ void main() {
       expect(state.categories.first.name, 'VIP');
     });
 
-    test('CategoriesNotifier deleteCategory removes category from list', () async {
-      final container2 = ProviderContainer(
-        overrides: [
-          categoriesProvider.overrideWith(() => MockCategoriesNotifier()),
-        ],
-      );
-      addTearDown(container2.dispose);
+    test(
+      'CategoriesNotifier deleteCategory removes category from list',
+      () async {
+        final container2 = ProviderContainer(
+          overrides: [
+            categoriesProvider.overrideWith(() => MockCategoriesNotifier()),
+          ],
+        );
+        addTearDown(container2.dispose);
 
-      final notifier = container2.read(categoriesProvider.notifier);
-      notifier.setEventId('evt-1');
+        final notifier = container2.read(categoriesProvider.notifier);
+        notifier.setEventId('evt-1');
 
-      await Future.delayed(Duration.zero);
+        await Future.delayed(Duration.zero);
 
-      final success = await notifier.deleteCategory('cat-1');
+        final success = await notifier.deleteCategory('cat-1');
 
-      expect(success, true);
-      final state = container2.read(categoriesProvider);
-      expect(state.categories.length, 1);
-      expect(state.categories.first.id, 'cat-2');
-    });
+        expect(success, true);
+        final state = container2.read(categoriesProvider);
+        expect(state.categories.length, 1);
+        expect(state.categories.first.id, 'cat-2');
+      },
+    );
   });
 }
