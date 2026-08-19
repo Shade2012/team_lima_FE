@@ -590,6 +590,11 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
     required String eventName,
     String? categoryName,
     required String attendeeName,
+    DateTime? eventDate,
+    String? eventTimeRange,
+    String? venueName,
+    String? venueAddress,
+    String? ticketType,
   }) async {
     state = state.copyWith(isProcessing: true, error: null);
 
@@ -654,10 +659,10 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
             .deduct(totalAmount, 'Ticket Purchase: $eventName');
       }
 
-      final displayCategory = categoryName ?? 'VIP PASS';
+      final displayCategory = categoryName ?? 'General Admission';
       final displaySeat = (seatCode != null && seatCode.isNotEmpty)
           ? seatCode
-          : '#NJF-${(1000 + DateTime.now().millisecond % 9000)}';
+          : '#TKN-${(1000 + DateTime.now().millisecond % 9000)}';
 
       final newTicket = CustomerTicket(
         id: orderResponse.id.isNotEmpty
@@ -666,13 +671,14 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
         ticketCode: displaySeat,
         eventName: eventName,
         categoryName: displayCategory,
-        eventDate: DateTime(2024, 10, 24),
-        eventTimeRange: '8:00 PM - 4:00 AM',
-        venueName: 'Main Stage, Sector 4',
-        venueAddress: '124 Industrial Ave, Metro City',
-        attendeeName: attendeeName.isNotEmpty ? attendeeName : 'Alex Chen',
-        ticketType: 'All Access',
-        qrData: 'DIGITAL TICKET | VELOCE\n$eventName\n$displaySeat',
+        eventDate: eventDate ?? DateTime.now().add(const Duration(days: 7)),
+        eventTimeRange: eventTimeRange ?? '07:00 PM - 11:00 PM',
+        venueName: venueName ?? 'Main Stage Pavilion',
+        venueAddress: venueAddress ?? 'Grand Exhibition Center',
+        attendeeName: attendeeName.isNotEmpty ? attendeeName : 'Customer',
+        ticketType: ticketType ?? 'E-Ticket',
+        qrData:
+            'DIGITAL TICKET | VELOCE\n$eventName\n$displayCategory\n$displaySeat',
         status: 'UPCOMING',
         price: totalAmount,
       );

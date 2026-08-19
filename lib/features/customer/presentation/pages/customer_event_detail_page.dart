@@ -740,10 +740,14 @@ class _CustomerEventDetailPageState
                   context,
                   MaterialPageRoute(
                     builder: (_) => CheckoutPage(
+                      eventId: widget.event?.id ?? widget.eventId,
+                      categoryId: categoryId,
                       eventName: title,
                       eventCategory: categoryName,
                       price: categoryPrice > 10000 ? 150.0 : categoryPrice,
                       location: widget.location,
+                      eventDate: widget.event?.eventDate,
+                      venueName: widget.location,
                     ),
                   ),
                 );

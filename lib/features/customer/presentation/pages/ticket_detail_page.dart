@@ -6,11 +6,13 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../data/models/customer_ticket_model.dart';
 import '../providers/customer_provider.dart';
+import 'customer_main_screen.dart';
 
 class TicketDetailPage extends ConsumerWidget {
   final CustomerTicket? ticket;
+  final bool isFromCheckout;
 
-  const TicketDetailPage({super.key, this.ticket});
+  const TicketDetailPage({super.key, this.ticket, this.isFromCheckout = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -21,17 +23,16 @@ class TicketDetailPage extends ConsumerWidget {
             ? ticketsState.tickets.first
             : CustomerTicket(
                 id: '019146a0-fallback',
-                ticketCode: '#NJF-2491',
-                eventName: 'Neon Jungle Festival',
-                categoryName: 'VIP PASS',
-                eventDate: DateTime(2024, 8, 24),
-                eventTimeRange: '8:00 PM - 4:00 AM',
-                venueName: 'The Grand Warehouse',
-                venueAddress: '124 Industrial Ave, Metro City',
-                attendeeName: 'Alex Chen',
-                ticketType: 'All Access',
-                qrData:
-                    'DIGITAL TICKET | VELOCE\nNeon Jungle Festival\nNJF-2491',
+                ticketCode: '#TKN-0001',
+                eventName: 'Event Ticket',
+                categoryName: 'General Admission',
+                eventDate: DateTime.now().add(const Duration(days: 7)),
+                eventTimeRange: '07:00 PM - 11:00 PM',
+                venueName: 'Main Stage Pavilion',
+                venueAddress: 'Grand Exhibition Center',
+                attendeeName: 'Customer',
+                ticketType: 'E-Ticket',
+                qrData: 'DIGITAL TICKET | VELOCE\nEvent Ticket\n#TKN-0001',
                 status: 'UPCOMING',
               ));
 
@@ -89,32 +90,63 @@ class TicketDetailPage extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          // Circular Back Button
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 6,
-                    offset: Offset(0, 2),
+          if (isFromCheckout)
+            GestureDetector(
+              onTap: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const CustomerMainScreen(initialIndex: 0),
                   ),
-                ],
+                  (route) => false,
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 6,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.home,
+                  color: AppColors.primary,
+                  size: 20,
+                ),
               ),
-              child: const Icon(
-                Icons.arrow_back,
-                color: AppColors.black,
-                size: 20,
+            )
+          else
+            GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 6,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.arrow_back,
+                  color: AppColors.black,
+                  size: 20,
+                ),
               ),
             ),
-          ),
           Expanded(
             child: Text(
-              'My Tickets',
+              isFromCheckout ? 'Ticket Confirmed' : 'Ticket Detail',
               style: AppTextStyles.title.copyWith(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -123,7 +155,27 @@ class TicketDetailPage extends ConsumerWidget {
               textAlign: TextAlign.center,
             ),
           ),
-          const SizedBox(width: 40),
+          if (isFromCheckout)
+            TextButton(
+              onPressed: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const CustomerMainScreen(initialIndex: 0),
+                  ),
+                  (route) => false,
+                );
+              },
+              child: Text(
+                'Home',
+                style: AppTextStyles.link.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            )
+          else
+            const SizedBox(width: 40),
         ],
       ),
     );
@@ -515,6 +567,40 @@ class TicketDetailPage extends ConsumerWidget {
   ) {
     return Column(
       children: [
+        if (isFromCheckout) ...[
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const CustomerMainScreen(initialIndex: 0),
+                  ),
+                  (route) => false,
+                );
+              },
+              icon: const Icon(Icons.home, size: 20, color: Colors.white),
+              label: Text(
+                'Back to Home',
+                style: AppTextStyles.button.copyWith(
+                  color: Colors.white,
+                  fontSize: 15,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                elevation: 0,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
         // Save to Wallet Button
         SizedBox(
           width: double.infinity,
@@ -530,8 +616,12 @@ class TicketDetailPage extends ConsumerWidget {
                     );
                   },
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
+              backgroundColor: isFromCheckout
+                  ? const Color(0xFF6C63FF).withValues(alpha: 0.12)
+                  : AppColors.primary,
+              foregroundColor: isFromCheckout
+                  ? AppColors.primary
+                  : Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24),
@@ -541,16 +631,16 @@ class TicketDetailPage extends ConsumerWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
+                Icon(
                   Icons.account_balance_wallet_outlined,
                   size: 20,
-                  color: Colors.white,
+                  color: isFromCheckout ? AppColors.primary : Colors.white,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   'Save to Wallet',
                   style: AppTextStyles.button.copyWith(
-                    color: Colors.white,
+                    color: isFromCheckout ? AppColors.primary : Colors.white,
                     fontSize: 15,
                   ),
                 ),
