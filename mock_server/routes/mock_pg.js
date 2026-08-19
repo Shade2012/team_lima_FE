@@ -110,6 +110,36 @@ module.exports = function (db) {
     if (order) {
       order.status = 'PAID';
       order.updatedAt = new Date().toISOString();
+
+      // Deduct E_WALLET balance if paymentMethod is E_WALLET
+      if (paymentMethod === 'E_WALLET' && order.customerId) {
+        if (!db.wallets) db.wallets = [];
+        if (!db.walletTransactions) db.walletTransactions = [];
+
+        let wallet = db.wallets.find(w => w.userId === order.customerId);
+        const amountToDeduct = order.totalPrice || (payment ? payment.amount : 0);
+
+        if (wallet) {
+          if (wallet.balance < amountToDeduct) {
+            return res.status(400).json({
+              status_code: 400,
+              message: 'Insufficient Wallet Balance. Please top up your wallet.'
+            });
+          }
+          wallet.balance -= amountToDeduct;
+          wallet.updatedAt = new Date().toISOString();
+
+          db.walletTransactions.push({
+            id: '019146a0-' + require('crypto').randomBytes(2).toString('hex') + '-7abc-9a12-' + require('crypto').randomBytes(6).toString('hex'),
+            walletId: wallet.id,
+            amount: -amountToDeduct,
+            type: 'PAYMENT',
+            refId: order.id,
+            note: `Payment for Order ${order.id}`,
+            createdAt: new Date().toISOString()
+          });
+        }
+      }
     } else {
       db.orders.push({
         id: orderId,

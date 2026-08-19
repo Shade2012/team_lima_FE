@@ -310,6 +310,38 @@ module.exports = function (db) {
       const activeTickets = db.tickets.filter(t => t.orderId === order.id && t.status !== 'REFUND');
       order.status = activeTickets.length === 0 ? 'FULL_REFUND' : 'PARTIAL_REFUND';
       order.updatedAt = new Date().toISOString();
+
+      // Credit refunded amount back to customer's Veloce Wallet
+      if (order.customerId && refund.refundAmount > 0) {
+        if (!db.wallets) db.wallets = [];
+        if (!db.walletTransactions) db.walletTransactions = [];
+
+        let wallet = db.wallets.find(w => w.userId === order.customerId);
+        if (!wallet) {
+          wallet = {
+            id: generateUuid(),
+            userId: order.customerId,
+            balance: 0,
+            currency: 'IDR',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+          db.wallets.push(wallet);
+        }
+
+        wallet.balance += refund.refundAmount;
+        wallet.updatedAt = new Date().toISOString();
+
+        db.walletTransactions.push({
+          id: generateUuid(),
+          walletId: wallet.id,
+          amount: refund.refundAmount,
+          type: 'REFUND',
+          refId: refund.id,
+          note: `Refund for Ticket ${ticket.id}`,
+          createdAt: new Date().toISOString()
+        });
+      }
     }
 
     return res.status(200).json({

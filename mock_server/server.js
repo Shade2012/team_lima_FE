@@ -33,6 +33,8 @@ let db = {
   tickets: [],
   payments: [],
   refunds: [],
+  wallets: [],
+  walletTransactions: [],
   blacklistedTokens: []
 };
 
@@ -76,7 +78,10 @@ app.get('/', (req, res) => {
       '/refunds',
       '/refunds/my-refunds',
       '/mock-pg/transaction',
-      '/mock-pg/simulate-payment'
+      '/mock-pg/simulate-payment',
+      '/wallet',
+      '/wallet/topup',
+      '/wallet/transactions'
     ]
   });
 });
@@ -92,6 +97,7 @@ app.use('/tickets', require('./routes/tickets')(db));
 app.use('/scans', require('./routes/scans')(db));
 app.use('/refunds', require('./routes/refunds')(db));
 app.use('/mock-pg', require('./routes/mock_pg')(db));
+app.use('/wallet', require('./routes/wallet')(db));
 
 // 404 Handler
 app.use((req, res) => {

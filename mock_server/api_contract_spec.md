@@ -406,8 +406,70 @@ Seluruh exception yang ditangkap oleh `HttpExceptionFilter` menghasilkan format:
 - **Response 201 Created**: `{ "providerTrxId": "<snap_token>", "checkoutUrl": "https://..." }`
 
 #### 2. Simulate Payment (`POST /mock-pg/simulate-payment`)
-- **Request Body**: `{ "providerTrxId": "<snap_token>", "paymentMethod": "GOPAY" }`
+- **Request Body**: `{ "providerTrxId": "<snap_token>", "paymentMethod": "E_WALLET" | "CREDIT_CARD" | "BANK_TRANSFER" | "QRIS" }`
 - **Response 200 OK**: `{ "message": "Success", "data": true }`
+
+---
+
+### J. Feature: Wallet / VelocePay (`/wallet`)
+
+#### 1. Get Wallet Balance (`GET /wallet`)
+- **Auth**: Bearer Token (Role: `CUSTOMER`)
+- **Response 200 OK** (`WalletResponseDto`):
+  ```json
+  {
+    "message": "Wallet balance retrieved successfully",
+    "data": {
+      "id": "019146a0-7d1e-7abc-9a12-wallet0000001",
+      "userId": "019146a0-7d1e-7abc-9a12-abcdef123456",
+      "balance": 500000,
+      "currency": "IDR",
+      "createdAt": "2026-08-12T10:00:00.000Z",
+      "updatedAt": "2026-08-19T20:00:00.000Z"
+    }
+  }
+  ```
+
+#### 2. Top Up Wallet (`POST /wallet/topup`)
+- **Auth**: Bearer Token (Role: `CUSTOMER`)
+- **Request Body** (`TopUpWalletDto`): `{ "amount": 100000 }`
+  - Validasi: `amount` berupa integer positif (min: 1, max: 10,000,000 per transaksi).
+  - Limit Saldo Maksimal: Rp 50.000.000.
+- **Response 201 Created** (`WalletResponseDto`):
+  ```json
+  {
+    "message": "Wallet topped up successfully",
+    "data": {
+      "id": "019146a0-7d1e-7abc-9a12-wallet0000001",
+      "userId": "019146a0-7d1e-7abc-9a12-abcdef123456",
+      "balance": 600000,
+      "currency": "IDR",
+      "createdAt": "2026-08-12T10:00:00.000Z",
+      "updatedAt": "2026-08-19T20:05:00.000Z"
+    }
+  }
+  ```
+- **Response 400 Bad Request**: `{ "status_code": 400, "message": "Top up failed. Maximum balance exceeded" }`
+
+#### 3. Get Wallet Transactions (`GET /wallet/transactions`)
+- **Auth**: Bearer Token (Role: `CUSTOMER`)
+- **Response 200 OK** (Array `WalletTransactionResponseDto`):
+  ```json
+  {
+    "message": "Transactions retrieved successfully",
+    "data": [
+      {
+        "id": "019146a0-7d1e-7abc-9a12-trx000000001",
+        "walletId": "019146a0-7d1e-7abc-9a12-wallet0000001",
+        "amount": 100000,
+        "type": "TOPUP",
+        "refId": "TOPUP-1724160000",
+        "note": "Wallet Top Up",
+        "createdAt": "2026-08-19T20:05:00.000Z"
+      }
+    ]
+  }
+  ```
 
 ---
 
@@ -419,6 +481,12 @@ enum Role {
   ORGANIZER
   GATE_OPERATOR
   ADMIN
+}
+
+enum WalletTransactionType {
+  TOPUP
+  PAYMENT
+  REFUND
 }
 
 enum TicketStatus {

@@ -561,6 +561,70 @@ Server sudah dilengkapi data awal (_seed data_) dari file `mock_server/data/init
 
 ---
 
+### 4.11 Feature Wallet / VelocePay (`/wallet`)
+
+#### 1. Get Wallet Balance (`GET /wallet`)
+- **Auth**: Bearer Token (Role: `CUSTOMER`)
+- **Response 200 OK**:
+  ```json
+  {
+    "message": "Wallet balance retrieved successfully",
+    "data": {
+      "id": "019146a0-7d1e-7abc-9a12-wallet0000001",
+      "userId": "019146a0-7d1e-7abc-9a12-abcdef123456",
+      "balance": 500000,
+      "currency": "IDR",
+      "createdAt": "2026-08-12T10:00:00.000Z",
+      "updatedAt": "2026-08-19T20:00:00.000Z"
+    }
+  }
+  ```
+
+#### 2. Top Up Wallet (`POST /wallet/topup`)
+- **Auth**: Bearer Token (Role: `CUSTOMER`)
+- **Body Request**:
+  ```json
+  {
+    "amount": 100000
+  }
+  ```
+- **Response 201 Created**:
+  ```json
+  {
+    "message": "Wallet topped up successfully",
+    "data": {
+      "id": "019146a0-7d1e-7abc-9a12-wallet0000001",
+      "userId": "019146a0-7d1e-7abc-9a12-abcdef123456",
+      "balance": 600000,
+      "currency": "IDR",
+      "createdAt": "2026-08-12T10:00:00.000Z",
+      "updatedAt": "2026-08-19T20:05:00.000Z"
+    }
+  }
+  ```
+
+#### 3. Get Wallet Transactions (`GET /wallet/transactions`)
+- **Auth**: Bearer Token (Role: `CUSTOMER`)
+- **Response 200 OK**:
+  ```json
+  {
+    "message": "Transactions retrieved successfully",
+    "data": [
+      {
+        "id": "019146a0-7d1e-7abc-9a12-trx000000001",
+        "walletId": "019146a0-7d1e-7abc-9a12-wallet0000001",
+        "amount": 100000,
+        "type": "TOPUP",
+        "refId": "TOPUP-1724160000",
+        "note": "Wallet Top Up",
+        "createdAt": "2026-08-19T20:05:00.000Z"
+      }
+    ]
+  }
+  ```
+
+---
+
 ## 5. Integrasi dengan Aplikasi Flutter
 
 Aplikasi Flutter sudah terhubung dengan Mock Server ini melalui layer `lib/core/`.
