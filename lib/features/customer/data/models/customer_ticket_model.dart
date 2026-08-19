@@ -47,40 +47,41 @@ class CustomerTicket {
         json['category']?['name']?.toString() ??
         'General Admission';
 
-    return CustomerTicket(
-      id: json['id']?.toString() ?? '',
-      ticketCode: code.isNotEmpty
-          ? code
-          : '#TKN-${json['id']?.toString().substring(0, 6) ?? "0000"}',
-      eventName: event,
-      categoryName: category,
-      eventDate: json['eventDate'] != null
-          ? DateTime.tryParse(json['eventDate'].toString()) ?? DateTime.now()
-          : (json['date'] != null
-                ? DateTime.tryParse(json['date'].toString()) ?? DateTime.now()
-                : DateTime.now()),
-      eventTimeRange:
-          json['eventTimeRange']?.toString() ??
-          json['timeRange']?.toString() ??
-          'TBA',
-      venueName:
-          json['venueName']?.toString() ??
-          json['location']?.toString() ??
-          'Main Arena',
-      venueAddress:
-          json['venueAddress']?.toString() ??
-          json['address']?.toString() ??
-          'Main Sector',
-      attendeeName:
-          json['attendeeName']?.toString() ??
-          json['userName']?.toString() ??
-          'Customer',
-      ticketType: json['ticketType']?.toString() ?? 'E-Ticket',
-      qrData: json['qrData']?.toString() ?? 'VELOCE TICKET | $event | $code',
-      status: json['status']?.toString() ?? 'UPCOMING',
-      imageUrl: json['imageUrl']?.toString() ?? json['image']?.toString(),
-      price: (json['price'] as num?)?.toDouble() ?? 0.0,
-    );
+      final id = json['id']?.toString() ?? '';
+      return CustomerTicket(
+        id: id,
+        ticketCode: code.isNotEmpty
+            ? code
+            : '#TKN-${id.length >= 6 ? id.substring(0, 6) : "0000"}',
+        eventName: event,
+        categoryName: category,
+        eventDate: json['eventDate'] != null
+            ? DateTime.tryParse(json['eventDate'].toString()) ?? DateTime.now()
+            : (json['date'] != null
+                  ? DateTime.tryParse(json['date'].toString()) ?? DateTime.now()
+                  : DateTime.now()),
+        eventTimeRange:
+            json['eventTimeRange']?.toString() ??
+            json['timeRange']?.toString() ??
+            'TBA',
+        venueName:
+            json['venueName']?.toString() ??
+            json['location']?.toString() ??
+            'Main Arena',
+        venueAddress:
+            json['venueAddress']?.toString() ??
+            json['address']?.toString() ??
+            'Main Sector',
+        attendeeName:
+            json['attendeeName']?.toString() ??
+            json['userName']?.toString() ??
+            'Customer',
+        ticketType: json['ticketType']?.toString() ?? 'E-Ticket',
+        qrData: json['qrData']?.toString() ?? 'VELOCE TICKET | $event | $code\nID: $id',
+        status: json['status']?.toString() ?? 'UPCOMING',
+        imageUrl: json['imageUrl']?.toString() ?? json['image']?.toString(),
+        price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      );
   }
 
   Map<String, dynamic> toJson() {

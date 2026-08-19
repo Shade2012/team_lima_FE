@@ -58,17 +58,8 @@ class ScannerNotifier extends Notifier<ScannerState> {
     state = state.copyWith(isProcessing: true);
 
     try {
-      // Extract ticket ID if payload contains formatting or ID prefix
-      String ticketId = qrData.trim();
-      if (ticketId.contains('ID:')) {
-        final match = RegExp(r'ID:\s*([^\s\n]+)').firstMatch(ticketId);
-        if (match != null) {
-          ticketId = match.group(1)!;
-        }
-      }
-
       final repo = ref.read(gateRepositoryProvider);
-      final responseMessage = await repo.scanTicket(ticketId);
+      final responseMessage = await repo.scanTicket(qrData);
 
       final result = ScanResult(isValid: true, message: responseMessage);
 

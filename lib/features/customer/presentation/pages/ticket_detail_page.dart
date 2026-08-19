@@ -32,7 +32,7 @@ class TicketDetailPage extends ConsumerWidget {
                 venueAddress: 'Grand Exhibition Center',
                 attendeeName: 'Customer',
                 ticketType: 'E-Ticket',
-                qrData: 'DIGITAL TICKET | VELOCE\nEvent Ticket\n#TKN-0001',
+                qrData: 'DIGITAL TICKET | VELOCE\nEvent Ticket\n#TKN-0001\nID: 019146a0-fallback',
                 status: 'UPCOMING',
               ));
 

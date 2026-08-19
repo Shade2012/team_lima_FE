@@ -644,10 +644,12 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
           ? seatCode
           : '#TKN-${(1000 + DateTime.now().millisecond % 9000)}';
 
+      final ticketId = orderResponse.id.isNotEmpty
+          ? orderResponse.id
+          : '019146a0-${DateTime.now().millisecondsSinceEpoch}';
+
       final newTicket = CustomerTicket(
-        id: orderResponse.id.isNotEmpty
-            ? orderResponse.id
-            : '019146a0-${DateTime.now().millisecondsSinceEpoch}',
+        id: ticketId,
         ticketCode: displaySeat,
         eventName: eventName,
         categoryName: displayCategory,
@@ -658,7 +660,7 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
         attendeeName: attendeeName.isNotEmpty ? attendeeName : 'Customer',
         ticketType: ticketType ?? 'E-Ticket',
         qrData:
-            'DIGITAL TICKET | VELOCE\n$eventName\n$displayCategory\n$displaySeat',
+            'DIGITAL TICKET | VELOCE\n$eventName\n$displayCategory\n$displaySeat\nID: $ticketId',
         status: 'UPCOMING',
         price: totalAmount,
       );
