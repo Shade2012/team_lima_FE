@@ -378,5 +378,16 @@
       "updatedAt": "2026-08-22T08:00:00.000Z"
     }
   ],
+  "wallets": [
+    {
+      "id": "019146a0-7d1e-7abc-9a12-wallet0000001",
+      "userId": "019146a0-7d1e-7abc-9a12-abcdef123456",
+      "balance": 0,
+      "currency": "IDR",
+      "createdAt": "2026-08-12T10:00:00.000Z",
+      "updatedAt": "2026-08-12T10:00:00.000Z"
+    }
+  ],
+  "walletTransactions": [],
   "blacklistedTokens": []
 }

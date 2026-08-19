@@ -138,3 +138,10 @@ stateDiagram-v2
    - Admin menyetujui refund via `PATCH /refunds/:id/approve` yang otomatis mengubah status tiket ke `REFUND` dan status pesanan ke `FULL_REFUND` (jika tidak ada tiket aktif tersisa) atau `PARTIAL_REFUND`.
 3. **Gate Operator Assignment**:
    - Detail Gate (`GET /gates/:id` & `GET /gates/event/:eventId`) menyajikan perincian daftar petugas gerbang (`operators`) yang ditugaskan di gate tersebut.
+
+7. **Alur Pengelolaan Wallet & VelocePay (`/wallet`)**
+   - Customer dapat memeriksa saldo wallet (`GET /wallet`), yang secara otomatis dibuatkan akun wallet ber-saldo awal `Rp 0` jika belum pernah ada.
+   - Customer dapat melakukan Top Up saldo (`POST /wallet/topup`) dengan nominal valid (integer positif, max Rp 10.000.000 per top-up, limit saldo maksimal Rp 50.000.000). Top up menambah saldo dan mencatat transaksi bertipe `TOPUP`.
+   - Ketika transaksi tiket dibayar menggunakan `paymentMethod: "E_WALLET"`, sistem memverifikasi kecukupan saldo, memotong saldo wallet secara otomatis, dan mencatat transaksi bertipe `PAYMENT`.
+   - Ketika pengajuan refund disetujui oleh Admin (`PATCH /refunds/:id/approve`), nominal refund dikembalikan (*credit*) ke saldo Veloce Wallet customer dan mencatat transaksi bertipe `REFUND`.
+   - Customer dapat melihat riwayat transaksi wallet (`GET /wallet/transactions`) yang diurutkan berdasarkan transaksi terbaru.
