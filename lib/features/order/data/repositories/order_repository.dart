@@ -26,6 +26,7 @@ class CreateOrderResponse {
   final String? providerTrxId;
   final String? snapToken;
   final String? snapRedirectUrl;
+  final String? checkoutUrl;
 
   CreateOrderResponse({
     required this.id,
@@ -36,22 +37,26 @@ class CreateOrderResponse {
     this.providerTrxId,
     this.snapToken,
     this.snapRedirectUrl,
+    this.checkoutUrl,
   });
 
   factory CreateOrderResponse.fromJson(Map<String, dynamic> json) {
     final payment = json['payment'] as Map<String, dynamic>?;
 
     return CreateOrderResponse(
-      id: json['id']?.toString() ?? '',
+      id: json['orderId']?.toString() ?? json['id']?.toString() ?? '',
       eventId: json['eventId']?.toString() ?? '',
-      userId: json['userId']?.toString() ?? '',
-      totalPrice: json['totalPrice'] is num
-          ? (json['totalPrice'] as num).toDouble()
-          : double.tryParse(json['totalPrice']?.toString() ?? '') ?? 0.0,
+      userId: json['userId']?.toString() ?? json['customerId']?.toString() ?? '',
+      totalPrice: json['totalAmount'] is num
+          ? (json['totalAmount'] as num).toDouble()
+          : (json['totalPrice'] is num
+              ? (json['totalPrice'] as num).toDouble()
+              : double.tryParse(json['totalAmount']?.toString() ?? json['totalPrice']?.toString() ?? '') ?? 0.0),
       status: json['status']?.toString() ?? 'HELD',
-      providerTrxId: payment?['providerTrxId']?.toString(),
+      providerTrxId: json['providerTrxId']?.toString() ?? payment?['providerTrxId']?.toString(),
       snapToken: payment?['snapToken']?.toString(),
       snapRedirectUrl: payment?['snapRedirectUrl']?.toString(),
+      checkoutUrl: json['checkoutUrl']?.toString() ?? payment?['checkoutUrl']?.toString(),
     );
   }
 }
