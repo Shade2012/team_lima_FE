@@ -601,54 +601,6 @@ class TicketDetailPage extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
         ],
-        // Save to Wallet Button
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: isRefunded
-                ? null
-                : () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Ticket saved to Apple / Google Wallet!'),
-                        backgroundColor: AppColors.success,
-                      ),
-                    );
-                  },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isFromCheckout
-                  ? const Color(0xFF6C63FF).withValues(alpha: 0.12)
-                  : AppColors.primary,
-              foregroundColor: isFromCheckout
-                  ? AppColors.primary
-                  : Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-              ),
-              elevation: 0,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.account_balance_wallet_outlined,
-                  size: 20,
-                  color: isFromCheckout ? AppColors.primary : Colors.white,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Save to Wallet',
-                  style: AppTextStyles.button.copyWith(
-                    color: isFromCheckout ? AppColors.primary : Colors.white,
-                    fontSize: 15,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
         // Request Refund Button
         SizedBox(
           width: double.infinity,

@@ -248,7 +248,7 @@ void main() {
 
         expect(find.text('Ticket Detail'), findsOneWidget);
         expect(find.text('Scan at entrance'), findsOneWidget);
-        expect(find.text('Save to Wallet'), findsOneWidget);
+        expect(find.text('Request Refund'), findsOneWidget);
       },
     );
 
