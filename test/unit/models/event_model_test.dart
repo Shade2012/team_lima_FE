@@ -94,6 +94,7 @@ void main() {
     test('Happy Path: Should serialize CreateEventRequest to JSON', () {
       final request = CreateEventRequest(
         name: 'New Festival',
+        description: 'A great festival',
         isSeated: true,
         salesStartTime: DateTime(2026, 8, 1),
         salesEndTime: DateTime(2026, 8, 30),
@@ -106,26 +107,34 @@ void main() {
       final json = request.toJson();
 
       expect(json['name'], 'New Festival');
+      expect(json['description'], 'A great festival');
       expect(json['isSeated'], true);
       expect(json['refundEndDate'], isNotNull);
       expect(json['refundPolicy'], 'Full refund');
       expect(json['refundPercentage'], 100);
     });
 
-    test('Unhappy Path: Should omit null optional fields', () {
+    test('Happy Path: Should serialize with all required fields', () {
       final request = CreateEventRequest(
         name: 'Minimal Event',
+        description: 'Minimal description',
         isSeated: false,
         salesStartTime: DateTime(2026, 8, 1),
         salesEndTime: DateTime(2026, 8, 30),
         eventDate: DateTime(2026, 9, 1),
+        refundEndDate: DateTime(2026, 8, 25),
+        refundPolicy: 'No refund',
+        refundPercentage: 0,
       );
 
       final json = request.toJson();
 
-      expect(json.containsKey('refundEndDate'), false);
-      expect(json.containsKey('refundPolicy'), false);
-      expect(json.containsKey('refundPercentage'), false);
+      expect(json['name'], 'Minimal Event');
+      expect(json['description'], 'Minimal description');
+      expect(json['isSeated'], false);
+      expect(json['refundEndDate'], isNotNull);
+      expect(json['refundPolicy'], 'No refund');
+      expect(json['refundPercentage'], 0);
     });
   });
 

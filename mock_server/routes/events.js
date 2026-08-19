@@ -1,6 +1,33 @@
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
+const multer = require('multer');
+const path = require('path');
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '..', 'uploads'));
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `event-${Date.now()}-${crypto.randomBytes(4).toString('hex')}${ext}`);
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = /jpeg|jpg|png|gif|webp/;
+    const ext = allowed.test(path.extname(file.originalname).toLowerCase());
+    const mime = allowed.test(file.mimetype);
+    if (ext && mime) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files (jpeg, jpg, png, gif, webp) are allowed'));
+    }
+  }
+});
 
 function generateUuid() {
   return '019146a0-' + crypto.randomBytes(2).toString('hex') + '-7abc-9a12-' + crypto.randomBytes(6).toString('hex');
@@ -154,7 +181,7 @@ module.exports = function (db) {
   });
 
   // 4. POST /events (Role: ORGANIZER)
-  router.post('/', (req, res) => {
+  router.post('/', upload.single('image'), (req, res) => {
     const user = getUserFromToken(req, db);
     if (!user || user.role !== 'ORGANIZER') {
       return res.status(403).json({
@@ -163,7 +190,7 @@ module.exports = function (db) {
       });
     }
 
-    const { name, isSeated, salesStartTime, salesEndTime, eventDate, refundEndDate, refundPolicy, refundPercentage } = req.body;
+    const { name, description, isSeated, salesStartTime, salesEndTime, eventDate, refundEndDate, refundPolicy, refundPercentage } = req.body;
 
     if (!name || isSeated === undefined || !salesStartTime || !salesEndTime || !eventDate) {
       return res.status(400).json({
@@ -199,17 +226,24 @@ module.exports = function (db) {
       });
     }
 
+    let imageUrl = null;
+    if (req.file) {
+      imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    }
+
     const newEvent = {
       id: generateUuid(),
       organizerId: user.id,
       name,
-      isSeated: Boolean(isSeated),
+      imageUrl,
+      description: description || null,
+      isSeated: isSeated === 'true' || isSeated === true,
       salesStartTime,
       salesEndTime,
       eventDate,
       refundEndDate: refundEndDate || null,
       refundPolicy: refundPolicy || '',
-      refundPercentage: refundPercentage || 0,
+      refundPercentage: refundPercentage ? Number(refundPercentage) : 0,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };

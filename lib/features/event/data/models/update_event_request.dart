@@ -1,5 +1,6 @@
 class UpdateEventRequest {
   final String? name;
+  final String? description;
   final bool? isSeated;
   final DateTime? salesStartTime;
   final DateTime? salesEndTime;
@@ -10,6 +11,7 @@ class UpdateEventRequest {
 
   UpdateEventRequest({
     this.name,
+    this.description,
     this.isSeated,
     this.salesStartTime,
     this.salesEndTime,
@@ -23,6 +25,9 @@ class UpdateEventRequest {
     final data = <String, dynamic>{};
     if (name != null && name!.isNotEmpty) {
       data['name'] = name;
+    }
+    if (description != null && description!.isNotEmpty) {
+      data['description'] = description;
     }
     if (isSeated != null) {
       data['isSeated'] = isSeated;

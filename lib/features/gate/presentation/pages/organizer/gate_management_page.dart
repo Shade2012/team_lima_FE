@@ -6,7 +6,7 @@ import 'package:team_five_fe/features/gate/data/models/gate_model.dart';
 import 'package:team_five_fe/features/gate/presentation/providers/gate_provider.dart';
 import 'package:team_five_fe/features/gate/presentation/pages/organizer/create_gate_page.dart';
 import 'package:team_five_fe/features/gate/presentation/pages/organizer/edit_gate_page.dart';
-import 'package:team_five_fe/features/gate/presentation/pages/organizer/register_gate_operator_page.dart';
+import 'package:team_five_fe/features/gate/presentation/pages/organizer/gate_operators_page.dart';
 
 class GateManagementPage extends ConsumerStatefulWidget {
   final String eventId;
@@ -306,27 +306,12 @@ class _GateManagementPageState extends ConsumerState<GateManagementPage> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        'Gate ID: ${gate.id.substring(0, 8)}...',
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.grey,
-                        ),
-                      ),
                     ],
                   ),
                 ),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    IconButton(
-                      onPressed: () => _navigateToRegisterOperator(gate),
-                      icon: Icon(
-                        Icons.person_add_outlined,
-                        color: AppColors.success,
-                        size: 20,
-                      ),
-                      tooltip: 'Register Operator',
-                    ),
                     IconButton(
                       onPressed: () => _navigateToEditGate(gate),
                       icon: Icon(
@@ -351,87 +336,71 @@ class _GateManagementPageState extends ConsumerState<GateManagementPage> {
             ),
           ),
           if (gate.operators.isNotEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Divider(height: 1, color: AppColors.greyLight),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Operators (${gate.operators.length})',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.grey,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  ...gate.operators.map(
-                    (operator) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: AppColors.success.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Icon(
-                              Icons.person,
-                              color: AppColors.success,
-                              size: 14,
-                            ),
+            GestureDetector(
+              onTap: () => _navigateToGateOperators(gate),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Divider(height: 1, color: AppColors.greyLight),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Text(
+                          'Operators (${gate.operators.length})',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.grey,
                           ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  operator.username,
-                                  style: AppTextStyles.bodyMedium.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                Text(
-                                  operator.email,
-                                  style: AppTextStyles.bodySmall.copyWith(
-                                    color: AppColors.grey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                        const Spacer(),
+                        Icon(
+                          Icons.chevron_right,
+                          color: AppColors.grey,
+                          size: 18,
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             )
           else
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Column(
-                children: [
-                  Divider(height: 1, color: AppColors.greyLight),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Icon(Icons.info_outline, size: 14, color: AppColors.grey),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Belum ada operator',
-                        style: AppTextStyles.bodySmall.copyWith(
+            GestureDetector(
+              onTap: () => _navigateToGateOperators(gate),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: Column(
+                  children: [
+                    Divider(height: 1, color: AppColors.greyLight),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          size: 14,
                           color: AppColors.grey,
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                        const SizedBox(width: 6),
+                        Text(
+                          'Click here to see operators',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.grey,
+                          ),
+                        ),
+                        const Spacer(),
+                        Icon(
+                          Icons.chevron_right,
+                          color: AppColors.grey,
+                          size: 18,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
         ],
@@ -440,6 +409,9 @@ class _GateManagementPageState extends ConsumerState<GateManagementPage> {
   }
 
   void _navigateToCreateGate() async {
+    print(
+      'DEBUG GateManagement - navigateToCreateGate eventId: "${widget.eventId}"',
+    );
     await Navigator.push(
       context,
       MaterialPageRoute(
@@ -464,33 +436,18 @@ class _GateManagementPageState extends ConsumerState<GateManagementPage> {
     );
   }
 
-  void _navigateToRegisterOperator(Gate gate) {
-    try {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => RegisterGateOperatorPage(
-            eventId: widget.eventId,
-            eventName: widget.eventName,
-            gateId: gate.id,
-            gateName: gate.name,
-          ),
+  void _navigateToGateOperators(Gate gate) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => GateOperatorsPage(
+          gateId: gate.id,
+          gateName: gate.name,
+          eventId: widget.eventId,
+          eventName: widget.eventName,
         ),
-      ).then((_) {
-        if (mounted) {
-          ref.read(gatesProvider.notifier).loadGates();
-        }
-      });
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'),
-            backgroundColor: AppColors.danger,
-          ),
-        );
-      }
-    }
+      ),
+    );
   }
 
   void _showDeleteConfirmation(Gate gate) {

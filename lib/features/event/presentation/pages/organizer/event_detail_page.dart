@@ -138,6 +138,70 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage>
     return value;
   }
 
+  void _showFullImage(BuildContext context, String imageUrl) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: false,
+        barrierColor: Colors.black,
+        barrierDismissible: true,
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Scaffold(
+              backgroundColor: Colors.black.withValues(alpha: 0.95),
+              body: Stack(
+                children: [
+                  // Full screen image with pinch-to-zoom
+                  Center(
+                    child: InteractiveViewer(
+                      minScale: 0.5,
+                      maxScale: 4.0,
+                      child: Image.network(
+                        imageUrl,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Center(
+                              child: Icon(
+                                Icons.broken_image_outlined,
+                                color: Colors.white54,
+                                size: 64,
+                              ),
+                            ),
+                      ),
+                    ),
+                  ),
+                  // Close button
+                  Positioned(
+                    top: MediaQuery.of(context).padding.top + 16,
+                    right: 16,
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final detailState = ref.watch(eventDetailProvider);
@@ -233,35 +297,60 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage>
     final isDraft = now.isBefore(event.salesStartTime);
     final isEnded = now.isAfter(event.salesEndTime);
 
-    return Column(
+    return Stack(
       children: [
-        // Purple Header
-        _buildPurpleHeader(event, isOnSale, isDraft, isEnded),
-        // Scrollable Content
-        Expanded(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              children: [
-                // Action Buttons (Edit + Share)
-                _buildActionButtons(event),
+        // Scrollable content
+        SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            children: [
+              // Purple Header with image + event info
+              _buildPurpleHeader(event, isOnSale, isDraft, isEnded),
+              // Description
+              if (event.description != null &&
+                  event.description!.isNotEmpty) ...[
                 const SizedBox(height: 16),
-                // Revenue Card
-                _buildRevenueCard(statistics),
-                const SizedBox(height: 16),
-                // Ticket Distribution
-                _buildTicketDistribution(statistics, event),
-                const SizedBox(height: 16),
-                // Sales Timeline
-                _buildSalesTimeline(event),
-                const SizedBox(height: 16),
-                // Refund Policy
-                _buildRefundPolicy(event),
-                const SizedBox(height: 16),
-                // Manage Buttons
-                _buildManageButtons(event),
-                const SizedBox(height: 32),
+                _buildDescription(event),
               ],
+              const SizedBox(height: 16),
+              // Revenue Card
+              _buildRevenueCard(statistics),
+              const SizedBox(height: 16),
+              // Ticket Distribution
+              _buildTicketDistribution(statistics, event),
+              const SizedBox(height: 16),
+              // Sales Timeline
+              _buildSalesTimeline(event),
+              const SizedBox(height: 16),
+              // Refund Policy
+              _buildRefundPolicy(event),
+              const SizedBox(height: 16),
+              // Management Buttons
+              _buildManageButtons(event),
+              const SizedBox(height: 16),
+              // Bottom Action Buttons (DELETE | EDIT)
+              _buildBottomActions(event),
+              const SizedBox(height: 50),
+            ],
+          ),
+        ),
+        // Floating Back Button
+        Positioned(
+          top: MediaQuery.of(context).padding.top + 12,
+          left: 16,
+          child: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.white.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.arrow_back,
+                color: AppColors.white,
+                size: 20,
+              ),
             ),
           ),
         ),
@@ -291,10 +380,15 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage>
       statusColor = AppColors.success;
     }
 
+    final hasImage = event.imageUrl != null && event.imageUrl!.isNotEmpty;
+    final timeFormat = DateFormat('HH:mm');
+    final startTime = timeFormat.format(event.salesStartTime);
+    final endTime = timeFormat.format(event.salesEndTime);
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 12,
+        top: MediaQuery.of(context).padding.top + 60,
         left: 20,
         right: 20,
         bottom: 24,
@@ -306,113 +400,314 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage>
           colors: [Color(0xFF6B0096), AppColors.primary],
         ),
       ),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Back Button
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.white.withValues(alpha: 0.2),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.arrow_back,
-                color: AppColors.white,
-                size: 20,
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          // Status Badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-            decoration: BoxDecoration(
-              color: statusColor,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              statusText,
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.white,
-                fontWeight: FontWeight.w700,
-                fontSize: 11,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          // Event Name
-          Text(
-            _safeString(event.name),
-            style: AppTextStyles.title.copyWith(
-              color: AppColors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 6),
-          // Date
-          Row(
-            children: [
-              const Icon(Icons.calendar_today, color: Colors.white70, size: 14),
-              const SizedBox(width: 6),
-              Text(
-                _safeDateFormat(event.eventDate),
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: Colors.white70,
-                  fontSize: 13,
+          // Event Image (left side)
+          if (hasImage)
+            GestureDetector(
+              onTap: () => _showFullImage(context, event.imageUrl!),
+              child: Container(
+                width: 100,
+                height: 140,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.black.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: Image.network(
+                    event.imageUrl!,
+                    width: 100,
+                    height: 140,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      width: 100,
+                      height: 140,
+                      color: AppColors.white.withValues(alpha: 0.2),
+                      child: const Icon(
+                        Icons.broken_image_outlined,
+                        color: Colors.white54,
+                        size: 36,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ],
+            ),
+          const SizedBox(width: 16),
+          // Event Info (right side)
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Status Badge
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: statusColor,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    statusText,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 10,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                // Event Name
+                Text(
+                  _safeString(event.name),
+                  style: AppTextStyles.title.copyWith(
+                    color: AppColors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    height: 1.2,
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 10),
+                // Date
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.calendar_today,
+                      color: Colors.white70,
+                      size: 14,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        _safeDateFormat(event.eventDate),
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                // Time
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.access_time,
+                      color: Colors.white70,
+                      size: 14,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        '$startTime - $endTime',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  // ==================== Action Buttons ====================
+  // ==================== Description ====================
 
-  Widget _buildActionButtons(Event event) {
+  Widget _buildDescription(Event event) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: SizedBox(
-        width: double.infinity,
-        child: OutlinedButton.icon(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => EditEventPage(
-                  eventId: event.id,
-                  eventName: event.name,
-                  isSeated: event.isSeated,
-                  salesStartTime: event.salesStartTime,
-                  salesEndTime: event.salesEndTime,
-                  eventDate: event.eventDate,
-                  refundEndDate: event.refundEndDate,
-                  refundPolicy: event.refundPolicy,
-                  refundPercentage: event.refundPercentage,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.black.withValues(alpha: 0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.description_outlined,
+                  color: AppColors.primary,
+                  size: 20,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  'Description',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    color: AppColors.black,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              event.description!,
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.grey,
+                fontSize: 13,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ==================== Bottom Action Buttons ====================
+
+  Widget _buildBottomActions(Event event) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        children: [
+          // Delete Button (left)
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () => _showDeleteConfirmation(event),
+              icon: const Icon(Icons.delete_outline, size: 18),
+              label: Text(
+                'Delete Event',
+                style: AppTextStyles.button.copyWith(
+                  fontSize: 13,
+                  color: AppColors.danger,
                 ),
               ),
-            );
-          },
-          icon: const Icon(Icons.edit_outlined, size: 18),
-          label: Text(
-            'Edit Event',
-            style: AppTextStyles.button.copyWith(fontSize: 13),
-          ),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.primary,
-            side: const BorderSide(color: AppColors.primary),
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.danger,
+                side: const BorderSide(color: AppColors.danger),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
             ),
           ),
+          const SizedBox(width: 12),
+          // Edit Button (right)
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => EditEventPage(
+                      eventId: event.id,
+                      eventName: event.name,
+                      description: event.description,
+                      imageUrl: event.imageUrl,
+                      isSeated: event.isSeated,
+                      salesStartTime: event.salesStartTime,
+                      salesEndTime: event.salesEndTime,
+                      eventDate: event.eventDate,
+                      refundEndDate: event.refundEndDate,
+                      refundPolicy: event.refundPolicy,
+                      refundPercentage: event.refundPercentage,
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.edit_outlined, size: 18),
+              label: Text(
+                'Edit Event',
+                style: AppTextStyles.button.copyWith(fontSize: 13),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==================== Delete Confirmation ====================
+
+  void _showDeleteConfirmation(Event event) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('Delete Event', style: AppTextStyles.title),
+        content: Text(
+          'Are you sure you want to delete "${event.name}"? This action cannot be undone.',
+          style: AppTextStyles.bodyMedium,
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey),
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final success = await ref
+                  .read(myEventsProvider.notifier)
+                  .deleteEvent(event.id);
+              if (success && mounted) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Event deleted successfully!',
+                        style: AppTextStyles.snackbar,
+                      ),
+                      backgroundColor: AppColors.success,
+                    ),
+                  );
+                  Navigator.pop(context);
+                }
+              }
+            },
+            child: Text(
+              'Delete',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.danger,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -4,11 +4,17 @@ import 'package:flutter/foundation.dart';
 class ApiConstants {
   ApiConstants._();
 
+  static const bool isPhysicalDevice = true;
+  static const String physicalDeviceIp = 'http://10.127.76.109:3000';
+
   /// Default local mock server base URL.
   /// On Android emulator, localhost is 10.0.2.2.
   static String get baseUrl {
     if (kIsWeb) return 'http://localhost:3000';
-    if (Platform.isAndroid) return 'http://10.0.2.2:3000';
+    if (Platform.isAndroid) {
+      if (isPhysicalDevice) return physicalDeviceIp;
+      return 'http://10.0.2.2:3000';
+    }
     return 'http://localhost:3000';
   }
 

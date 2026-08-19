@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/event_model.dart';
 import '../../data/models/event_statistics_model.dart';
@@ -205,11 +206,11 @@ class CreateEventNotifier extends Notifier<CreateEventState> {
     return CreateEventState();
   }
 
-  Future<bool> createEvent(CreateEventRequest request) async {
+  Future<bool> createEvent(CreateEventRequest request, {File? imageFile}) async {
     state = state.copyWith(isLoading: true, error: null, isSuccess: false);
     try {
       final repository = ref.read(eventRepositoryProvider);
-      final event = await repository.createEvent(request);
+      final event = await repository.createEvent(request, imageFile: imageFile);
       state = state.copyWith(
         isLoading: false,
         isSuccess: true,
@@ -264,11 +265,11 @@ class UpdateEventNotifier extends Notifier<UpdateEventState> {
     return UpdateEventState();
   }
 
-  Future<bool> updateEvent(String id, UpdateEventRequest request) async {
+  Future<bool> updateEvent(String id, UpdateEventRequest request, {File? imageFile}) async {
     state = state.copyWith(isLoading: true, error: null, isSuccess: false);
     try {
       final repository = ref.read(eventRepositoryProvider);
-      await repository.updateEvent(id, request);
+      await repository.updateEvent(id, request, imageFile: imageFile);
       state = state.copyWith(isLoading: false, isSuccess: true);
       ref.read(eventDetailProvider.notifier).loadEvent(id);
       ref.read(myEventsProvider.notifier).loadMyEvents();

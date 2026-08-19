@@ -50,9 +50,6 @@ class GateOperatorRequest {
   }
 
   dynamic toJson() {
-    if (operators.length == 1) {
-      return operators.first.toJson();
-    }
     return operators.map((op) => op.toJson()).toList();
   }
 }

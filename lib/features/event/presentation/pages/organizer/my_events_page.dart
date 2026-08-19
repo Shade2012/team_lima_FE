@@ -301,6 +301,7 @@ class _MyEventsPageState extends ConsumerState<MyEventsPage>
         now.isAfter(event.salesStartTime) && now.isBefore(event.salesEndTime);
     final isDraft = now.isBefore(event.salesStartTime);
     final isSoldOut = now.isAfter(event.salesEndTime);
+    final hasImage = event.imageUrl != null && event.imageUrl!.isNotEmpty;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -329,8 +330,23 @@ class _MyEventsPageState extends ConsumerState<MyEventsPage>
           child: Column(
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildEventIcon(event, index, isOnSale, isDraft, isSoldOut),
+                  // Event image or fallback icon
+                  if (hasImage)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.network(
+                        event.imageUrl!,
+                        width: 60,
+                        height: 80,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            _buildFallbackIcon(event, index),
+                      ),
+                    )
+                  else
+                    _buildFallbackIcon(event, index),
                   const SizedBox(width: 12),
                   Expanded(
                     child: _buildEventInfo(event, isOnSale, isDraft, isSoldOut),
@@ -354,35 +370,22 @@ class _MyEventsPageState extends ConsumerState<MyEventsPage>
     );
   }
 
-  // ==================== Event Icon ====================
+  // ==================== Fallback Icon ====================
 
-  Widget _buildEventIcon(
-    Event event,
-    int index,
-    bool isOnSale,
-    bool isDraft,
-    bool isSoldOut,
-  ) {
+  Widget _buildFallbackIcon(Event event, int index) {
     final icon = _getIcon(index);
     final initials = _getInitials(event.name);
 
     return Container(
-      width: 52,
-      height: 52,
+      width: 60,
+      height: 80,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.8)],
         ),
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.25),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Stack(
         alignment: Alignment.center,

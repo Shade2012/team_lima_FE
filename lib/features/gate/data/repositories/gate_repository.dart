@@ -67,6 +67,18 @@ class GateRepository {
     }
   }
 
+  /// GET /gates/:id
+  Future<Gate> getGateById(String id) async {
+    try {
+      final response = await _dioClient.dio.get(ApiConstants.gateDetail(id));
+      return Gate.fromJson(response.data['data']);
+    } on DioException catch (e) {
+      throw Exception(
+        _extractErrorMessage(e, fallback: 'Failed to fetch gate'),
+      );
+    }
+  }
+
   /// POST /users/register/gate-operator
   Future<List<UserModel>> registerGateOperator(
     GateOperatorRequest request,

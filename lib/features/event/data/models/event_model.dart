@@ -1,7 +1,12 @@
+import 'package:team_five_fe/core/constants/api_constants.dart';
+
 class Event {
   final String id;
   final String organizerId;
   final String name;
+  final String? imageKey;
+  final String? imageUrl;
+  final String? description;
   final bool isSeated;
   final DateTime salesStartTime;
   final DateTime salesEndTime;
@@ -16,6 +21,9 @@ class Event {
     required this.id,
     required this.organizerId,
     required this.name,
+    this.imageKey,
+    this.imageUrl,
+    this.description,
     required this.isSeated,
     required this.salesStartTime,
     required this.salesEndTime,
@@ -28,10 +36,17 @@ class Event {
   });
 
   factory Event.fromJson(Map<String, dynamic> json) {
+    final imageKey = json['imageKey']?.toString();
+    final imageUrl = json['imageUrl']?.toString() ??
+        (imageKey != null ? '${ApiConstants.baseUrl}/$imageKey' : null);
+
     return Event(
       id: json['id']?.toString() ?? '',
       organizerId: json['organizerId']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
+      imageKey: imageKey,
+      imageUrl: imageUrl,
+      description: json['description']?.toString(),
       isSeated: json['isSeated'] == true,
       salesStartTime: json['salesStartTime'] != null
           ? DateTime.tryParse(json['salesStartTime'].toString()) ??
@@ -64,6 +79,9 @@ class Event {
       'id': id,
       'organizerId': organizerId,
       'name': name,
+      'imageKey': imageKey,
+      'imageUrl': imageUrl,
+      'description': description,
       'isSeated': isSeated,
       'salesStartTime': salesStartTime.toIso8601String(),
       'salesEndTime': salesEndTime.toIso8601String(),
