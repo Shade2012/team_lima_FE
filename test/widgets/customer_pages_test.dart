@@ -17,7 +17,7 @@ class MockCustomerExploreNotifier extends CustomerExploreNotifier {
   }
 
   @override
-  Future<void> loadPublicEvents() async {
+  Future<void> loadPublicEvents({bool forceRefresh = false}) async {
     // Mock override to bypass network request during widget testing
   }
 }

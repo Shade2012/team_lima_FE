@@ -174,7 +174,10 @@ class CustomerExploreNotifier extends Notifier<CustomerExploreState> {
     return CustomerExploreState();
   }
 
-  Future<void> loadPublicEvents() async {
+  Future<void> loadPublicEvents({bool forceRefresh = false}) async {
+    if (!forceRefresh && (state.isLoading || state.events.isNotEmpty)) {
+      return;
+    }
     state = state.copyWith(isLoading: true, error: null);
     try {
       final repository = ref.read(eventRepositoryProvider);

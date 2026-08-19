@@ -26,7 +26,7 @@ class CustomerExplorePage extends ConsumerWidget {
             // Body Content
             Expanded(
               child: RefreshIndicator(
-                onRefresh: () => exploreNotifier.loadPublicEvents(),
+                onRefresh: () => exploreNotifier.loadPublicEvents(forceRefresh: true),
                 color: AppColors.primary,
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(
@@ -177,7 +177,7 @@ class CustomerExplorePage extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             ElevatedButton(
-              onPressed: () => notifier.loadPublicEvents(),
+              onPressed: () => notifier.loadPublicEvents(forceRefresh: true),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
@@ -208,7 +208,7 @@ class CustomerExplorePage extends ConsumerWidget {
                   ),
                 ),
                 TextButton(
-                  onPressed: () => notifier.loadPublicEvents(),
+                  onPressed: () => notifier.loadPublicEvents(forceRefresh: true),
                   style: TextButton.styleFrom(
                     padding: EdgeInsets.zero,
                     minimumSize: Size.zero,
@@ -312,7 +312,7 @@ class CustomerExplorePage extends ConsumerWidget {
                 ),
               ),
               TextButton(
-                onPressed: () => notifier.loadPublicEvents(),
+                onPressed: () => notifier.loadPublicEvents(forceRefresh: true),
                 style: TextButton.styleFrom(
                   padding: EdgeInsets.zero,
                   minimumSize: Size.zero,
