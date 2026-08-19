@@ -1,10 +1,7 @@
-import 'package:team_five_fe/core/constants/api_constants.dart';
-
 class Event {
   final String id;
   final String organizerId;
   final String name;
-  final String? imageKey;
   final String? imageUrl;
   final String? description;
   final bool isSeated;
@@ -21,7 +18,6 @@ class Event {
     required this.id,
     required this.organizerId,
     required this.name,
-    this.imageKey,
     this.imageUrl,
     this.description,
     required this.isSeated,
@@ -36,16 +32,11 @@ class Event {
   });
 
   factory Event.fromJson(Map<String, dynamic> json) {
-    final imageKey = json['imageKey']?.toString();
-    final imageUrl = json['imageUrl']?.toString() ??
-        (imageKey != null ? '${ApiConstants.baseUrl}/$imageKey' : null);
-
     return Event(
       id: json['id']?.toString() ?? '',
       organizerId: json['organizerId']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
-      imageKey: imageKey,
-      imageUrl: imageUrl,
+      imageUrl: json['imageUrl']?.toString(),
       description: json['description']?.toString(),
       isSeated: json['isSeated'] == true,
       salesStartTime: json['salesStartTime'] != null
@@ -79,7 +70,6 @@ class Event {
       'id': id,
       'organizerId': organizerId,
       'name': name,
-      'imageKey': imageKey,
       'imageUrl': imageUrl,
       'description': description,
       'isSeated': isSeated,

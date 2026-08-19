@@ -30,10 +30,6 @@ class _CreateGatePageState extends ConsumerState<CreateGatePage> {
   @override
   void initState() {
     super.initState();
-    print('DEBUG CreateGatePage - eventId: "${widget.eventId}"');
-    print('DEBUG CreateGatePage - eventName: "${widget.eventName}"');
-    print('DEBUG CreateGatePage - eventId length: ${widget.eventId.length}');
-    print('DEBUG CreateGatePage - eventId isEmpty: ${widget.eventId.isEmpty}');
   }
 
   @override
@@ -195,7 +191,6 @@ class _CreateGatePageState extends ConsumerState<CreateGatePage> {
         eventId: widget.eventId,
         name: _nameController.text.trim(),
       );
-      print('DEBUG CreateGate - Sending request: ${request.toJson()}');
       final gate = await ref.read(gatesProvider.notifier).createGate(request);
       if (gate != null && mounted) {
         setState(() {

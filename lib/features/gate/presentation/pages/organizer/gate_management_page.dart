@@ -409,9 +409,6 @@ class _GateManagementPageState extends ConsumerState<GateManagementPage> {
   }
 
   void _navigateToCreateGate() async {
-    print(
-      'DEBUG GateManagement - navigateToCreateGate eventId: "${widget.eventId}"',
-    );
     await Navigator.push(
       context,
       MaterialPageRoute(
