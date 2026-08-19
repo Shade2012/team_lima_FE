@@ -39,7 +39,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   final _expiryController = TextEditingController();
   final _cvcController = TextEditingController();
   final _cardHolderController = TextEditingController();
-  final _promoController = TextEditingController();
 
   @override
   void initState() {
@@ -55,7 +54,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     _expiryController.dispose();
     _cvcController.dispose();
     _cardHolderController.dispose();
-    _promoController.dispose();
     super.dispose();
   }
 
@@ -136,19 +134,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                       walletState,
                       walletNotifier,
                     ),
-
-                    const SizedBox(height: 24),
-                    // Billing Details Section
-                    Text(
-                      'Billing Details',
-                      style: AppTextStyles.title.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    _buildBillingDetails(checkoutState, checkoutNotifier),
 
                     const SizedBox(height: 24),
                     // Order Summary Section
@@ -582,44 +567,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     );
   }
 
-  // ==================== Billing Details ====================
-
-  Widget _buildBillingDetails(CheckoutState state, CheckoutNotifier notifier) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE5E5EA)),
-      ),
-      child: Row(
-        children: [
-          Checkbox(
-            value: state.sameAsProfileAddress,
-            fillColor: WidgetStateProperty.resolveWith(
-              (states) => states.contains(WidgetState.selected)
-                  ? AppColors.primary
-                  : null,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(4),
-            ),
-            onChanged: (val) => notifier.toggleSameAsProfileAddress(val),
-          ),
-          Expanded(
-            child: Text(
-              'Same as account profile address',
-              style: AppTextStyles.bodyMedium.copyWith(
-                fontSize: 13,
-                color: AppColors.black,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   // ==================== Order Summary Section ====================
 
   Widget _buildOrderSummary(
@@ -755,74 +702,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
           _buildSummaryLine(
             'Taxes & Processing',
             _formatCurrency(state.taxesAndProcessing),
-          ),
-          if (state.isPromoApplied) ...[
-            const SizedBox(height: 8),
-            _buildSummaryLine(
-              'Promo Discount (VELOCE10)',
-              '-${_formatCurrency(state.discount)}',
-              isDiscount: true,
-            ),
-          ],
-          const SizedBox(height: 16),
-
-          // Promo Code Input Box
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF9FAFC),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE5E5EA)),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.confirmation_number_outlined,
-                  color: Colors.black38,
-                  size: 18,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    controller: _promoController,
-                    decoration: const InputDecoration(
-                      hintText: 'Promo Code (VELOCE10)',
-                      hintStyle: TextStyle(color: Colors.black38, fontSize: 13),
-                      border: InputBorder.none,
-                    ),
-                    onChanged: (val) => notifier.setPromoCode(val),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    final applied = notifier.applyPromoCode();
-                    if (applied) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Promo code applied successfully!'),
-                          backgroundColor: AppColors.success,
-                        ),
-                      );
-                    } else if (state.error != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(state.error!),
-                          backgroundColor: AppColors.danger,
-                        ),
-                      );
-                    }
-                  },
-                  child: Text(
-                    'APPLY',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ),
           const SizedBox(height: 16),
           const Divider(height: 1, color: Color(0xFFF0F0F5)),

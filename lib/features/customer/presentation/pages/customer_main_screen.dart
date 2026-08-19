@@ -3,7 +3,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import 'customer_explore_page.dart';
 import 'my_tickets_page.dart';
-import 'saved_events_page.dart';
+import 'customer_orders_page.dart';
 import 'customer_profile_page.dart';
 
 class CustomerMainScreen extends StatefulWidget {
@@ -21,7 +21,7 @@ class _CustomerMainScreenState extends State<CustomerMainScreen> {
   final List<Widget> _pages = const [
     CustomerExplorePage(),
     MyTicketsPage(),
-    SavedEventsPage(),
+    CustomerOrdersPage(),
     CustomerProfilePage(),
   ];
 
@@ -67,9 +67,9 @@ class _CustomerMainScreenState extends State<CustomerMainScreen> {
                 ),
                 _buildNavItem(
                   2,
-                  Icons.favorite_border,
-                  Icons.favorite,
-                  'Saved',
+                  Icons.receipt_long_outlined,
+                  Icons.receipt_long,
+                  'Orders',
                 ),
                 _buildNavItem(3, Icons.person_outline, Icons.person, 'Profile'),
               ],

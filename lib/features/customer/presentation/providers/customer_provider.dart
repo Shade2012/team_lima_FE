@@ -1,11 +1,34 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/customer_ticket_model.dart';
+import '../../data/models/customer_order_model.dart';
+import '../../data/models/customer_refund_model.dart';
+import '../../data/repositories/customer_ticket_repository.dart';
+import '../../data/repositories/customer_order_repository.dart';
+import '../../data/repositories/customer_refund_repository.dart';
 import '../../../event/data/models/event_model.dart';
 import '../../../event/presentation/providers/event_provider.dart';
 import '../../../order/data/repositories/order_repository.dart';
 
 final orderRepositoryProvider = Provider<OrderRepository>((ref) {
   return OrderRepository();
+});
+
+final customerTicketRepositoryProvider = Provider<CustomerTicketRepository>((
+  ref,
+) {
+  return CustomerTicketRepository();
+});
+
+final customerOrderRepositoryProvider = Provider<CustomerOrderRepository>((
+  ref,
+) {
+  return CustomerOrderRepository();
+});
+
+final customerRefundRepositoryProvider = Provider<CustomerRefundRepository>((
+  ref,
+) {
+  return CustomerRefundRepository();
 });
 
 // ==================== Customer Wallet State ====================
@@ -33,7 +56,7 @@ class CustomerWalletState {
   final String? error;
 
   CustomerWalletState({
-    this.balance = 0.0, // Initial balance is Rp 0 per user requirement
+    this.balance = 0.0,
     this.transactions = const [],
     this.isLoading = false,
     this.error,
@@ -234,14 +257,30 @@ class CustomerTicketsNotifier extends Notifier<CustomerTicketsState> {
       price: 150.0,
     );
 
+    Future.microtask(() => loadTickets());
     return CustomerTicketsState(tickets: [initialTicket]);
+  }
+
+  Future<void> loadTickets() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final repo = ref.read(customerTicketRepositoryProvider);
+      final fetchedTickets = await repo.getMyTickets();
+      if (fetchedTickets.isNotEmpty) {
+        state = state.copyWith(tickets: fetchedTickets, isLoading: false);
+      } else {
+        state = state.copyWith(isLoading: false);
+      }
+    } catch (_) {
+      state = state.copyWith(isLoading: false);
+    }
   }
 
   void addTicket(CustomerTicket ticket) {
     state = state.copyWith(tickets: [ticket, ...state.tickets]);
   }
 
-  void requestRefund(String ticketId) {
+  void markTicketRefunded(String ticketId) {
     final updated = state.tickets.map((t) {
       if (t.id == ticketId) {
         return CustomerTicket(
@@ -272,11 +311,147 @@ final customerTicketsProvider =
       return CustomerTicketsNotifier();
     });
 
+// ==================== Customer Orders State ====================
+
+class CustomerOrdersState {
+  final List<CustomerOrderModel> orders;
+  final bool isLoading;
+  final String? error;
+
+  CustomerOrdersState({
+    this.orders = const [],
+    this.isLoading = false,
+    this.error,
+  });
+
+  CustomerOrdersState copyWith({
+    List<CustomerOrderModel>? orders,
+    bool? isLoading,
+    String? error,
+  }) {
+    return CustomerOrdersState(
+      orders: orders ?? this.orders,
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
+    );
+  }
+}
+
+class CustomerOrdersNotifier extends Notifier<CustomerOrdersState> {
+  @override
+  CustomerOrdersState build() {
+    Future.microtask(() => loadOrders());
+    return CustomerOrdersState();
+  }
+
+  Future<void> loadOrders() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final repo = ref.read(customerOrderRepositoryProvider);
+      final orders = await repo.getCustomerOrders();
+      state = state.copyWith(orders: orders, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: e.toString().replaceAll('Exception: ', ''),
+      );
+    }
+  }
+}
+
+final customerOrdersProvider =
+    NotifierProvider<CustomerOrdersNotifier, CustomerOrdersState>(() {
+      return CustomerOrdersNotifier();
+    });
+
+// ==================== Customer Refunds State ====================
+
+class CustomerRefundsState {
+  final List<CustomerRefundModel> refunds;
+  final bool isLoading;
+  final bool isSubmitting;
+  final String? error;
+
+  CustomerRefundsState({
+    this.refunds = const [],
+    this.isLoading = false,
+    this.isSubmitting = false,
+    this.error,
+  });
+
+  CustomerRefundsState copyWith({
+    List<CustomerRefundModel>? refunds,
+    bool? isLoading,
+    bool? isSubmitting,
+    String? error,
+  }) {
+    return CustomerRefundsState(
+      refunds: refunds ?? this.refunds,
+      isLoading: isLoading ?? this.isLoading,
+      isSubmitting: isSubmitting ?? this.isSubmitting,
+      error: error,
+    );
+  }
+}
+
+class CustomerRefundsNotifier extends Notifier<CustomerRefundsState> {
+  @override
+  CustomerRefundsState build() {
+    Future.microtask(() => loadRefunds());
+    return CustomerRefundsState();
+  }
+
+  Future<void> loadRefunds() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final repo = ref.read(customerRefundRepositoryProvider);
+      final list = await repo.getMyRefunds();
+      state = state.copyWith(refunds: list, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: e.toString().replaceAll('Exception: ', ''),
+      );
+    }
+  }
+
+  Future<bool> submitRefund({
+    required String ticketId,
+    required String reason,
+  }) async {
+    state = state.copyWith(isSubmitting: true, error: null);
+    try {
+      final repo = ref.read(customerRefundRepositoryProvider);
+      final newRefund = await repo.requestRefund(
+        ticketId: ticketId,
+        reason: reason,
+      );
+      state = state.copyWith(
+        refunds: [newRefund, ...state.refunds],
+        isSubmitting: false,
+      );
+      // Mark ticket refunded in CustomerTicketsNotifier
+      ref.read(customerTicketsProvider.notifier).markTicketRefunded(ticketId);
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isSubmitting: false,
+        error: e.toString().replaceAll('Exception: ', ''),
+      );
+      return false;
+    }
+  }
+}
+
+final customerRefundsProvider =
+    NotifierProvider<CustomerRefundsNotifier, CustomerRefundsState>(() {
+      return CustomerRefundsNotifier();
+    });
+
 // ==================== Checkout State ====================
 
 class CheckoutState {
-  final String
-  paymentMethod; // 'E_WALLET', 'CREDIT_CARD', 'BANK_TRANSFER', 'QRIS'
+  final String paymentMethod;
   final String cardNumber;
   final String expiryDate;
   final String cvc;
@@ -409,7 +584,6 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
     try {
       final totalAmount = state.total;
 
-      // Wallet balance check if paying with E_WALLET
       if (state.paymentMethod == 'E_WALLET') {
         final walletBalance = ref.read(customerWalletProvider).balance;
         if (walletBalance < totalAmount) {
@@ -428,7 +602,6 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
           ? categoryId
           : '019146a0-7d1e-7abc-9a12-category0001';
 
-      // 1. Call POST /orders/event/:eventId
       final orderRepo = ref.read(orderRepositoryProvider);
       CreateOrderResponse? orderResponse;
       try {
@@ -443,7 +616,6 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
           ],
         );
       } catch (_) {
-        // Fallback for offline / mock testing if server isn't reachable
         orderResponse = CreateOrderResponse(
           id: '019146a0-order-${DateTime.now().millisecondsSinceEpoch}',
           eventId: targetEventId,
@@ -454,7 +626,6 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
         );
       }
 
-      // 2. Call POST /mock-pg/simulate-payment
       final trxId =
           orderResponse.providerTrxId ??
           'TRX-MOCK-${DateTime.now().millisecondsSinceEpoch}';
@@ -463,11 +634,8 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
           providerTrxId: trxId,
           paymentMethod: state.paymentMethod,
         );
-      } catch (_) {
-        // Fallback for offline simulation
-      }
+      } catch (_) {}
 
-      // 3. Deduct wallet if paid via E_WALLET
       if (state.paymentMethod == 'E_WALLET') {
         ref
             .read(customerWalletProvider.notifier)
@@ -498,6 +666,8 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
       );
 
       ref.read(customerTicketsProvider.notifier).addTicket(newTicket);
+      // Reload orders and tickets
+      ref.read(customerOrdersProvider.notifier).loadOrders();
       state = state.copyWith(isProcessing: false, error: null);
       return newTicket;
     } catch (e) {

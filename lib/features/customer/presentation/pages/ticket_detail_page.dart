@@ -565,7 +565,7 @@ class TicketDetailPage extends ConsumerWidget {
           child: OutlinedButton(
             onPressed: isRefunded
                 ? null
-                : () => _showRefundConfirmDialog(context, ref, ticket),
+                : () => _showRefundDialog(context, ref, ticket),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
               side: const BorderSide(color: Color(0xFFE5E5EA), width: 1.5),
@@ -586,47 +586,101 @@ class TicketDetailPage extends ConsumerWidget {
     );
   }
 
-  void _showRefundConfirmDialog(
-    BuildContext context,
+  void _showRefundDialog(
+    BuildContext pageContext,
     WidgetRef ref,
     CustomerTicket ticket,
   ) {
+    final reasonController = TextEditingController();
+
     showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
+      context: pageContext,
+      builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Request Refund',
           style: AppTextStyles.title.copyWith(fontSize: 18),
         ),
-        content: Text(
-          'Are you sure you want to request a refund for ${ticket.eventName}?\n(80% refund policy applies)',
-          style: AppTextStyles.bodyMedium,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Are you sure you want to request a refund for ${ticket.eventName}?',
+              style: AppTextStyles.bodyMedium,
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: reasonController,
+              decoration: InputDecoration(
+                hintText: 'Enter reason for refund (e.g. Schedule conflict)',
+                hintStyle: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.grey,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+              ),
+              maxLines: 2,
+            ),
+          ],
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: Text(
               'Cancel',
               style: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey),
             ),
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ref
-                  .read(customerTicketsProvider.notifier)
-                  .requestRefund(ticket.id);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Refund request submitted successfully.'),
-                  backgroundColor: AppColors.success,
-                ),
-              );
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.danger,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () async {
+              final reason = reasonController.text.trim();
+              final finalReason = reason.isNotEmpty
+                  ? reason
+                  : 'Requested by customer';
+              Navigator.pop(dialogContext);
+              final success = await ref
+                  .read(customerRefundsProvider.notifier)
+                  .submitRefund(ticketId: ticket.id, reason: finalReason);
+
+              if (pageContext.mounted) {
+                if (success) {
+                  ScaffoldMessenger.of(pageContext).showSnackBar(
+                    const SnackBar(
+                      content: Text('Refund request submitted successfully.'),
+                      backgroundColor: AppColors.success,
+                    ),
+                  );
+                } else {
+                  final error = ref.read(customerRefundsProvider).error;
+                  ScaffoldMessenger.of(pageContext).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        error ?? 'Failed to submit refund request.',
+                      ),
+                      backgroundColor: AppColors.danger,
+                    ),
+                  );
+                }
+              }
             },
-            child: Text(
+            child: const Text(
               'Confirm Refund',
-              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.danger),
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
