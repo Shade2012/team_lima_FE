@@ -63,7 +63,10 @@ class EventRepository {
   }
 
   /// POST /events
-  Future<Event> createEvent(CreateEventRequest request, {File? imageFile}) async {
+  Future<Event> createEvent(
+    CreateEventRequest request, {
+    File? imageFile,
+  }) async {
     try {
       final formData = FormData.fromMap({
         ...request.toJson(),
@@ -86,7 +89,11 @@ class EventRepository {
   }
 
   /// PATCH /events/:id
-  Future<Event> updateEvent(String id, UpdateEventRequest request, {File? imageFile}) async {
+  Future<Event> updateEvent(
+    String id,
+    UpdateEventRequest request, {
+    File? imageFile,
+  }) async {
     try {
       dynamic data;
       if (imageFile != null) {

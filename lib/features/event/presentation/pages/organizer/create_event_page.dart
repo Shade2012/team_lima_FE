@@ -764,7 +764,9 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
       return;
     }
 
-    final refundPercentage = int.tryParse(_refundPercentageController.text.trim());
+    final refundPercentage = int.tryParse(
+      _refundPercentageController.text.trim(),
+    );
     if (refundPercentage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

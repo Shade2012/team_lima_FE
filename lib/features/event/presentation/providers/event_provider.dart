@@ -206,7 +206,10 @@ class CreateEventNotifier extends Notifier<CreateEventState> {
     return CreateEventState();
   }
 
-  Future<bool> createEvent(CreateEventRequest request, {File? imageFile}) async {
+  Future<bool> createEvent(
+    CreateEventRequest request, {
+    File? imageFile,
+  }) async {
     state = state.copyWith(isLoading: true, error: null, isSuccess: false);
     try {
       final repository = ref.read(eventRepositoryProvider);
@@ -265,7 +268,11 @@ class UpdateEventNotifier extends Notifier<UpdateEventState> {
     return UpdateEventState();
   }
 
-  Future<bool> updateEvent(String id, UpdateEventRequest request, {File? imageFile}) async {
+  Future<bool> updateEvent(
+    String id,
+    UpdateEventRequest request, {
+    File? imageFile,
+  }) async {
     state = state.copyWith(isLoading: true, error: null, isSuccess: false);
     try {
       final repository = ref.read(eventRepositoryProvider);

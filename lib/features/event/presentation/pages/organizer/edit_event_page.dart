@@ -423,11 +423,11 @@ class _EditEventPageState extends ConsumerState<EditEventPage> {
                   fit: BoxFit.cover,
                 )
               : hasCurrentImage
-                  ? DecorationImage(
-                      image: NetworkImage(widget.imageUrl!),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
+              ? DecorationImage(
+                  image: NetworkImage(widget.imageUrl!),
+                  fit: BoxFit.cover,
+                )
+              : null,
         ),
         child: !(hasNewImage || hasCurrentImage)
             ? Column(
@@ -780,10 +780,8 @@ class _EditEventPageState extends ConsumerState<EditEventPage> {
           : null,
     );
 
-    ref.read(updateEventProvider.notifier).updateEvent(
-          widget.eventId,
-          request,
-          imageFile: _selectedImage,
-        );
+    ref
+        .read(updateEventProvider.notifier)
+        .updateEvent(widget.eventId, request, imageFile: _selectedImage);
   }
 }
