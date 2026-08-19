@@ -310,6 +310,15 @@ class _CustomerProfilePageState extends ConsumerState<CustomerProfilePage> {
                   ),
                 ],
               ),
+              IconButton(
+                onPressed: () => _showWalletTransactionsSheet(context, walletState),
+                icon: const Icon(
+                  Icons.history,
+                  color: AppColors.primary,
+                  size: 22,
+                ),
+                tooltip: 'Transaction History',
+              ),
             ],
           ),
           const SizedBox(height: 14),
@@ -365,6 +374,217 @@ class _CustomerProfilePageState extends ConsumerState<CustomerProfilePage> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  void _showWalletTransactionsSheet(
+    BuildContext context,
+    CustomerWalletState walletState,
+  ) {
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp',
+      decimalDigits: 0,
+    );
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Consumer(
+        builder: (context, ref, child) {
+          final liveWalletState = ref.watch(customerWalletProvider);
+          final transactions = liveWalletState.transactions;
+
+          return Container(
+            height: MediaQuery.of(context).size.height * 0.65,
+            decoration: const BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Column(
+              children: [
+                const SizedBox(height: 12),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.greyLight,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Wallet Transactions',
+                        style: AppTextStyles.title.copyWith(fontSize: 18),
+                      ),
+                      IconButton(
+                        onPressed: () => ref
+                            .read(customerWalletProvider.notifier)
+                            .loadWallet(forceRefresh: true),
+                        icon: const Icon(Icons.refresh, size: 20),
+                        tooltip: 'Refresh',
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                Expanded(
+                  child: transactions.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.receipt_long_outlined,
+                                size: 48,
+                                color: Colors.grey.shade400,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'No transactions yet',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.separated(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          itemCount: transactions.length,
+                          separatorBuilder: (_, __) =>
+                              const Divider(height: 1, color: Color(0xFFF0F0F5)),
+                          itemBuilder: (context, index) {
+                            final tx = transactions[index];
+                            final isPositive = tx.isTopUp || tx.type == 'REFUND';
+                            final typeLabel = tx.type;
+
+                            Color badgeColor;
+                            Color badgeBg;
+                            if (tx.type == 'TOPUP') {
+                              badgeColor = AppColors.success;
+                              badgeBg = AppColors.success.withValues(alpha: 0.1);
+                            } else if (tx.type == 'REFUND') {
+                              badgeColor = Colors.blue;
+                              badgeBg = Colors.blue.withValues(alpha: 0.1);
+                            } else {
+                              badgeColor = AppColors.danger;
+                              badgeBg = AppColors.danger.withValues(alpha: 0.1);
+                            }
+
+                            final dateStr = tx.createdAt != null
+                                ? DateFormat('dd MMM yyyy, HH:mm')
+                                    .format(tx.createdAt!)
+                                : 'Recent';
+
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: badgeBg,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      tx.type == 'TOPUP'
+                                          ? Icons.add_circle_outline
+                                          : (tx.type == 'REFUND'
+                                              ? Icons.replay
+                                              : Icons.shopping_bag_outlined),
+                                      color: badgeColor,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                tx.note ??
+                                                    (tx.type == 'TOPUP'
+                                                        ? 'Wallet Top Up'
+                                                        : 'Ticket Purchase'),
+                                                style: AppTextStyles.bodyMedium
+                                                    .copyWith(
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 13,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 6,
+                                                vertical: 2,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: badgeBg,
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                              ),
+                                              child: Text(
+                                                typeLabel,
+                                                style: TextStyle(
+                                                  fontSize: 9,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: badgeColor,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          dateStr,
+                                          style:
+                                              AppTextStyles.bodySmall.copyWith(
+                                            color: Colors.black45,
+                                            fontSize: 11,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    '${isPositive ? '+' : ''}${formatter.format(tx.amount.abs())}',
+                                    style: AppTextStyles.bodyMedium.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      color: isPositive
+                                          ? AppColors.success
+                                          : AppColors.black,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

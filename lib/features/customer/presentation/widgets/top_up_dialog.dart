@@ -72,8 +72,8 @@ class _TopUpDialogState extends ConsumerState<TopUpDialog> {
         // Backend API hook
         success = await widget.onTopUp!(amount);
       } else {
-        // Default local provider simulation
-        ref.read(customerWalletProvider.notifier).topUp(amount);
+        // Invoke wallet notifier topUp API
+        success = await ref.read(customerWalletProvider.notifier).topUp(amount);
       }
 
       if (mounted) {
