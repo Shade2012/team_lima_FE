@@ -5,7 +5,6 @@ import 'package:team_five_fe/features/customer/presentation/pages/customer_profi
 import 'package:team_five_fe/features/auth/presentation/providers/auth_provider.dart';
 import 'package:team_five_fe/features/auth/data/models/user_model.dart';
 import 'package:team_five_fe/features/customer/presentation/providers/customer_provider.dart';
-import 'package:team_five_fe/features/customer/data/models/customer_ticket_model.dart';
 
 class MockAuthNotifier extends AuthNotifier {
   final UserModel? mockUser;
@@ -18,8 +17,12 @@ class MockAuthNotifier extends AuthNotifier {
 
   @override
   Future<bool> updateProfile({String? username, String? email}) async {
-    if (username == null || email == null || username.isEmpty || email.isEmpty)
+    if (username == null ||
+        email == null ||
+        username.isEmpty ||
+        email.isEmpty) {
       return false;
+    }
     state = state.copyWith(
       currentUser: UserModel(
         id: mockUser?.id ?? 'usr-1',
