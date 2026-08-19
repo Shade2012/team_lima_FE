@@ -132,8 +132,21 @@ class CustomerWalletNotifier extends Notifier<CustomerWalletState> {
 
   bool deduct(double amount, String description) {
     if (state.balance < amount) return false;
-    final currentBal = state.balance;
-    state = state.copyWith(localBalance: currentBal - amount);
+    final newBal = state.balance - amount;
+    final updatedWallet = state.wallet != null
+        ? CustomerWalletModel(
+            id: state.wallet!.id,
+            userId: state.wallet!.userId,
+            balance: newBal,
+            currency: state.wallet!.currency,
+            createdAt: state.wallet!.createdAt,
+            updatedAt: DateTime.now(),
+          )
+        : null;
+    state = state.copyWith(
+      wallet: updatedWallet,
+      localBalance: newBal,
+    );
     return true;
   }
 }

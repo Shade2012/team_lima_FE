@@ -101,6 +101,7 @@ void main() {
 
           await Future.delayed(Duration.zero);
           final notifier = container.read(customerWalletProvider.notifier);
+          await notifier.loadWallet();
           final success = notifier.deduct(50000.0, 'Ticket Purchase');
 
           expect(success, true);
@@ -142,6 +143,7 @@ void main() {
 
         await Future.delayed(Duration.zero);
         final notifier = container.read(customerWalletProvider.notifier);
+        await notifier.loadWallet();
         final success = notifier.deduct(100000.0, 'Ticket Purchase');
 
         expect(success, false);
