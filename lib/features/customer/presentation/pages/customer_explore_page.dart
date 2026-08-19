@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../event/data/models/event_model.dart';
 import '../providers/customer_provider.dart';
 import '../widgets/top_up_dialog.dart';
 import 'customer_event_detail_page.dart';
@@ -24,24 +25,31 @@ class CustomerExplorePage extends ConsumerWidget {
             _buildAppBar(context, exploreState.searchQuery, exploreNotifier),
             // Body Content
             Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.only(bottom: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 12),
-                    // Customer Wallet Card Section
-                    _buildWalletCard(context, ref),
-                    const SizedBox(height: 20),
-                    // "For You" Section
-                    _buildForYouSection(
-                      context,
-                      ref,
-                      exploreState,
-                      exploreNotifier,
-                    ),
-                  ],
+              child: RefreshIndicator(
+                onRefresh: () =>
+                    exploreNotifier.loadPublicEvents(forceRefresh: true),
+                color: AppColors.primary,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics(),
+                  ),
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 12),
+                      // Customer Wallet Card Section
+                      _buildWalletCard(context, ref),
+                      const SizedBox(height: 20),
+                      // "For You" Section
+                      _buildForYouSection(
+                        context,
+                        ref,
+                        exploreState,
+                        exploreNotifier,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -141,37 +149,152 @@ class CustomerExplorePage extends ConsumerWidget {
 
   // ==================== "For You" Section ====================
 
+  // ==================== "For You" Section ====================
+
   Widget _buildForYouSection(
     BuildContext context,
     WidgetRef ref,
     CustomerExploreState state,
     CustomerExploreNotifier notifier,
   ) {
-    // Sample items matching Image 1
-    final cardItems = [
-      {
-        'id': 'evt_1',
-        'category': 'ELECTRONIC',
-        'timeBadge': 'Tomorrow',
-        'title': 'Night Drive Se...',
-        'fullTitle': 'Night Drive Session',
-        'venue': 'The Warehouse',
-        'price': 45.0,
-        'image': 'assets/images/night_drive_cover.png',
-        'gradient': [const Color(0xFF2C2C2C), const Color(0xFF1E1E24)],
-      },
-      {
-        'id': 'evt_2',
-        'category': 'ACOUSTIC',
-        'timeBadge': 'Oct 28',
-        'title': 'Unplugged...',
-        'fullTitle': 'Unplugged Acoustic Night',
-        'venue': 'City Sympho...',
-        'price': 60.0,
-        'image': 'assets/images/acoustic_cover.png',
-        'gradient': [const Color(0xFF3B2F2F), const Color(0xFF1F1A1A)],
-      },
+    if (state.isLoading && state.events.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 30),
+        child: Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
+      );
+    }
+
+    if (state.error != null && state.events.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        child: Column(
+          children: [
+            Text(
+              'Failed to load events: ${state.error}',
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.danger),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: () => notifier.loadPublicEvents(forceRefresh: true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (state.filteredEvents.isEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section Header
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'For You',
+                  style: AppTextStyles.title.copyWith(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.black,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () =>
+                      notifier.loadPublicEvents(forceRefresh: true),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Text(
+                    'Refresh',
+                    style: AppTextStyles.link.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 30),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 70,
+                    height: 70,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.event_busy,
+                      size: 36,
+                      color: AppColors.primary.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'No events found',
+                    style: AppTextStyles.bodyLarge.copyWith(
+                      color: AppColors.black,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    state.searchQuery.isNotEmpty
+                        ? 'Try searching with a different keyword'
+                        : 'No public events available at this time',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    final gradients = [
+      [const Color(0xFF2C2C2C), const Color(0xFF1E1E24)],
+      [const Color(0xFF3B2F2F), const Color(0xFF1F1A1A)],
+      [const Color(0xFF1E2A38), const Color(0xFF101820)],
+      [const Color(0xFF2E1A47), const Color(0xFF1A0B2E)],
     ];
+
+    final cardItems = state.filteredEvents.map((e) {
+      final index = state.events.indexOf(e);
+      final dateBadge = DateFormat('MMM dd').format(e.eventDate);
+      return {
+        'id': e.id,
+        'event': e,
+        'category': e.isSeated ? 'SEATED' : 'GENERAL',
+        'timeBadge': dateBadge,
+        'title': e.name.length > 18 ? '${e.name.substring(0, 15)}...' : e.name,
+        'fullTitle': e.name,
+        'venue': e.isSeated ? 'Seated Venue' : 'General Venue',
+        'price': 150.0,
+        'isSeated': e.isSeated,
+        'gradient': gradients[index % gradients.length],
+      };
+    }).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -191,14 +314,14 @@ class CustomerExplorePage extends ConsumerWidget {
                 ),
               ),
               TextButton(
-                onPressed: () {},
+                onPressed: () => notifier.loadPublicEvents(forceRefresh: true),
                 style: TextButton.styleFrom(
                   padding: EdgeInsets.zero,
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 child: Text(
-                  'See All',
+                  'Refresh',
                   style: AppTextStyles.link.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w600,
@@ -224,12 +347,14 @@ class CustomerExplorePage extends ConsumerWidget {
               return _buildEventCard(
                 context,
                 id: item['id'] as String,
+                event: item['event'] as Event?,
                 category: item['category'] as String,
                 timeBadge: item['timeBadge'] as String,
                 title: item['title'] as String,
                 fullTitle: item['fullTitle'] as String,
                 venue: item['venue'] as String,
                 price: item['price'] as double,
+                isSeated: item['isSeated'] as bool,
                 isSaved: isSaved,
                 gradientColors: item['gradient'] as List<Color>,
                 onToggleSave: () =>
@@ -247,12 +372,14 @@ class CustomerExplorePage extends ConsumerWidget {
   Widget _buildEventCard(
     BuildContext context, {
     required String id,
+    Event? event,
     required String category,
     required String timeBadge,
     required String title,
     required String fullTitle,
     required String venue,
     required double price,
+    required bool isSeated,
     required bool isSaved,
     required List<Color> gradientColors,
     required VoidCallback onToggleSave,
@@ -410,11 +537,13 @@ class CustomerExplorePage extends ConsumerWidget {
                           context,
                           MaterialPageRoute(
                             builder: (_) => CustomerEventDetailPage(
+                              event: event,
+                              eventId: id,
                               eventName: fullTitle,
                               categoryName: category,
                               price: price,
                               location: venue,
-                              isSeated: true,
+                              isSeated: isSeated,
                             ),
                           ),
                         );

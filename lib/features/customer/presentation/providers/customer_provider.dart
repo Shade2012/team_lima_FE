@@ -174,7 +174,10 @@ class CustomerExploreNotifier extends Notifier<CustomerExploreState> {
     return CustomerExploreState();
   }
 
-  Future<void> loadPublicEvents() async {
+  Future<void> loadPublicEvents({bool forceRefresh = false}) async {
+    if (!forceRefresh && (state.isLoading || state.events.isNotEmpty)) {
+      return;
+    }
     state = state.copyWith(isLoading: true, error: null);
     try {
       final repository = ref.read(eventRepositoryProvider);
@@ -241,36 +244,19 @@ class CustomerTicketsState {
 class CustomerTicketsNotifier extends Notifier<CustomerTicketsState> {
   @override
   CustomerTicketsState build() {
-    final initialTicket = CustomerTicket(
-      id: '019146a0-7d1e-7abc-9a12-ticket0001',
-      ticketCode: '#NJF-2491',
-      eventName: 'Neon Jungle Festival',
-      categoryName: 'VIP PASS',
-      eventDate: DateTime(2024, 8, 24),
-      eventTimeRange: '8:00 PM - 4:00 AM',
-      venueName: 'The Grand Warehouse',
-      venueAddress: '124 Industrial Ave, Metro City',
-      attendeeName: 'Alex Chen',
-      ticketType: 'All Access',
-      qrData: 'DIGITAL TICKET | VELOCE\nNeon Jungle Festival\nNJF-2491',
-      status: 'UPCOMING',
-      price: 150.0,
-    );
-
     Future.microtask(() => loadTickets());
-    return CustomerTicketsState(tickets: [initialTicket]);
+    return CustomerTicketsState();
   }
 
-  Future<void> loadTickets() async {
+  Future<void> loadTickets({bool forceRefresh = false}) async {
+    if (!forceRefresh && (state.isLoading || state.tickets.isNotEmpty)) {
+      return;
+    }
     state = state.copyWith(isLoading: true, error: null);
     try {
       final repo = ref.read(customerTicketRepositoryProvider);
       final fetchedTickets = await repo.getMyTickets();
-      if (fetchedTickets.isNotEmpty) {
-        state = state.copyWith(tickets: fetchedTickets, isLoading: false);
-      } else {
-        state = state.copyWith(isLoading: false);
-      }
+      state = state.copyWith(tickets: fetchedTickets, isLoading: false);
     } catch (_) {
       state = state.copyWith(isLoading: false);
     }
@@ -344,7 +330,10 @@ class CustomerOrdersNotifier extends Notifier<CustomerOrdersState> {
     return CustomerOrdersState();
   }
 
-  Future<void> loadOrders() async {
+  Future<void> loadOrders({bool forceRefresh = false}) async {
+    if (!forceRefresh && (state.isLoading || state.orders.isNotEmpty)) {
+      return;
+    }
     state = state.copyWith(isLoading: true, error: null);
     try {
       final repo = ref.read(customerOrderRepositoryProvider);
@@ -401,7 +390,10 @@ class CustomerRefundsNotifier extends Notifier<CustomerRefundsState> {
     return CustomerRefundsState();
   }
 
-  Future<void> loadRefunds() async {
+  Future<void> loadRefunds({bool forceRefresh = false}) async {
+    if (!forceRefresh && (state.isLoading || state.refunds.isNotEmpty)) {
+      return;
+    }
     state = state.copyWith(isLoading: true, error: null);
     try {
       final repo = ref.read(customerRefundRepositoryProvider);
@@ -578,6 +570,11 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
     required String eventName,
     String? categoryName,
     required String attendeeName,
+    DateTime? eventDate,
+    String? eventTimeRange,
+    String? venueName,
+    String? venueAddress,
+    String? ticketType,
   }) async {
     state = state.copyWith(isProcessing: true, error: null);
 
@@ -642,25 +639,28 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
             .deduct(totalAmount, 'Ticket Purchase: $eventName');
       }
 
-      final displayCategory = categoryName ?? 'VIP PASS';
+      final displayCategory = categoryName ?? 'General Admission';
       final displaySeat = (seatCode != null && seatCode.isNotEmpty)
           ? seatCode
-          : '#NJF-${(1000 + DateTime.now().millisecond % 9000)}';
+          : '#TKN-${(1000 + DateTime.now().millisecond % 9000)}';
+
+      final ticketId = orderResponse.id.isNotEmpty
+          ? orderResponse.id
+          : '019146a0-${DateTime.now().millisecondsSinceEpoch}';
 
       final newTicket = CustomerTicket(
-        id: orderResponse.id.isNotEmpty
-            ? orderResponse.id
-            : '019146a0-${DateTime.now().millisecondsSinceEpoch}',
+        id: ticketId,
         ticketCode: displaySeat,
         eventName: eventName,
         categoryName: displayCategory,
-        eventDate: DateTime(2024, 10, 24),
-        eventTimeRange: '8:00 PM - 4:00 AM',
-        venueName: 'Main Stage, Sector 4',
-        venueAddress: '124 Industrial Ave, Metro City',
-        attendeeName: attendeeName.isNotEmpty ? attendeeName : 'Alex Chen',
-        ticketType: 'All Access',
-        qrData: 'DIGITAL TICKET | VELOCE\n$eventName\n$displaySeat',
+        eventDate: eventDate ?? DateTime.now().add(const Duration(days: 7)),
+        eventTimeRange: eventTimeRange ?? '07:00 PM - 11:00 PM',
+        venueName: venueName ?? 'Main Stage Pavilion',
+        venueAddress: venueAddress ?? 'Grand Exhibition Center',
+        attendeeName: attendeeName.isNotEmpty ? attendeeName : 'Customer',
+        ticketType: ticketType ?? 'E-Ticket',
+        qrData:
+            'DIGITAL TICKET | VELOCE\n$eventName\n$displayCategory\n$displaySeat\nID: $ticketId',
         status: 'UPCOMING',
         price: totalAmount,
       );

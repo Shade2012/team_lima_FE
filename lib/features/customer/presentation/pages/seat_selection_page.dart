@@ -249,6 +249,18 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
     // Reverse categories so Index 0 (closest to stage) is rendered at bottom near STAGE banner
     final reversed = categories.reversed.toList();
 
+    // Determine currently active category (matching _selectedCategoryId or widget.categoryId/categoryName)
+    final activeCategoryId =
+        _selectedCategoryId ??
+        categories
+            .firstWhere(
+              (c) =>
+                  c.id == widget.categoryId ||
+                  c.name.toUpperCase() == widget.categoryName.toUpperCase(),
+              orElse: () => categories.first,
+            )
+            .id;
+
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
@@ -268,6 +280,16 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
                     category: reversed[i],
                     seats: seatsListState.seatsByCategory[reversed[i].id] ?? [],
                     color: _getCategoryColor(categories.length - 1 - i),
+                    isSelectedCategory: reversed[i].id == activeCategoryId,
+                    onSelectCategory: () {
+                      setState(() {
+                        _selectedCategoryId = reversed[i].id;
+                        _selectedCategoryName = reversed[i].name;
+                        _selectedPrice = reversed[i].price.toDouble();
+                        _selectedSeatCode = null;
+                        _selectedSeatDisplayNum = null;
+                      });
+                    },
                   ),
                   if (i < reversed.length - 1)
                     Container(height: 1, color: AppColors.greyLight),
@@ -317,6 +339,8 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
     required TicketCategory category,
     required List<Seat> seats,
     required Color color,
+    required bool isSelectedCategory,
+    required VoidCallback onSelectCategory,
   }) {
     final rowsCount = (category.rows != null && category.rows! > 0)
         ? category.rows!
@@ -329,12 +353,102 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
 
     final totalGridSeats = rowsCount * colsCount;
 
+    if (!isSelectedCategory) {
+      // Inactive / Unselected Category placeholder card
+      return InkWell(
+        onTap: onSelectCategory,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          color: color.withValues(alpha: 0.04),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: color,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        category.name,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Other Category • $totalGridSeats Seats',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.grey,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Text(
+                    _formatPrice(category.price),
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: color,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.touch_app, size: 12, color: color),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Switch',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: color,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Active selected category with full seat grid
     return Column(
       children: [
         Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          color: color.withValues(alpha: 0.05),
+          color: color.withValues(alpha: 0.12),
           child: Row(
             children: [
               Container(
@@ -347,17 +461,40 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: Text(
-                  category.name,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.black,
-                    fontSize: 13,
-                  ),
+                child: Row(
+                  children: [
+                    Text(
+                      category.name,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.black,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: color,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Text(
+                        'SELECTED',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Text(
-                '${_formatPrice(category.price)}  •  $totalGridSeats seats (${category.blockedSeats.length} blocked)',
+                '${_formatPrice(category.price)} • $totalGridSeats seats (${category.blockedSeats.length} blocked)',
                 style: AppTextStyles.bodySmall.copyWith(
                   color: AppColors.grey,
                   fontSize: 11,
@@ -389,151 +526,191 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
     required int colsCount,
     required Color color,
   }) {
-    return Column(
-      children: List.generate(rowsCount, (r) {
-        final rowLabel = _getRowLabel(r);
-
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Row label indicator on left
-              SizedBox(
-                width: 20,
-                child: Text(
-                  rowLabel,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.grey,
-                    fontSize: 11,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 6),
-              // Seats in this row
-              Wrap(
-                spacing: 6,
-                children: List.generate(colsCount, (c) {
-                  final colIndex = c + 1;
-                  final totalSeatIndex = r * colsCount + c;
-                  final fullSeatCode = '${category.name}-$rowLabel-$colIndex';
-                  final shortSeatCode = '$rowLabel-$colIndex';
-
-                  // 1. Check if Blocked
-                  final isBlocked = _isSeatBlocked(
-                    category,
-                    rowLabel,
-                    colIndex,
-                    totalSeatIndex,
-                  );
-
-                  // 2. Check API status for Held or Booked
-                  final apiSeat = _findSeatByPosition(
-                    seats,
-                    rowLabel,
-                    colIndex,
-                  );
-                  final isHeld = !isBlocked && apiSeat?.status == 'HELD';
-                  final isBooked = !isBlocked && apiSeat?.status == 'BOOKED';
-
-                  // 3. Selectable check
-                  final isAvailable = !isBlocked && !isHeld && !isBooked;
-
-                  final isSelected =
-                      _selectedSeatCode == fullSeatCode ||
-                      _selectedSeatCode == shortSeatCode ||
-                      (_selectedCategoryName == category.name &&
-                          _selectedSeatDisplayNum == shortSeatCode);
-
-                  return GestureDetector(
-                    onTap: !isAvailable
-                        ? null
-                        : () {
-                            setState(() {
-                              if (isSelected) {
-                                _selectedSeatCode = null;
-                                _selectedCategoryName = null;
-                                _selectedCategoryId = null;
-                                _selectedSeatDisplayNum = null;
-                                _selectedPrice = null;
-                              } else {
-                                _selectedSeatCode = fullSeatCode;
-                                _selectedCategoryName = category.name;
-                                _selectedCategoryId = category.id;
-                                _selectedSeatDisplayNum = shortSeatCode;
-                                _selectedPrice = category.price.toDouble();
-                              }
-                            });
-                          },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 150),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Column header coordinates (1, 2, 3, ...)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(width: 26),
+                for (var c = 0; c < colsCount; c++) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: SizedBox(
                       width: 36,
-                      height: 30,
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? color
-                            : isBlocked
-                            ? const Color(0xFFE5E5EA)
-                            : isHeld
-                            ? AppColors.warning.withValues(alpha: 0.15)
-                            : isBooked
-                            ? AppColors.danger.withValues(alpha: 0.15)
-                            : color.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: isSelected
-                              ? color
-                              : isBlocked
-                              ? const Color(0xFFD1D1D6)
-                              : isHeld
-                              ? AppColors.warning
-                              : isBooked
-                              ? AppColors.danger
-                              : color.withValues(alpha: 0.4),
-                          width: isSelected ? 2 : 1,
+                      child: Text(
+                        '${c + 1}',
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.grey,
+                          fontSize: 11,
                         ),
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color: color.withValues(alpha: 0.4),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ]
-                            : [],
-                      ),
-                      child: Center(
-                        child: isBlocked
-                            ? const Icon(
-                                Icons.close,
-                                size: 12,
-                                color: Colors.black38,
-                              )
-                            : Text(
-                                '$colIndex',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                  color: isSelected
-                                      ? AppColors.white
-                                      : isHeld
-                                      ? AppColors.warning
-                                      : isBooked
-                                      ? AppColors.danger
-                                      : color,
-                                  height: 1,
-                                ),
-                              ),
                       ),
                     ),
-                  );
-                }),
-              ),
-            ],
+                  ),
+                ],
+              ],
+            ),
           ),
-        );
-      }),
+          ...List.generate(rowsCount, (r) {
+            final rowLabel = _getRowLabel(r);
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Row label indicator on left
+                  SizedBox(
+                    width: 20,
+                    child: Text(
+                      rowLabel,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.grey,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  // Seats in this row
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: List.generate(colsCount, (c) {
+                      final colIndex = c + 1;
+                      final totalSeatIndex = r * colsCount + c;
+                      final fullSeatCode =
+                          '${category.name}-$rowLabel-$colIndex';
+                      final shortSeatCode = '$rowLabel-$colIndex';
+
+                      // 1. Check if Blocked
+                      final isBlocked = _isSeatBlocked(
+                        category,
+                        rowLabel,
+                        colIndex,
+                        totalSeatIndex,
+                      );
+
+                      // 2. Check API status for Held or Booked
+                      final apiSeat = _findSeatByPosition(
+                        seats,
+                        rowLabel,
+                        colIndex,
+                      );
+                      final isHeld = !isBlocked && apiSeat?.status == 'HELD';
+                      final isBooked =
+                          !isBlocked && apiSeat?.status == 'BOOKED';
+
+                      // 3. Selectable check
+                      final isAvailable = !isBlocked && !isHeld && !isBooked;
+
+                      final isSelected =
+                          _selectedSeatCode == fullSeatCode ||
+                          _selectedSeatCode == shortSeatCode ||
+                          (_selectedCategoryName == category.name &&
+                              _selectedSeatDisplayNum == shortSeatCode);
+
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: GestureDetector(
+                          onTap: !isAvailable
+                              ? null
+                              : () {
+                                  setState(() {
+                                    if (isSelected) {
+                                      _selectedSeatCode = null;
+                                      _selectedCategoryName = null;
+                                      _selectedCategoryId = null;
+                                      _selectedSeatDisplayNum = null;
+                                      _selectedPrice = null;
+                                    } else {
+                                      _selectedSeatCode = fullSeatCode;
+                                      _selectedCategoryName = category.name;
+                                      _selectedCategoryId = category.id;
+                                      _selectedSeatDisplayNum = shortSeatCode;
+                                      _selectedPrice = category.price
+                                          .toDouble();
+                                    }
+                                  });
+                                },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            width: 36,
+                            height: 30,
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? color
+                                  : isBlocked
+                                  ? const Color(0xFFE5E5EA)
+                                  : isHeld
+                                  ? AppColors.warning.withValues(alpha: 0.15)
+                                  : isBooked
+                                  ? AppColors.danger.withValues(alpha: 0.15)
+                                  : color.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: isSelected
+                                    ? color
+                                    : isBlocked
+                                    ? const Color(0xFFD1D1D6)
+                                    : isHeld
+                                    ? AppColors.warning
+                                    : isBooked
+                                    ? AppColors.danger
+                                    : color.withValues(alpha: 0.4),
+                                width: isSelected ? 2 : 1,
+                              ),
+                              boxShadow: isSelected
+                                  ? [
+                                      BoxShadow(
+                                        color: color.withValues(alpha: 0.4),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 3),
+                                      ),
+                                    ]
+                                  : [],
+                            ),
+                            child: Center(
+                              child: isBlocked
+                                  ? const Icon(
+                                      Icons.close,
+                                      size: 12,
+                                      color: Colors.black38,
+                                    )
+                                  : Text(
+                                      '$colIndex',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                        color: isSelected
+                                            ? AppColors.white
+                                            : isHeld
+                                            ? AppColors.warning
+                                            : isBooked
+                                            ? AppColors.danger
+                                            : color,
+                                        height: 1,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
     );
   }
 

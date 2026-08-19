@@ -32,26 +32,57 @@ class CustomerTicket {
   });
 
   factory CustomerTicket.fromJson(Map<String, dynamic> json) {
+    final code =
+        json['ticketCode']?.toString() ??
+        json['seatCode']?.toString() ??
+        json['code']?.toString() ??
+        '';
+    final event =
+        json['eventName']?.toString() ??
+        json['event']?['name']?.toString() ??
+        json['title']?.toString() ??
+        'Event Ticket';
+    final category =
+        json['categoryName']?.toString() ??
+        json['category']?['name']?.toString() ??
+        'General Admission';
+
+    final id = json['id']?.toString() ?? '';
     return CustomerTicket(
-      id: json['id']?.toString() ?? '',
-      ticketCode: json['ticketCode']?.toString() ?? '#NJF-2491',
-      eventName: json['eventName']?.toString() ?? 'Neon Jungle Festival',
-      categoryName: json['categoryName']?.toString() ?? 'VIP PASS',
+      id: id,
+      ticketCode: code.isNotEmpty
+          ? code
+          : '#TKN-${id.length >= 6 ? id.substring(0, 6) : "0000"}',
+      eventName: event,
+      categoryName: category,
       eventDate: json['eventDate'] != null
           ? DateTime.tryParse(json['eventDate'].toString()) ?? DateTime.now()
-          : DateTime.now(),
-      eventTimeRange: json['eventTimeRange']?.toString() ?? '8:00 PM - 4:00 AM',
-      venueName: json['venueName']?.toString() ?? 'The Grand Warehouse',
+          : (json['date'] != null
+                ? DateTime.tryParse(json['date'].toString()) ?? DateTime.now()
+                : DateTime.now()),
+      eventTimeRange:
+          json['eventTimeRange']?.toString() ??
+          json['timeRange']?.toString() ??
+          'TBA',
+      venueName:
+          json['venueName']?.toString() ??
+          json['location']?.toString() ??
+          'Main Arena',
       venueAddress:
-          json['venueAddress']?.toString() ?? '124 Industrial Ave, Metro City',
-      attendeeName: json['attendeeName']?.toString() ?? 'Alex Chen',
-      ticketType: json['ticketType']?.toString() ?? 'All Access',
+          json['venueAddress']?.toString() ??
+          json['address']?.toString() ??
+          'Main Sector',
+      attendeeName:
+          json['attendeeName']?.toString() ??
+          json['userName']?.toString() ??
+          'Customer',
+      ticketType: json['ticketType']?.toString() ?? 'E-Ticket',
       qrData:
           json['qrData']?.toString() ??
-          'DIGITAL TICKET | VELOCE\nNeon Jungle Festival\nNJF-2491',
+          'VELOCE TICKET | $event | $code\nID: $id',
       status: json['status']?.toString() ?? 'UPCOMING',
-      imageUrl: json['imageUrl']?.toString(),
-      price: (json['price'] as num?)?.toDouble() ?? 150.0,
+      imageUrl: json['imageUrl']?.toString() ?? json['image']?.toString(),
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
     );
   }
 

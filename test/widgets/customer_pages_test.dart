@@ -7,6 +7,7 @@ import 'package:team_five_fe/features/customer/presentation/pages/customer_event
 import 'package:team_five_fe/features/customer/presentation/pages/customer_explore_page.dart';
 import 'package:team_five_fe/features/customer/presentation/pages/customer_profile_page.dart';
 import 'package:team_five_fe/features/customer/presentation/pages/seat_selection_page.dart';
+import 'package:team_five_fe/features/customer/presentation/pages/ticket_detail_page.dart';
 import 'package:team_five_fe/features/customer/presentation/widgets/top_up_dialog.dart';
 import 'package:team_five_fe/features/customer/presentation/providers/customer_provider.dart';
 
@@ -17,7 +18,7 @@ class MockCustomerExploreNotifier extends CustomerExploreNotifier {
   }
 
   @override
-  Future<void> loadPublicEvents() async {
+  Future<void> loadPublicEvents({bool forceRefresh = false}) async {
     // Mock override to bypass network request during widget testing
   }
 }
@@ -232,6 +233,39 @@ void main() {
         expect(find.text('Veloce E-Wallet'), findsOneWidget);
         expect(find.text('Available Balance'), findsOneWidget);
         expect(find.text('Top Up'), findsOneWidget);
+      },
+    );
+
+    // ==================== TICKET DETAIL PAGE ====================
+    testWidgets(
+      'Happy Path: TicketDetailPage renders ticket stub and QR code',
+      (tester) async {
+        await tester.pumpWidget(
+          const ProviderScope(child: MaterialApp(home: TicketDetailPage())),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(find.text('Ticket Detail'), findsOneWidget);
+        expect(find.text('Scan at entrance'), findsOneWidget);
+        expect(find.text('Request Refund'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Happy Path: TicketDetailPage from checkout renders Ticket Confirmed and Back to Home button',
+      (tester) async {
+        await tester.pumpWidget(
+          const ProviderScope(
+            child: MaterialApp(home: TicketDetailPage(isFromCheckout: true)),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(find.text('Ticket Confirmed'), findsOneWidget);
+        expect(find.text('Back to Home'), findsOneWidget);
+        expect(find.text('Home'), findsOneWidget);
       },
     );
   });

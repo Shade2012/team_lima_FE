@@ -17,6 +17,11 @@ class CheckoutPage extends ConsumerStatefulWidget {
   final String eventCategory;
   final double price;
   final String location;
+  final DateTime? eventDate;
+  final String? eventTimeRange;
+  final String? venueName;
+  final String? venueAddress;
+  final String? ticketType;
 
   const CheckoutPage({
     super.key,
@@ -24,10 +29,15 @@ class CheckoutPage extends ConsumerStatefulWidget {
     this.categoryId,
     this.seatId,
     this.seatCode,
-    this.eventName = 'Neon Jungle Festival',
-    this.eventCategory = 'LIVE EVENT',
+    this.eventName = 'Event Ticket',
+    this.eventCategory = 'General Admission',
     this.price = 150.0,
-    this.location = 'Main Stage, Sector 4',
+    this.location = 'Main Stage Pavilion',
+    this.eventDate,
+    this.eventTimeRange,
+    this.venueName,
+    this.venueAddress,
+    this.ticketType,
   });
 
   @override
@@ -746,6 +756,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                         eventName: widget.eventName,
                         categoryName: widget.eventCategory,
                         attendeeName: attendeeName,
+                        eventDate: widget.eventDate,
+                        eventTimeRange: widget.eventTimeRange,
+                        venueName: widget.venueName ?? widget.location,
+                        venueAddress: widget.venueAddress,
+                        ticketType: widget.ticketType,
                       );
                       if (context.mounted) {
                         if (newTicket != null) {
@@ -758,8 +773,10 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (_) =>
-                                  TicketDetailPage(ticket: newTicket),
+                              builder: (_) => TicketDetailPage(
+                                ticket: newTicket,
+                                isFromCheckout: true,
+                              ),
                             ),
                           );
                         } else if (state.error != null) {

@@ -17,7 +17,7 @@ class MockCustomerOrdersNotifier extends CustomerOrdersNotifier {
   }
 
   @override
-  Future<void> loadOrders() async {}
+  Future<void> loadOrders({bool forceRefresh = false}) async {}
 }
 
 class MockCustomerRefundsNotifier extends CustomerRefundsNotifier {
@@ -30,7 +30,7 @@ class MockCustomerRefundsNotifier extends CustomerRefundsNotifier {
   }
 
   @override
-  Future<void> loadRefunds() async {}
+  Future<void> loadRefunds({bool forceRefresh = false}) async {}
 }
 
 void main() {
