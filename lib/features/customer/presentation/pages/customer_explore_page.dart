@@ -247,7 +247,7 @@ class CustomerExplorePage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Tidak ada event yang ditemukan',
+                    'No events found',
                     style: AppTextStyles.bodyLarge.copyWith(
                       color: AppColors.black,
                       fontWeight: FontWeight.w600,
@@ -256,8 +256,8 @@ class CustomerExplorePage extends ConsumerWidget {
                   const SizedBox(height: 4),
                   Text(
                     state.searchQuery.isNotEmpty
-                        ? 'Coba kata kunci pencarian yang lain'
-                        : 'Belum ada event publik yang tersedia saat ini',
+                        ? 'Try searching with a different keyword'
+                        : 'No public events available at this time',
                     style: AppTextStyles.bodySmall.copyWith(
                       color: AppColors.grey,
                     ),
