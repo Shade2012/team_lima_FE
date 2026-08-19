@@ -244,24 +244,8 @@ class CustomerTicketsState {
 class CustomerTicketsNotifier extends Notifier<CustomerTicketsState> {
   @override
   CustomerTicketsState build() {
-    final initialTicket = CustomerTicket(
-      id: '019146a0-7d1e-7abc-9a12-ticket0001',
-      ticketCode: '#NJF-2491',
-      eventName: 'Neon Jungle Festival',
-      categoryName: 'VIP PASS',
-      eventDate: DateTime(2024, 8, 24),
-      eventTimeRange: '8:00 PM - 4:00 AM',
-      venueName: 'The Grand Warehouse',
-      venueAddress: '124 Industrial Ave, Metro City',
-      attendeeName: 'Alex Chen',
-      ticketType: 'All Access',
-      qrData: 'DIGITAL TICKET | VELOCE\nNeon Jungle Festival\nNJF-2491',
-      status: 'UPCOMING',
-      price: 150.0,
-    );
-
     Future.microtask(() => loadTickets());
-    return CustomerTicketsState(tickets: [initialTicket]);
+    return CustomerTicketsState();
   }
 
   Future<void> loadTickets({bool forceRefresh = false}) async {
@@ -272,11 +256,7 @@ class CustomerTicketsNotifier extends Notifier<CustomerTicketsState> {
     try {
       final repo = ref.read(customerTicketRepositoryProvider);
       final fetchedTickets = await repo.getMyTickets();
-      if (fetchedTickets.isNotEmpty) {
-        state = state.copyWith(tickets: fetchedTickets, isLoading: false);
-      } else {
-        state = state.copyWith(isLoading: false);
-      }
+      state = state.copyWith(tickets: fetchedTickets, isLoading: false);
     } catch (_) {
       state = state.copyWith(isLoading: false);
     }
