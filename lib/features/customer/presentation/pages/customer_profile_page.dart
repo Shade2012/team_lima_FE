@@ -26,6 +26,14 @@ class _CustomerProfilePageState extends ConsumerState<CustomerProfilePage> {
   final _emailController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(customerWalletProvider.notifier).loadWallet();
+    });
+  }
+
+  @override
   void dispose() {
     _usernameController.dispose();
     _emailController.dispose();

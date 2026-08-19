@@ -78,7 +78,6 @@ class CustomerWalletState {
 class CustomerWalletNotifier extends Notifier<CustomerWalletState> {
   @override
   CustomerWalletState build() {
-    Future.microtask(() => loadWallet());
     return CustomerWalletState();
   }
 
@@ -86,8 +85,8 @@ class CustomerWalletNotifier extends Notifier<CustomerWalletState> {
     if (!forceRefresh && (state.isLoading || state.wallet != null)) {
       return;
     }
-    state = state.copyWith(isLoading: true, error: null);
     try {
+      state = state.copyWith(isLoading: true, error: null);
       final repo = ref.read(customerWalletRepositoryProvider);
       final fetchedWallet = await repo.getWallet();
       final fetchedTrxs = await repo.getWalletTransactions();
@@ -98,10 +97,12 @@ class CustomerWalletNotifier extends Notifier<CustomerWalletState> {
         isLoading: false,
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString().replaceAll('Exception: ', ''),
-      );
+      try {
+        state = state.copyWith(
+          isLoading: false,
+          error: e.toString().replaceAll('Exception: ', ''),
+        );
+      } catch (_) {}
     }
   }
 
