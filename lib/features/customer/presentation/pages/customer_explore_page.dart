@@ -26,7 +26,8 @@ class CustomerExplorePage extends ConsumerWidget {
             // Body Content
             Expanded(
               child: RefreshIndicator(
-                onRefresh: () => exploreNotifier.loadPublicEvents(forceRefresh: true),
+                onRefresh: () =>
+                    exploreNotifier.loadPublicEvents(forceRefresh: true),
                 color: AppColors.primary,
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(
@@ -208,7 +209,8 @@ class CustomerExplorePage extends ConsumerWidget {
                   ),
                 ),
                 TextButton(
-                  onPressed: () => notifier.loadPublicEvents(forceRefresh: true),
+                  onPressed: () =>
+                      notifier.loadPublicEvents(forceRefresh: true),
                   style: TextButton.styleFrom(
                     padding: EdgeInsets.zero,
                     minimumSize: Size.zero,

@@ -264,7 +264,10 @@ class CustomerTicketsNotifier extends Notifier<CustomerTicketsState> {
     return CustomerTicketsState(tickets: [initialTicket]);
   }
 
-  Future<void> loadTickets() async {
+  Future<void> loadTickets({bool forceRefresh = false}) async {
+    if (!forceRefresh && (state.isLoading || state.tickets.isNotEmpty)) {
+      return;
+    }
     state = state.copyWith(isLoading: true, error: null);
     try {
       final repo = ref.read(customerTicketRepositoryProvider);
@@ -347,7 +350,10 @@ class CustomerOrdersNotifier extends Notifier<CustomerOrdersState> {
     return CustomerOrdersState();
   }
 
-  Future<void> loadOrders() async {
+  Future<void> loadOrders({bool forceRefresh = false}) async {
+    if (!forceRefresh && (state.isLoading || state.orders.isNotEmpty)) {
+      return;
+    }
     state = state.copyWith(isLoading: true, error: null);
     try {
       final repo = ref.read(customerOrderRepositoryProvider);
@@ -404,7 +410,10 @@ class CustomerRefundsNotifier extends Notifier<CustomerRefundsState> {
     return CustomerRefundsState();
   }
 
-  Future<void> loadRefunds() async {
+  Future<void> loadRefunds({bool forceRefresh = false}) async {
+    if (!forceRefresh && (state.isLoading || state.refunds.isNotEmpty)) {
+      return;
+    }
     state = state.copyWith(isLoading: true, error: null);
     try {
       final repo = ref.read(customerRefundRepositoryProvider);

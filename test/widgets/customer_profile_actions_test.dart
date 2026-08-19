@@ -48,7 +48,7 @@ class MockCustomerTicketsNotifier extends CustomerTicketsNotifier {
   }
 
   @override
-  Future<void> loadTickets() async {}
+  Future<void> loadTickets({bool forceRefresh = false}) async {}
 }
 
 void main() {
