@@ -416,7 +416,9 @@ class TicketDetailPage extends ConsumerWidget {
                         )
                       else
                         QrImageView(
-                          data: ticket.qrData,
+                          data: ticket.id.isNotEmpty
+                              ? ticket.id
+                              : ticket.qrData,
                           version: QrVersions.auto,
                           size: 180.0,
                           eyeStyle: const QrEyeStyle(
