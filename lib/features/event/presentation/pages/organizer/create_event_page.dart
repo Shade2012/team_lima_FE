@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:team_five_fe/core/theme/app_colors.dart';
 import 'package:team_five_fe/core/theme/app_text_styles.dart';
@@ -18,6 +20,7 @@ class CreateEventPage extends ConsumerStatefulWidget {
 class _CreateEventPageState extends ConsumerState<CreateEventPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _descriptionController = TextEditingController();
   final _refundPolicyController = TextEditingController();
   final _refundPercentageController = TextEditingController();
 
@@ -26,12 +29,14 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
   DateTime? _salesEndTime;
   DateTime? _eventDate;
   DateTime? _refundEndDate;
+  File? _selectedImage;
 
   final _dateFormat = DateFormat('dd MMM yyyy, HH:mm');
 
   @override
   void dispose() {
     _nameController.dispose();
+    _descriptionController.dispose();
     _refundPolicyController.dispose();
     _refundPercentageController.dispose();
     super.dispose();
@@ -199,7 +204,11 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
                     title: 'Event Info',
                     icon: Icons.info_outline,
                     children: [
+                      _buildImagePicker(),
+                      const SizedBox(height: 12),
                       _buildNameField(),
+                      const SizedBox(height: 12),
+                      _buildDescriptionField(),
                       const SizedBox(height: 12),
                       _buildIsSeatedSwitch(),
                     ],
@@ -232,7 +241,7 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
                       ),
                       const SizedBox(height: 12),
                       _buildDateTimeField(
-                        label: 'Refund End Date (Optional)',
+                        label: 'Refund End Date',
                         value: _refundEndDate,
                         onSelect: (date) =>
                             setState(() => _refundEndDate = date),
@@ -346,6 +355,103 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
         return null;
       },
     );
+  }
+
+  Widget _buildDescriptionField() {
+    return CustomTextField(
+      controller: _descriptionController,
+      hintText: 'Event Description',
+      prefixIcon: Icons.description_outlined,
+      maxLines: 5,
+    );
+  }
+
+  Widget _buildImagePicker() {
+    return GestureDetector(
+      onTap: _pickImage,
+      child: Container(
+        height: _selectedImage != null ? 200 : 120,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.greyLight),
+          image: _selectedImage != null
+              ? DecorationImage(
+                  image: FileImage(_selectedImage!),
+                  fit: BoxFit.cover,
+                )
+              : null,
+        ),
+        child: _selectedImage == null
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.add_photo_alternate_outlined,
+                    size: 36,
+                    color: AppColors.primary.withValues(alpha: 0.6),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Add Event Photo',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.grey,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Tap to select from gallery',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.grey,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              )
+            : Stack(
+                alignment: Alignment.topRight,
+                children: [
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: GestureDetector(
+                      onTap: () => setState(() => _selectedImage = null),
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: AppColors.danger,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close,
+                          color: AppColors.white,
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1920,
+      maxHeight: 1080,
+      imageQuality: 85,
+    );
+
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
   }
 
   Widget _buildIsSeatedSwitch() {
@@ -471,7 +577,7 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
   Widget _buildRefundPolicyField() {
     return CustomTextField(
       controller: _refundPolicyController,
-      hintText: 'Refund Policy (Optional)',
+      hintText: 'Refund Policy',
       prefixIcon: Icons.info_outline,
       maxLines: 2,
     );
@@ -480,7 +586,7 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
   Widget _buildRefundPercentageField() {
     return CustomTextField(
       controller: _refundPercentageController,
-      hintText: 'Refund Percentage (Optional)',
+      hintText: 'Refund Percentage',
       prefixIcon: Icons.percent,
       keyboardType: TextInputType.number,
     );
@@ -606,21 +712,88 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
       return;
     }
 
+    if (_refundEndDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Refund end date is required',
+            style: AppTextStyles.snackbar,
+          ),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+      return;
+    }
+
+    if (_descriptionController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Description is required',
+            style: AppTextStyles.snackbar,
+          ),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+      return;
+    }
+
+    if (_refundPolicyController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Refund policy is required',
+            style: AppTextStyles.snackbar,
+          ),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+      return;
+    }
+
+    if (_refundPercentageController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Refund percentage is required',
+            style: AppTextStyles.snackbar,
+          ),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+      return;
+    }
+
+    final refundPercentage = int.tryParse(
+      _refundPercentageController.text.trim(),
+    );
+    if (refundPercentage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Refund percentage must be a valid number',
+            style: AppTextStyles.snackbar,
+          ),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+      return;
+    }
+
     final request = CreateEventRequest(
       name: _nameController.text.trim(),
+      description: _descriptionController.text.trim(),
       isSeated: _isSeated,
       salesStartTime: _salesStartTime!,
       salesEndTime: _salesEndTime!,
       eventDate: _eventDate!,
-      refundEndDate: _refundEndDate,
-      refundPolicy: _refundPolicyController.text.trim().isNotEmpty
-          ? _refundPolicyController.text.trim()
-          : null,
-      refundPercentage: _refundPercentageController.text.trim().isNotEmpty
-          ? int.tryParse(_refundPercentageController.text.trim())
-          : null,
+      refundEndDate: _refundEndDate!,
+      refundPolicy: _refundPolicyController.text.trim(),
+      refundPercentage: refundPercentage,
     );
 
-    ref.read(createEventProvider.notifier).createEvent(request);
+    ref
+        .read(createEventProvider.notifier)
+        .createEvent(request, imageFile: _selectedImage);
   }
 }

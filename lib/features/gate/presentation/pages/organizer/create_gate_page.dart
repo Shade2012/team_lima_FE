@@ -28,6 +28,11 @@ class _CreateGatePageState extends ConsumerState<CreateGatePage> {
   Gate? _createdGate;
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     super.dispose();

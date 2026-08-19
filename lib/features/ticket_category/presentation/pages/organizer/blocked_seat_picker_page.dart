@@ -107,6 +107,8 @@ class _BlockedSeatPickerPageState extends State<BlockedSeatPickerPage> {
                   _buildLegend(),
                   const SizedBox(height: 16),
                   _buildSeatGrid(),
+                  const SizedBox(height: 30),
+                  _buildStageVisual(),
                 ],
               ),
             ),
@@ -217,6 +219,33 @@ class _BlockedSeatPickerPageState extends State<BlockedSeatPickerPage> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildStageVisual() {
+    return Container(
+      width: double.infinity,
+      height: 70,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [AppColors.greyLight, AppColors.background],
+        ),
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(40)),
+        border: Border.all(color: AppColors.greyLight),
+      ),
+      child: const Center(
+        child: Text(
+          'S  T  A  G  E',
+          style: TextStyle(
+            color: AppColors.grey,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 4,
+          ),
+        ),
+      ),
     );
   }
 

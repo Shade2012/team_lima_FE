@@ -356,6 +356,26 @@ class _AdminEventsPageState extends ConsumerState<AdminEventsPage>
     bool isDraft,
     bool isSoldOut,
   ) {
+    final hasImage = event.imageUrl != null && event.imageUrl!.isNotEmpty;
+
+    if (hasImage) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Image.network(
+          event.imageUrl!,
+          width: 52,
+          height: 52,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+              _buildFallbackIcon(event, index),
+        ),
+      );
+    }
+
+    return _buildFallbackIcon(event, index);
+  }
+
+  Widget _buildFallbackIcon(Event event, int index) {
     final icon = _getIcon(index);
     final initials = _getInitials(event.name);
 

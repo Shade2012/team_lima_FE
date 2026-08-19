@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:team_five_fe/core/theme/app_colors.dart';
 import 'package:team_five_fe/core/theme/app_text_styles.dart';
@@ -10,6 +12,8 @@ import 'package:team_five_fe/features/event/presentation/providers/event_provide
 class EditEventPage extends ConsumerStatefulWidget {
   final String eventId;
   final String eventName;
+  final String? description;
+  final String? imageUrl;
   final bool isSeated;
   final DateTime salesStartTime;
   final DateTime salesEndTime;
@@ -22,6 +26,8 @@ class EditEventPage extends ConsumerStatefulWidget {
     super.key,
     required this.eventId,
     required this.eventName,
+    this.description,
+    this.imageUrl,
     required this.isSeated,
     required this.salesStartTime,
     required this.salesEndTime,
@@ -38,6 +44,7 @@ class EditEventPage extends ConsumerStatefulWidget {
 class _EditEventPageState extends ConsumerState<EditEventPage> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
+  late final TextEditingController _descriptionController;
   late final TextEditingController _refundPolicyController;
   late final TextEditingController _refundPercentageController;
 
@@ -46,6 +53,7 @@ class _EditEventPageState extends ConsumerState<EditEventPage> {
   late DateTime? _salesEndTime;
   late DateTime? _eventDate;
   late DateTime? _refundEndDate;
+  File? _selectedImage;
 
   final _dateFormat = DateFormat('dd MMM yyyy, HH:mm');
 
@@ -53,6 +61,9 @@ class _EditEventPageState extends ConsumerState<EditEventPage> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.eventName);
+    _descriptionController = TextEditingController(
+      text: widget.description ?? '',
+    );
     _refundPolicyController = TextEditingController(
       text: widget.refundPolicy ?? '',
     );
@@ -71,6 +82,7 @@ class _EditEventPageState extends ConsumerState<EditEventPage> {
   @override
   void dispose() {
     _nameController.dispose();
+    _descriptionController.dispose();
     _refundPolicyController.dispose();
     _refundPercentageController.dispose();
     super.dispose();
@@ -229,7 +241,11 @@ class _EditEventPageState extends ConsumerState<EditEventPage> {
                     title: 'Event Info',
                     icon: Icons.info_outline,
                     children: [
+                      _buildImagePicker(),
+                      const SizedBox(height: 12),
                       _buildNameField(),
+                      const SizedBox(height: 12),
+                      _buildDescriptionField(),
                       const SizedBox(height: 12),
                       _buildIsSeatedSwitch(),
                     ],
@@ -376,6 +392,116 @@ class _EditEventPageState extends ConsumerState<EditEventPage> {
         return null;
       },
     );
+  }
+
+  Widget _buildDescriptionField() {
+    return CustomTextField(
+      controller: _descriptionController,
+      hintText: 'Event Description',
+      prefixIcon: Icons.description_outlined,
+      maxLines: 5,
+    );
+  }
+
+  Widget _buildImagePicker() {
+    final hasCurrentImage =
+        widget.imageUrl != null && widget.imageUrl!.isNotEmpty;
+    final hasNewImage = _selectedImage != null;
+
+    return GestureDetector(
+      onTap: _pickImage,
+      child: Container(
+        height: hasNewImage || hasCurrentImage ? 200 : 120,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.greyLight),
+          image: hasNewImage
+              ? DecorationImage(
+                  image: FileImage(_selectedImage!),
+                  fit: BoxFit.cover,
+                )
+              : hasCurrentImage
+              ? DecorationImage(
+                  image: NetworkImage(widget.imageUrl!),
+                  fit: BoxFit.cover,
+                )
+              : null,
+        ),
+        child: !(hasNewImage || hasCurrentImage)
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.add_photo_alternate_outlined,
+                    size: 36,
+                    color: AppColors.primary.withValues(alpha: 0.6),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Change Event Photo',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.grey,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Tap to select from gallery',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.grey,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              )
+            : Stack(
+                alignment: Alignment.topRight,
+                children: [
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedImage = null;
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: AppColors.danger,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close,
+                          color: AppColors.white,
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1920,
+      maxHeight: 1080,
+      imageQuality: 85,
+    );
+
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
   }
 
   Widget _buildIsSeatedSwitch() {
@@ -638,6 +764,9 @@ class _EditEventPageState extends ConsumerState<EditEventPage> {
 
     final request = UpdateEventRequest(
       name: _nameController.text.trim(),
+      description: _descriptionController.text.trim().isNotEmpty
+          ? _descriptionController.text.trim()
+          : null,
       isSeated: _isSeated,
       salesStartTime: _salesStartTime,
       salesEndTime: _salesEndTime,
@@ -651,6 +780,8 @@ class _EditEventPageState extends ConsumerState<EditEventPage> {
           : null,
     );
 
-    ref.read(updateEventProvider.notifier).updateEvent(widget.eventId, request);
+    ref
+        .read(updateEventProvider.notifier)
+        .updateEvent(widget.eventId, request, imageFile: _selectedImage);
   }
 }

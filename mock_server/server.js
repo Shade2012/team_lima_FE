@@ -6,9 +6,19 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 // Enable CORS & JSON parsing
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Serve uploaded files statically
+app.use('/uploads', express.static(uploadsDir));
 
 // Load seed mock data
 const seedDataPath = path.join(__dirname, 'data', 'initial_mock_data.json');

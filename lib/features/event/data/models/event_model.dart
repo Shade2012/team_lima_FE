@@ -2,6 +2,8 @@ class Event {
   final String id;
   final String organizerId;
   final String name;
+  final String? imageUrl;
+  final String? description;
   final bool isSeated;
   final DateTime salesStartTime;
   final DateTime salesEndTime;
@@ -16,6 +18,8 @@ class Event {
     required this.id,
     required this.organizerId,
     required this.name,
+    this.imageUrl,
+    this.description,
     required this.isSeated,
     required this.salesStartTime,
     required this.salesEndTime,
@@ -32,6 +36,8 @@ class Event {
       id: json['id']?.toString() ?? '',
       organizerId: json['organizerId']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
+      imageUrl: json['imageUrl']?.toString(),
+      description: json['description']?.toString(),
       isSeated: json['isSeated'] == true,
       salesStartTime: json['salesStartTime'] != null
           ? DateTime.tryParse(json['salesStartTime'].toString()) ??
@@ -64,6 +70,8 @@ class Event {
       'id': id,
       'organizerId': organizerId,
       'name': name,
+      'imageUrl': imageUrl,
+      'description': description,
       'isSeated': isSeated,
       'salesStartTime': salesStartTime.toIso8601String(),
       'salesEndTime': salesEndTime.toIso8601String(),

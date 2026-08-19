@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import '../models/event_model.dart';
 import '../models/event_statistics_model.dart';
@@ -62,11 +63,22 @@ class EventRepository {
   }
 
   /// POST /events
-  Future<Event> createEvent(CreateEventRequest request) async {
+  Future<Event> createEvent(
+    CreateEventRequest request, {
+    File? imageFile,
+  }) async {
     try {
+      final formData = FormData.fromMap({
+        ...request.toJson(),
+        if (imageFile != null)
+          'image': await MultipartFile.fromFile(
+            imageFile.path,
+            filename: imageFile.path.split('/').last,
+          ),
+      });
       final response = await _dioClient.dio.post(
         ApiConstants.events,
-        data: request.toJson(),
+        data: formData,
       );
       return Event.fromJson(response.data['data']);
     } on DioException catch (e) {
@@ -77,11 +89,28 @@ class EventRepository {
   }
 
   /// PATCH /events/:id
-  Future<Event> updateEvent(String id, UpdateEventRequest request) async {
+  Future<Event> updateEvent(
+    String id,
+    UpdateEventRequest request, {
+    File? imageFile,
+  }) async {
     try {
+      dynamic data;
+      if (imageFile != null) {
+        final formData = FormData.fromMap({
+          ...request.toJson(),
+          'image': await MultipartFile.fromFile(
+            imageFile.path,
+            filename: imageFile.path.split('/').last,
+          ),
+        });
+        data = formData;
+      } else {
+        data = request.toJson();
+      }
       final response = await _dioClient.dio.patch(
         ApiConstants.eventDetail(id),
-        data: request.toJson(),
+        data: data,
       );
       return Event.fromJson(response.data['data']);
     } on DioException catch (e) {
