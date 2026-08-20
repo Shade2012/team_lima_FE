@@ -285,13 +285,11 @@ class CustomerExplorePage extends ConsumerWidget {
       return {
         'id': e.id,
         'event': e,
-        'category': e.isSeated ? 'SEATED' : 'GENERAL',
+        'category': 'EVENT',
         'timeBadge': dateBadge,
         'title': e.name.length > 18 ? '${e.name.substring(0, 15)}...' : e.name,
         'fullTitle': e.name,
-        'venue': e.isSeated ? 'Seated Venue' : 'General Venue',
-        'price': 150.0,
-        'isSeated': e.isSeated,
+        'venue': 'Main Venue',
         'gradient': gradients[index % gradients.length],
       };
     }).toList();
@@ -334,7 +332,7 @@ class CustomerExplorePage extends ConsumerWidget {
         const SizedBox(height: 14),
         // Horizontal Scroll Cards List
         SizedBox(
-          height: 295,
+          height: 325,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -353,8 +351,6 @@ class CustomerExplorePage extends ConsumerWidget {
                 title: item['title'] as String,
                 fullTitle: item['fullTitle'] as String,
                 venue: item['venue'] as String,
-                price: item['price'] as double,
-                isSeated: item['isSeated'] as bool,
                 isSaved: isSaved,
                 gradientColors: item['gradient'] as List<Color>,
                 onToggleSave: () =>
@@ -378,8 +374,6 @@ class CustomerExplorePage extends ConsumerWidget {
     required String title,
     required String fullTitle,
     required String venue,
-    required double price,
-    required bool isSeated,
     required bool isSaved,
     required List<Color> gradientColors,
     required VoidCallback onToggleSave,
@@ -405,7 +399,7 @@ class CustomerExplorePage extends ConsumerWidget {
           Stack(
             children: [
               Container(
-                height: 140,
+                height: 135,
                 width: double.infinity,
                 decoration: BoxDecoration(
                   borderRadius: const BorderRadius.vertical(
@@ -511,67 +505,110 @@ class CustomerExplorePage extends ConsumerWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 12),
-                // Price & Get Tickets Button Row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Flexible(
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          '\$${price.toInt()}',
-                          style: AppTextStyles.title.copyWith(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.black,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => CustomerEventDetailPage(
-                              event: event,
-                              eventId: id,
-                              eventName: fullTitle,
-                              categoryName: category,
-                              price: price,
-                              location: venue,
-                              isSeated: isSeated,
+                const SizedBox(height: 8),
+                // Dedicated Price Range Row (between venue & Get Tickets button)
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Consumer(
+                    builder: (context, ref, child) {
+                      final categoriesAsync = ref.watch(
+                        customerCategoriesByEventProvider(id),
+                      );
+                      final formatter = NumberFormat.currency(
+                        locale: 'id_ID',
+                        symbol: 'Rp ',
+                        decimalDigits: 0,
+                      );
+
+                      return categoriesAsync.when(
+                        data: (cats) {
+                          if (cats.isEmpty) {
+                            return Text(
+                              'Rp 0',
+                              style: AppTextStyles.title.copyWith(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.primary,
+                              ),
+                            );
+                          }
+                          final prices = cats.map((c) => c.price).toList();
+                          final minP = prices.reduce((a, b) => a < b ? a : b);
+                          final maxP = prices.reduce((a, b) => a > b ? a : b);
+                          final text = minP == maxP
+                              ? formatter.format(minP)
+                              : '${formatter.format(minP)} - ${formatter.format(maxP)}';
+                          return Text(
+                            text,
+                            style: AppTextStyles.title.copyWith(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.primary,
                             ),
+                          );
+                        },
+                        loading: () => Text(
+                          'Loading...',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            fontSize: 11,
+                            color: Colors.grey,
                           ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFF7ECFF),
-                        foregroundColor: AppColors.primary,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
                         ),
-                        minimumSize: const Size(0, 30),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                        error: (_, _) => Text(
+                          'Rp 500.000 - Rp 1.500.000',
+                          style: AppTextStyles.title.copyWith(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primary,
+                          ),
                         ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 10),
+                // Get Tickets Button Row (Aligned right)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => CustomerEventDetailPage(
+                            event: event,
+                            eventId: id,
+                            eventName: fullTitle,
+                            categoryName: category,
+                            location: venue,
+                          ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFF6E8FF),
+                      foregroundColor: AppColors.primary,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
                       ),
-                      child: Text(
-                        'Get Tickets',
-                        style: AppTextStyles.bodySmall.copyWith(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 11,
-                          color: AppColors.primary,
-                        ),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                  ],
+                    child: Text(
+                      'Get Tickets',
+                      style: AppTextStyles.button.copyWith(
+                        color: AppColors.primary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),

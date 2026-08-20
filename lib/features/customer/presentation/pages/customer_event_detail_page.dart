@@ -29,6 +29,7 @@ final customerCategoriesByEventProvider =
             name: 'VIP Front Row',
             price: 1500000,
             totalQuota: 100,
+            isSeated: true,
           ),
           TicketCategory(
             id: 'cat_reg',
@@ -36,6 +37,7 @@ final customerCategoriesByEventProvider =
             name: 'Regular Admission',
             price: 750000,
             totalQuota: 250,
+            isSeated: false,
           ),
         ];
       }
@@ -48,7 +50,6 @@ class CustomerEventDetailPage extends ConsumerStatefulWidget {
   final String categoryName;
   final double price;
   final String location;
-  final bool isSeated;
 
   const CustomerEventDetailPage({
     super.key,
@@ -56,9 +57,8 @@ class CustomerEventDetailPage extends ConsumerStatefulWidget {
     this.eventId,
     this.eventName = 'Sonic Resonance Festival 2024',
     this.categoryName = 'ELECTRONIC',
-    this.price = 150.0,
+    this.price = 1500000.0,
     this.location = 'Main Stage Pavilion • Oct 15-17',
-    this.isSeated = true,
   });
 
   @override
@@ -79,7 +79,6 @@ class _CustomerEventDetailPageState
     );
 
     final title = widget.event?.name ?? widget.eventName;
-    final isSeated = widget.event?.isSeated ?? widget.isSeated;
     final refundPolicy =
         widget.event?.refundPolicy ??
         'Refund dapat diajukan maksimal 7 hari sebelum event.';
@@ -136,26 +135,6 @@ class _CustomerEventDetailPageState
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              if (isSeated)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF6E8FF),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    'SEATED EVENT',
-                                    style: AppTextStyles.bodySmall.copyWith(
-                                      color: AppColors.primaryDark,
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 10,
-                                    ),
-                                  ),
-                                ),
                             ],
                           ),
                           const SizedBox(height: 10),
@@ -172,6 +151,10 @@ class _CustomerEventDetailPageState
 
                           // Date & Venue Details Card
                           _buildDetailsCard(eventDateStr, widget.location),
+                          const SizedBox(height: 20),
+
+                          // Venue Floor Plan Overview Card (UX Improvement)
+                          _buildVenueOverviewCard(),
                           const SizedBox(height: 20),
 
                           // Refund Policy Box
@@ -217,7 +200,6 @@ class _CustomerEventDetailPageState
             _buildBottomActionBar(
               context,
               categoriesAsync.asData?.value,
-              isSeated,
               title,
             ),
           ],
@@ -250,7 +232,7 @@ class _CustomerEventDetailPageState
               child: const Icon(
                 Icons.arrow_back,
                 color: AppColors.black,
-                size: 20,
+                size: 18,
               ),
             ),
           ),
@@ -258,86 +240,32 @@ class _CustomerEventDetailPageState
             'Event Details',
             style: AppTextStyles.title.copyWith(
               fontSize: 18,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w800,
               color: AppColors.black,
             ),
           ),
-          IconButton(
-            onPressed: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Sharing event...')));
-            },
-            icon: const Icon(Icons.share_outlined, color: AppColors.primary),
-          ),
+          const SizedBox(width: 38),
         ],
       ),
     );
   }
 
   Widget _buildCoverBanner(String category) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        height: 200,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          gradient: const LinearGradient(
-            colors: [Color(0xFF2A004E), Color(0xFF6B0096), Color(0xFFAF06FF)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.25),
-              blurRadius: 16,
-              offset: const Offset(0, 8),
-            ),
-          ],
+    return Container(
+      height: 200,
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF2C2C2C), Color(0xFF1E1E24)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        child: Stack(
-          children: [
-            Center(
-              child: Icon(
-                category == 'ELECTRONIC' ? Icons.equalizer : Icons.music_note,
-                color: Colors.white24,
-                size: 70,
-              ),
-            ),
-            Positioned(
-              bottom: 16,
-              right: 16,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.black45,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  children: const [
-                    Icon(
-                      Icons.photo_library_outlined,
-                      color: Colors.white,
-                      size: 14,
-                    ),
-                    SizedBox(width: 6),
-                    Text(
-                      'Live Concert',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+      ),
+      child: Center(
+        child: Icon(
+          category == 'ELECTRONIC' ? Icons.equalizer : Icons.music_note,
+          color: Colors.white24,
+          size: 64,
         ),
       ),
     );
@@ -348,30 +276,23 @@ class _CustomerEventDetailPageState
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFEFEFEF)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E5EA)),
       ),
       child: Column(
         children: [
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF7ECFF),
-                  shape: BoxShape.circle,
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
-                  Icons.calendar_month,
+                  Icons.calendar_today,
                   color: AppColors.primary,
-                  size: 20,
+                  size: 18,
                 ),
               ),
               const SizedBox(width: 14),
@@ -400,21 +321,21 @@ class _CustomerEventDetailPageState
             ],
           ),
           const Padding(
-            padding: EdgeInsets.symmetric(vertical: 10),
-            child: Divider(height: 1, color: Color(0xFFF0F0F5)),
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Divider(height: 1, color: Color(0xFFF0F0F0)),
           ),
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF7ECFF),
-                  shape: BoxShape.circle,
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
-                  Icons.location_on,
+                  Icons.location_on_outlined,
                   color: AppColors.primary,
-                  size: 20,
+                  size: 18,
                 ),
               ),
               const SizedBox(width: 14),
@@ -490,189 +411,364 @@ class _CustomerEventDetailPageState
     );
   }
 
+  Widget _buildVenueOverviewCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E5EA)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.map, size: 18, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Venue Floor Plan & Layout Overview',
+                  style: AppTextStyles.title.copyWith(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.black,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            height: 120,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E1E24),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    'S T A G E',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 3,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildZoneChip('Standing Zone', const Color(0xFF00D68F)),
+                    _buildZoneChip('VIP Seated', const Color(0xFF6C63FF)),
+                    _buildZoneChip('Regular Zone', const Color(0xFFFFB800)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildZoneChip(String label, Color color) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: const TextStyle(color: Colors.white70, fontSize: 10),
+        ),
+      ],
+    );
+  }
+
   Widget _buildCategoryList(List<TicketCategory> categories) {
     if (categories.isEmpty) return _buildFallbackCategoryList();
 
-    return RadioGroup<int>(
-      groupValue: _selectedCategoryIndex,
-      onChanged: (val) {
-        if (val != null) setState(() => _selectedCategoryIndex = val);
-      },
-      child: Column(
-        children: List.generate(categories.length, (index) {
-          final category = categories[index];
-          final isSelected = index == _selectedCategoryIndex;
+    return Column(
+      children: List.generate(categories.length, (index) {
+        final category = categories[index];
+        final isSelected = index == _selectedCategoryIndex;
 
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: InkWell(
-              onTap: () => setState(() => _selectedCategoryIndex = index),
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: isSelected
-                        ? AppColors.primary
-                        : const Color(0xFFE5E5EA),
-                    width: isSelected ? 2 : 1,
-                  ),
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: InkWell(
+            onTap: () => setState(() => _selectedCategoryIndex = index),
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isSelected
+                      ? AppColors.primary
+                      : const Color(0xFFE5E5EA),
+                  width: isSelected ? 2 : 1,
                 ),
-                child: Row(
-                  children: [
-                    Radio<int>(
-                      value: index,
-                      fillColor: WidgetStateProperty.resolveWith(
-                        (states) => states.contains(WidgetState.selected)
-                            ? AppColors.primary
-                            : null,
-                      ),
+              ),
+              child: Row(
+                children: [
+                  Radio<int>(
+                    value: index,
+                    groupValue: _selectedCategoryIndex,
+                    onChanged: (val) {
+                      if (val != null) {
+                        setState(() => _selectedCategoryIndex = val);
+                      }
+                    },
+                    fillColor: WidgetStateProperty.resolveWith(
+                      (states) => states.contains(WidgetState.selected)
+                          ? AppColors.primary
+                          : null,
                     ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            category.name,
-                            style: AppTextStyles.bodyLarge.copyWith(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 15,
-                              color: AppColors.black,
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 6,
+                          runSpacing: 4,
+                          children: [
+                            Text(
+                              category.name,
+                              style: AppTextStyles.bodyLarge.copyWith(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                                color: AppColors.black,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '${category.totalQuota} Seats Quota',
-                            style: AppTextStyles.bodySmall.copyWith(
-                              color: Colors.black45,
-                              fontSize: 12,
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: category.isSeated
+                                    ? const Color(0xFFF6E8FF)
+                                    : const Color(0xFFE6F9ED),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    category.isSeated
+                                        ? Icons.event_seat
+                                        : Icons.stadium,
+                                    size: 11,
+                                    color: category.isSeated
+                                        ? AppColors.primaryDark
+                                        : const Color(0xFF00A86B),
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    category.isSeated ? 'Seated' : 'Standing',
+                                    style: TextStyle(
+                                      color: category.isSeated
+                                          ? AppColors.primaryDark
+                                          : const Color(0xFF00A86B),
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${category.totalQuota} Quota Available',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: Colors.black45,
+                            fontSize: 11,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      'Rp ${NumberFormat('#,###').format(category.price)}',
+                  ),
+                  const SizedBox(width: 6),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      'Rp ${NumberFormat('#,###', 'id_ID').format(category.price)}',
                       style: AppTextStyles.title.copyWith(
-                        fontSize: 15,
+                        fontSize: 14,
                         fontWeight: FontWeight.w800,
                         color: AppColors.primary,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          );
-        }),
-      ),
+          ),
+        );
+      }),
     );
   }
 
   Widget _buildFallbackCategoryList() {
     final fallbackList = [
-      {'name': 'VIP Front Row', 'price': 150.0, 'quota': 100},
-      {'name': 'Regular Admission', 'price': 75.0, 'quota': 300},
+      {'name': 'VIP Front Row', 'price': 1500000, 'quota': 100, 'isSeated': true},
+      {'name': 'Regular Admission', 'price': 750000, 'quota': 300, 'isSeated': false},
     ];
 
-    return RadioGroup<int>(
-      groupValue: _selectedCategoryIndex,
-      onChanged: (val) {
-        if (val != null) setState(() => _selectedCategoryIndex = val);
-      },
-      child: Column(
-        children: List.generate(fallbackList.length, (index) {
-          final item = fallbackList[index];
-          final isSelected = index == _selectedCategoryIndex;
+    return Column(
+      children: List.generate(fallbackList.length, (index) {
+        final item = fallbackList[index];
+        final isSelected = index == _selectedCategoryIndex;
+        final isSeated = item['isSeated'] as bool;
 
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: InkWell(
-              onTap: () => setState(() => _selectedCategoryIndex = index),
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: isSelected
-                        ? AppColors.primary
-                        : const Color(0xFFE5E5EA),
-                    width: isSelected ? 2 : 1,
-                  ),
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: InkWell(
+            onTap: () => setState(() => _selectedCategoryIndex = index),
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isSelected
+                      ? AppColors.primary
+                      : const Color(0xFFE5E5EA),
+                  width: isSelected ? 2 : 1,
                 ),
-                child: Row(
-                  children: [
-                    Radio<int>(
-                      value: index,
-                      fillColor: WidgetStateProperty.resolveWith(
-                        (states) => states.contains(WidgetState.selected)
-                            ? AppColors.primary
-                            : null,
-                      ),
+              ),
+              child: Row(
+                children: [
+                  Radio<int>(
+                    value: index,
+                    groupValue: _selectedCategoryIndex,
+                    onChanged: (val) {
+                      if (val != null) {
+                        setState(() => _selectedCategoryIndex = val);
+                      }
+                    },
+                    fillColor: WidgetStateProperty.resolveWith(
+                      (states) => states.contains(WidgetState.selected)
+                          ? AppColors.primary
+                          : null,
                     ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item['name'] as String,
-                            style: AppTextStyles.bodyLarge.copyWith(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 15,
-                              color: AppColors.black,
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 6,
+                          runSpacing: 4,
+                          children: [
+                            Text(
+                              item['name'] as String,
+                              style: AppTextStyles.bodyLarge.copyWith(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                                color: AppColors.black,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '${item['quota']} Quota Left',
-                            style: AppTextStyles.bodySmall.copyWith(
-                              color: Colors.black45,
-                              fontSize: 12,
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isSeated
+                                    ? const Color(0xFFF6E8FF)
+                                    : const Color(0xFFE6F9ED),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                isSeated ? 'Seated' : 'Standing',
+                                style: TextStyle(
+                                  color: isSeated
+                                      ? AppColors.primaryDark
+                                      : const Color(0xFF00A86B),
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 10,
+                                ),
+                              ),
                             ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${item['quota']} Quota Left',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: Colors.black45,
+                            fontSize: 11,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      '\$${(item['price'] as double).toInt()}',
+                  ),
+                  const SizedBox(width: 6),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      'Rp ${NumberFormat('#,###', 'id_ID').format(item['price'] as int)}',
                       style: AppTextStyles.title.copyWith(
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.w800,
                         color: AppColors.primary,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          );
-        }),
-      ),
+          ),
+        );
+      }),
     );
   }
 
   Widget _buildBottomActionBar(
     BuildContext context,
     List<TicketCategory>? categories,
-    bool isSeated,
     String title,
   ) {
-    final categoryName = categories != null && categories.isNotEmpty
-        ? categories[_selectedCategoryIndex % categories.length].name
-        : 'VIP PASS';
+    final selectedCategory = categories != null && categories.isNotEmpty
+        ? categories[_selectedCategoryIndex % categories.length]
+        : null;
 
-    final categoryPrice = categories != null && categories.isNotEmpty
-        ? categories[_selectedCategoryIndex % categories.length].price
-              .toDouble()
-        : widget.price;
+    final categoryName = selectedCategory?.name ?? 'VIP Front Row';
+    final categoryPrice = selectedCategory?.price.toDouble() ?? 1500000.0;
+    final categoryId = selectedCategory?.id ?? 'cat_vip';
+    final isCategorySeated = selectedCategory?.isSeated ?? (_selectedCategoryIndex == 0);
 
-    final categoryId = categories != null && categories.isNotEmpty
-        ? categories[_selectedCategoryIndex % categories.length].id
-        : 'cat_vip';
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -703,9 +799,7 @@ class _CustomerEventDetailPageState
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
-                    categoryPrice > 10000
-                        ? 'Rp ${NumberFormat('#,###').format(categoryPrice)}'
-                        : '\$${categoryPrice.toInt()}',
+                    formatter.format(categoryPrice),
                     style: AppTextStyles.title.copyWith(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
@@ -719,7 +813,7 @@ class _CustomerEventDetailPageState
           const SizedBox(width: 16),
           ElevatedButton(
             onPressed: () {
-              if (isSeated) {
+              if (isCategorySeated) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -731,7 +825,7 @@ class _CustomerEventDetailPageState
                       eventName: title,
                       categoryName: categoryName,
                       categoryId: categoryId,
-                      price: categoryPrice > 10000 ? 150.0 : categoryPrice,
+                      price: categoryPrice,
                     ),
                   ),
                 );
@@ -744,7 +838,7 @@ class _CustomerEventDetailPageState
                       categoryId: categoryId,
                       eventName: title,
                       eventCategory: categoryName,
-                      price: categoryPrice > 10000 ? 150.0 : categoryPrice,
+                      price: categoryPrice,
                       location: widget.location,
                       eventDate: widget.event?.eventDate,
                       venueName: widget.location,
@@ -765,13 +859,15 @@ class _CustomerEventDetailPageState
             child: Row(
               children: [
                 Icon(
-                  isSeated ? Icons.event_seat : Icons.shopping_bag_outlined,
+                  isCategorySeated
+                      ? Icons.event_seat
+                      : Icons.shopping_bag_outlined,
                   size: 18,
                   color: Colors.white,
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  isSeated ? 'Select Seat' : 'Checkout Now',
+                  isCategorySeated ? 'Select Seat' : 'Checkout Now',
                   style: AppTextStyles.button.copyWith(
                     color: Colors.white,
                     fontSize: 14,
