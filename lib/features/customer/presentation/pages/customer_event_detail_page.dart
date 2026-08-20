@@ -453,7 +453,10 @@ class _CustomerEventDetailPageState
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primary,
                     borderRadius: BorderRadius.circular(8),
@@ -530,18 +533,18 @@ class _CustomerEventDetailPageState
               ),
               child: Row(
                 children: [
-                  Radio<int>(
-                    value: index,
-                    groupValue: _selectedCategoryIndex,
-                    onChanged: (val) {
-                      if (val != null) {
-                        setState(() => _selectedCategoryIndex = val);
-                      }
-                    },
-                    fillColor: WidgetStateProperty.resolveWith(
-                      (states) => states.contains(WidgetState.selected)
-                          ? AppColors.primary
-                          : null,
+                  Container(
+                    width: 20,
+                    height: 20,
+                    margin: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isSelected
+                            ? AppColors.primary
+                            : Colors.grey.shade400,
+                        width: isSelected ? 6 : 2,
+                      ),
                     ),
                   ),
                   Expanded(
@@ -634,8 +637,18 @@ class _CustomerEventDetailPageState
 
   Widget _buildFallbackCategoryList() {
     final fallbackList = [
-      {'name': 'VIP Front Row', 'price': 1500000, 'quota': 100, 'isSeated': true},
-      {'name': 'Regular Admission', 'price': 750000, 'quota': 300, 'isSeated': false},
+      {
+        'name': 'VIP Front Row',
+        'price': 1500000,
+        'quota': 100,
+        'isSeated': true,
+      },
+      {
+        'name': 'Regular Admission',
+        'price': 750000,
+        'quota': 300,
+        'isSeated': false,
+      },
     ];
 
     return Column(
@@ -663,18 +676,18 @@ class _CustomerEventDetailPageState
               ),
               child: Row(
                 children: [
-                  Radio<int>(
-                    value: index,
-                    groupValue: _selectedCategoryIndex,
-                    onChanged: (val) {
-                      if (val != null) {
-                        setState(() => _selectedCategoryIndex = val);
-                      }
-                    },
-                    fillColor: WidgetStateProperty.resolveWith(
-                      (states) => states.contains(WidgetState.selected)
-                          ? AppColors.primary
-                          : null,
+                  Container(
+                    width: 20,
+                    height: 20,
+                    margin: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isSelected
+                            ? AppColors.primary
+                            : Colors.grey.shade400,
+                        width: isSelected ? 6 : 2,
+                      ),
                     ),
                   ),
                   Expanded(
@@ -762,7 +775,8 @@ class _CustomerEventDetailPageState
     final categoryName = selectedCategory?.name ?? 'VIP Front Row';
     final categoryPrice = selectedCategory?.price.toDouble() ?? 1500000.0;
     final categoryId = selectedCategory?.id ?? 'cat_vip';
-    final isCategorySeated = selectedCategory?.isSeated ?? (_selectedCategoryIndex == 0);
+    final isCategorySeated =
+        selectedCategory?.isSeated ?? (_selectedCategoryIndex == 0);
 
     final formatter = NumberFormat.currency(
       locale: 'id_ID',

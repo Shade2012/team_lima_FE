@@ -20,7 +20,7 @@ class MyTicketsPage extends ConsumerWidget {
         child: Column(
           children: [
             // App Bar
-            _buildAppBar(context),
+            _buildAppBar(context, ref),
             // Tickets List
             Expanded(
               child: tickets.isEmpty
@@ -168,9 +168,9 @@ class MyTicketsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildAppBar(BuildContext context) {
+  Widget _buildAppBar(BuildContext context, WidgetRef ref) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(bottom: BorderSide(color: Color(0xFFEFEFEF))),
@@ -178,7 +178,7 @@ class MyTicketsPage extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const SizedBox(width: 24),
+          const SizedBox(width: 48),
           Text(
             'My Tickets',
             style: AppTextStyles.title.copyWith(
@@ -187,7 +187,27 @@ class MyTicketsPage extends ConsumerWidget {
               color: AppColors.black,
             ),
           ),
-          const SizedBox(width: 24),
+          IconButton(
+            tooltip: 'Debug GET /tickets/my-tickets',
+            icon: const Icon(
+              Icons.bug_report,
+              color: AppColors.primary,
+              size: 22,
+            ),
+            onPressed: () async {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Testing GET /tickets/my-tickets ... Check terminal logs!',
+                  ),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+              await ref
+                  .read(customerTicketsProvider.notifier)
+                  .loadTickets(forceRefresh: true);
+            },
+          ),
         ],
       ),
     );

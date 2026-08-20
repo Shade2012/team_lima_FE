@@ -469,7 +469,7 @@ class _CustomerProfilePageState extends ConsumerState<CustomerProfilePage> {
                             vertical: 12,
                           ),
                           itemCount: transactions.length,
-                          separatorBuilder: (_, __) =>
+                          separatorBuilder: (_, _) =>
                               const Divider(height: 1, color: Color(0xFFF0F0F5)),
                           itemBuilder: (context, index) {
                             final tx = transactions[index];

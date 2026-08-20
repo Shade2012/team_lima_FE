@@ -219,26 +219,27 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     CustomerWalletNotifier walletNotifier,
   ) {
     final isWalletInsufficient =
-        state.paymentMethod == 'E_WALLET' && walletState.balance < state.total;
+        state.paymentMethod == 'VELOCE_PAY' &&
+        walletState.balance < state.total;
 
     return Column(
       children: [
-        // 1. E_WALLET (Veloce e-Wallet Option)
+        // 1. VELOCE_PAY (Veloce e-Wallet Option)
         Container(
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: state.paymentMethod == 'E_WALLET'
+              color: state.paymentMethod == 'VELOCE_PAY'
                   ? AppColors.primary
                   : const Color(0xFFE5E5EA),
-              width: state.paymentMethod == 'E_WALLET' ? 2 : 1,
+              width: state.paymentMethod == 'VELOCE_PAY' ? 2 : 1,
             ),
           ),
           child: Column(
             children: [
               InkWell(
-                onTap: () => notifier.setPaymentMethod('E_WALLET'),
+                onTap: () => notifier.setPaymentMethod('VELOCE_PAY'),
                 borderRadius: BorderRadius.circular(16),
                 child: Padding(
                   padding: const EdgeInsets.all(14),
@@ -251,10 +252,10 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: state.paymentMethod == 'E_WALLET'
+                            color: state.paymentMethod == 'VELOCE_PAY'
                                 ? AppColors.primary
                                 : Colors.grey.shade400,
-                            width: state.paymentMethod == 'E_WALLET' ? 6 : 2,
+                            width: state.paymentMethod == 'VELOCE_PAY' ? 6 : 2,
                           ),
                         ),
                       ),
@@ -269,7 +270,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Veloce Wallet (E-Wallet)',
+                              'Veloce Wallet',
                               style: AppTextStyles.bodyMedium.copyWith(
                                 fontWeight: FontWeight.w700,
                                 fontSize: 14,
@@ -321,7 +322,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                   ),
                 ),
               ),
-              if (state.paymentMethod == 'E_WALLET' && isWalletInsufficient)
+              if (state.paymentMethod == 'VELOCE_PAY' && isWalletInsufficient)
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(
@@ -359,134 +360,45 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         ),
         const SizedBox(height: 10),
 
-        // 2. CREDIT_CARD Option Box
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: state.paymentMethod == 'CREDIT_CARD'
-                  ? AppColors.primary
-                  : const Color(0xFFE5E5EA),
-              width: state.paymentMethod == 'CREDIT_CARD' ? 2 : 1,
-            ),
-          ),
-          child: Column(
-            children: [
-              InkWell(
-                onTap: () => notifier.setPaymentMethod('CREDIT_CARD'),
-                borderRadius: BorderRadius.circular(16),
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 20,
-                        height: 20,
-                        margin: const EdgeInsets.only(right: 10),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: state.paymentMethod == 'CREDIT_CARD'
-                                ? AppColors.primary
-                                : Colors.grey.shade400,
-                            width: state.paymentMethod == 'CREDIT_CARD' ? 6 : 2,
-                          ),
-                        ),
-                      ),
-                      const Icon(
-                        Icons.credit_card,
-                        color: AppColors.primary,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Credit or Debit Card',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                      _buildBrandBadge('VISA'),
-                      const SizedBox(width: 4),
-                      _buildBrandBadge('MC'),
-                    ],
-                  ),
-                ),
-              ),
-              if (state.paymentMethod == 'CREDIT_CARD')
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Divider(height: 1, color: Color(0xFFF0F0F5)),
-                      const SizedBox(height: 12),
-                      Text(
-                        'CARD NUMBER',
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: Colors.black54,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 10,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      TextField(
-                        controller: _cardNumberController,
-                        keyboardType: TextInputType.number,
-                        decoration: _buildInputDecoration(
-                          hintText: '4000 0000 0000 0000',
-                          suffixIcon: Icons.credit_card_outlined,
-                        ),
-                        onChanged: (val) => notifier.setCardNumber(val),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 10),
-
-        // 3. BANK_TRANSFER Option Box
+        // 2. VIRTUAL_ACCOUNT Option Box
         _buildPaymentOptionBox(
-          title: 'Bank Transfer (Virtual Account)',
-          value: 'BANK_TRANSFER',
+          title: 'Virtual Account (Bank Transfer)',
+          value: 'VIRTUAL_ACCOUNT',
           groupValue: state.paymentMethod,
           icon: Icons.account_balance_outlined,
-          onSelect: () => notifier.setPaymentMethod('BANK_TRANSFER'),
+          onSelect: () => notifier.setPaymentMethod('VIRTUAL_ACCOUNT'),
         ),
         const SizedBox(height: 10),
 
-        // 4. QRIS Option Box
+        // 3. GOPAY Option Box
         _buildPaymentOptionBox(
-          title: 'QRIS Instant Scan',
-          value: 'QRIS',
+          title: 'GoPay',
+          value: 'GOPAY',
           groupValue: state.paymentMethod,
-          icon: Icons.qr_code_scanner_outlined,
-          onSelect: () => notifier.setPaymentMethod('QRIS'),
+          icon: Icons.account_balance_wallet_outlined,
+          onSelect: () => notifier.setPaymentMethod('GOPAY'),
+        ),
+        const SizedBox(height: 10),
+
+        // 4. SHOPPE_PAY Option Box
+        _buildPaymentOptionBox(
+          title: 'ShopeePay',
+          value: 'SHOPPE_PAY',
+          groupValue: state.paymentMethod,
+          icon: Icons.shopping_bag_outlined,
+          onSelect: () => notifier.setPaymentMethod('SHOPPE_PAY'),
+        ),
+        const SizedBox(height: 10),
+
+        // 5. OVO Option Box
+        _buildPaymentOptionBox(
+          title: 'OVO',
+          value: 'OVO',
+          groupValue: state.paymentMethod,
+          icon: Icons.payments_outlined,
+          onSelect: () => notifier.setPaymentMethod('OVO'),
         ),
       ],
-    );
-  }
-
-  Widget _buildBrandBadge(String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-      decoration: BoxDecoration(
-        color: const Color(0xFFEFEFF4),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontSize: 9,
-          fontWeight: FontWeight.w800,
-          color: Colors.black54,
-        ),
-      ),
     );
   }
 
@@ -542,34 +454,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  InputDecoration _buildInputDecoration({
-    required String hintText,
-    IconData? suffixIcon,
-  }) {
-    return InputDecoration(
-      hintText: hintText,
-      hintStyle: AppTextStyles.bodyMedium.copyWith(color: Colors.black38),
-      filled: true,
-      fillColor: const Color(0xFFF9FAFC),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      suffixIcon: suffixIcon != null
-          ? Icon(suffixIcon, color: Colors.black26, size: 18)
-          : null,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
       ),
     );
   }
@@ -781,7 +665,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                             SnackBar(
                               content: Text(state.error!),
                               backgroundColor: AppColors.danger,
-                              action: state.paymentMethod == 'E_WALLET'
+                              action: state.paymentMethod == 'VELOCE_PAY'
                                   ? SnackBarAction(
                                       label: 'TOP UP',
                                       textColor: Colors.white,
