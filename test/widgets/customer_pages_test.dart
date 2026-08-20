@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:team_five_fe/features/customer/data/models/customer_ticket_model.dart';
 import 'package:team_five_fe/features/customer/data/models/customer_wallet_model.dart';
 import 'package:team_five_fe/features/customer/data/repositories/customer_wallet_repository.dart';
 import 'package:team_five_fe/features/customer/presentation/pages/customer_main_screen.dart';
@@ -169,7 +170,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Secure Checkout'), findsOneWidget);
-        expect(find.text('Credit or Debit Card'), findsOneWidget);
+        expect(find.text('Veloce Wallet'), findsOneWidget);
         expect(find.text('Order Summary'), findsOneWidget);
         expect(find.text('Complete Payment'), findsOneWidget);
       },
@@ -310,6 +311,22 @@ void main() {
     );
 
     // ==================== TICKET DETAIL PAGE ====================
+    final sampleTicket = CustomerTicket(
+      id: 'tkt_001',
+      ticketCode: 'VIP-001',
+      eventName: 'Sonic Resonance Festival 2024',
+      categoryName: 'VIP PASS',
+      eventDate: DateTime(2026, 9, 20),
+      eventTimeRange: '07:00 PM - 11:00 PM',
+      venueName: 'Grand Hall',
+      venueAddress: '123 Music Street',
+      attendeeName: 'Alex Chen',
+      ticketType: 'VIP Pass',
+      qrData: 'DIGITAL TICKET | tkt_001',
+      status: 'UPCOMING',
+      price: 1500000.0,
+    );
+
     testWidgets(
       'Happy Path: TicketDetailPage renders ticket stub and QR code',
       (tester) async {
@@ -320,7 +337,9 @@ void main() {
                 mockWalletRepo,
               ),
             ],
-            child: const MaterialApp(home: TicketDetailPage()),
+            child: MaterialApp(
+              home: TicketDetailPage(ticket: sampleTicket),
+            ),
           ),
         );
 
@@ -342,8 +361,11 @@ void main() {
                 mockWalletRepo,
               ),
             ],
-            child: const MaterialApp(
-              home: TicketDetailPage(isFromCheckout: true),
+            child: MaterialApp(
+              home: TicketDetailPage(
+                ticket: sampleTicket,
+                isFromCheckout: true,
+              ),
             ),
           ),
         );

@@ -223,7 +223,7 @@ void main() {
       );
 
       test(
-        'Unhappy Path: completePayment with E_WALLET fails when wallet balance is insufficient',
+        'Unhappy Path: completePayment with VELOCE_PAY fails when wallet balance is insufficient',
         () async {
           final mockRepo = MockCustomerWalletRepository(balance: 0.0);
           final container = ProviderContainer(
@@ -235,7 +235,7 @@ void main() {
 
           await Future.delayed(Duration.zero);
           final checkoutNotifier = container.read(checkoutProvider.notifier);
-          checkoutNotifier.setPaymentMethod('E_WALLET');
+          checkoutNotifier.setPaymentMethod('VELOCE_PAY');
 
           // Wallet balance is 0.0, payment requires total > 0
           final ticket = await checkoutNotifier.completePayment(
