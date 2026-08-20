@@ -16,27 +16,50 @@ class TicketDetailPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ticketsState = ref.watch(customerTicketsProvider);
-    final currentTicket =
-        ticket ??
-        (ticketsState.tickets.isNotEmpty
-            ? ticketsState.tickets.first
-            : CustomerTicket(
-                id: '019146a0-fallback',
-                ticketCode: '#TKN-0001',
-                eventName: 'Event Ticket',
-                categoryName: 'General Admission',
-                eventDate: DateTime.now().add(const Duration(days: 7)),
-                eventTimeRange: '07:00 PM - 11:00 PM',
-                venueName: 'Main Stage Pavilion',
-                venueAddress: 'Grand Exhibition Center',
-                attendeeName: 'Customer',
-                ticketType: 'E-Ticket',
-                qrData:
-                    'DIGITAL TICKET | VELOCE\nEvent Ticket\n#TKN-0001\nID: 019146a0-fallback',
-                status: 'UPCOMING',
-              ));
+    if (ticket == null) {
+      return Scaffold(
+        backgroundColor: const Color(0xFFF9FAFC),
+        body: SafeArea(
+          child: Column(
+            children: [
+              _buildAppBar(context, ref, ''),
+              Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.confirmation_number_outlined,
+                        size: 64,
+                        color: Colors.grey,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Ticket Not Found',
+                        style: AppTextStyles.title.copyWith(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'No ticket data parameter provided.',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
+    final currentTicket = ticket!;
     final isRefunded = currentTicket.status == 'REFUNDED';
     final dateFormat = DateFormat('EEE, MMM dd, yyyy');
     final formattedDate = dateFormat.format(currentTicket.eventDate);
@@ -47,7 +70,7 @@ class TicketDetailPage extends ConsumerWidget {
         child: Column(
           children: [
             // Header Bar
-            _buildAppBar(context),
+            _buildAppBar(context, ref, currentTicket.id),
             // Body Content
             Expanded(
               child: SingleChildScrollView(
@@ -86,7 +109,11 @@ class TicketDetailPage extends ConsumerWidget {
 
   // ==================== Header Bar ====================
 
-  Widget _buildAppBar(BuildContext context) {
+  Widget _buildAppBar(
+    BuildContext context,
+    WidgetRef ref,
+    String ticketId,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
@@ -176,7 +203,36 @@ class TicketDetailPage extends ConsumerWidget {
               ),
             )
           else
-            const SizedBox(width: 40),
+            GestureDetector(
+              onTap: () async {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Testing GET /tickets API... Check terminal!',
+                    ),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+                try {
+                  final repo = ref.read(customerTicketRepositoryProvider);
+                  await repo.getMyTickets();
+                  if (ticketId.isNotEmpty) {
+                    await repo.getTicketDetail(ticketId);
+                  }
+                } catch (_) {}
+              },
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: Text(
+                  'Test API',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

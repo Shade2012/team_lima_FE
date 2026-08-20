@@ -8,7 +8,6 @@ import '../../data/repositories/customer_refund_repository.dart';
 import '../../../event/data/models/event_model.dart';
 import '../../../event/presentation/providers/event_provider.dart';
 import '../../../order/data/repositories/order_repository.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
 
 final orderRepositoryProvider = Provider<OrderRepository>((ref) {
   return OrderRepository();
@@ -79,27 +78,8 @@ class CustomerWalletState {
 }
 
 class CustomerWalletNotifier extends Notifier<CustomerWalletState> {
-  static final Map<String, CustomerWalletState> _userWallets = {};
-  String? _currentUserKey;
-
   @override
   CustomerWalletState build() {
-    final authState = ref.watch(authProvider);
-    final user = authState.currentUser;
-    final userKey =
-        (user?.email != null && user!.email.isNotEmpty)
-            ? user.email
-            : (user?.username != null && user!.username.isNotEmpty)
-            ? user.username
-            : (user?.id != null && user!.id.isNotEmpty)
-            ? user.id
-            : null;
-
-    if (userKey != null && userKey.isNotEmpty) {
-      _currentUserKey = userKey;
-      return _userWallets[userKey] ?? CustomerWalletState();
-    }
-    _currentUserKey = null;
     return CustomerWalletState();
   }
 
@@ -116,9 +96,6 @@ class CustomerWalletNotifier extends Notifier<CustomerWalletState> {
       balance: state.balance + amount,
       transactions: [newTx, ...state.transactions],
     );
-    if (_currentUserKey != null) {
-      _userWallets[_currentUserKey!] = state;
-    }
   }
 
   bool deduct(double amount, String description) {
@@ -134,9 +111,6 @@ class CustomerWalletNotifier extends Notifier<CustomerWalletState> {
       balance: state.balance - amount,
       transactions: [newTx, ...state.transactions],
     );
-    if (_currentUserKey != null) {
-      _userWallets[_currentUserKey!] = state;
-    }
     return true;
   }
 }
@@ -485,7 +459,7 @@ class CheckoutState {
   final String? error;
 
   CheckoutState({
-    this.paymentMethod = 'E_WALLET',
+    this.paymentMethod = 'VELOCE_PAY',
     this.cardNumber = '',
     this.expiryDate = '',
     this.cvc = '',
@@ -607,7 +581,7 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
     try {
       final totalAmount = state.total;
 
-      if (state.paymentMethod == 'E_WALLET') {
+      if (state.paymentMethod == 'VELOCE_PAY') {
         final walletBalance = ref.read(customerWalletProvider).balance;
         if (walletBalance < totalAmount) {
           state = state.copyWith(
@@ -659,23 +633,34 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
         );
       } catch (_) {}
 
-      if (state.paymentMethod == 'E_WALLET') {
+      if (state.paymentMethod == 'VELOCE_PAY') {
         ref
             .read(customerWalletProvider.notifier)
             .deduct(totalAmount, 'Ticket Purchase: $eventName');
       }
+
+      // Try fetching the real tickets from backend after successful payment
+      try {
+        final ticketRepo = ref.read(customerTicketRepositoryProvider);
+        final realTickets = await ticketRepo.getMyTickets();
+        if (realTickets.isNotEmpty) {
+          final fetchedTicket = realTickets.first;
+          ref.read(customerTicketsProvider.notifier).loadTickets(forceRefresh: true);
+          ref.read(customerOrdersProvider.notifier).loadOrders();
+          state = state.copyWith(isProcessing: false, error: null);
+          return fetchedTicket;
+        }
+      } catch (_) {}
 
       final displayCategory = categoryName ?? 'General Admission';
       final displaySeat = (seatCode != null && seatCode.isNotEmpty)
           ? seatCode
           : '#TKN-${(1000 + DateTime.now().millisecond % 9000)}';
 
-      final ticketId = orderResponse.id.isNotEmpty
-          ? orderResponse.id
-          : '019146a0-${DateTime.now().millisecondsSinceEpoch}';
+      final fallbackTicketId = '019146a0-${DateTime.now().millisecondsSinceEpoch}';
 
       final newTicket = CustomerTicket(
-        id: ticketId,
+        id: fallbackTicketId,
         ticketCode: displaySeat,
         eventName: eventName,
         categoryName: displayCategory,
@@ -686,13 +671,12 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
         attendeeName: attendeeName.isNotEmpty ? attendeeName : 'Customer',
         ticketType: ticketType ?? 'E-Ticket',
         qrData:
-            'DIGITAL TICKET | VELOCE\n$eventName\n$displayCategory\n$displaySeat\nID: $ticketId',
+            'DIGITAL TICKET | VELOCE\n$eventName\n$displayCategory\n$displaySeat\nID: $fallbackTicketId',
         status: 'UPCOMING',
         price: totalAmount,
       );
 
       ref.read(customerTicketsProvider.notifier).addTicket(newTicket);
-      // Reload orders and tickets
       ref.read(customerOrdersProvider.notifier).loadOrders();
       state = state.copyWith(isProcessing: false, error: null);
       return newTicket;
