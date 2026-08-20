@@ -43,18 +43,18 @@ class CreateOrderResponse {
   factory CreateOrderResponse.fromJson(Map<String, dynamic> json) {
     final payment = json['payment'] as Map<String, dynamic>?;
 
-    final id = json['id']?.toString() ?? json['orderId']?.toString() ?? '';
+    final id = json['orderId']?.toString() ?? json['id']?.toString() ?? '';
 
     final totalPrice = json['totalAmount'] is num
         ? (json['totalAmount'] as num).toDouble()
         : json['totalPrice'] is num
-        ? (json['totalPrice'] as num).toDouble()
-        : double.tryParse(
-                json['totalAmount']?.toString() ??
-                    json['totalPrice']?.toString() ??
-                    '',
-              ) ??
-              0.0;
+            ? (json['totalPrice'] as num).toDouble()
+            : double.tryParse(
+                  json['totalAmount']?.toString() ??
+                      json['totalPrice']?.toString() ??
+                      '',
+                ) ??
+                0.0;
 
     final providerTrxId =
         json['providerTrxId']?.toString() ??
@@ -68,20 +68,20 @@ class CreateOrderResponse {
         json['snapRedirectUrl']?.toString() ??
         payment?['snapRedirectUrl']?.toString();
 
+    final checkoutUrl =
+        json['checkoutUrl']?.toString() ?? payment?['checkoutUrl']?.toString();
+
     return CreateOrderResponse(
-      id: json['orderId']?.toString() ?? json['id']?.toString() ?? '',
+      id: id,
       eventId: json['eventId']?.toString() ?? '',
-      userId: json['userId']?.toString() ?? json['customerId']?.toString() ?? '',
-      totalPrice: json['totalAmount'] is num
-          ? (json['totalAmount'] as num).toDouble()
-          : (json['totalPrice'] is num
-              ? (json['totalPrice'] as num).toDouble()
-              : double.tryParse(json['totalAmount']?.toString() ?? json['totalPrice']?.toString() ?? '') ?? 0.0),
+      userId:
+          json['userId']?.toString() ?? json['customerId']?.toString() ?? '',
+      totalPrice: totalPrice,
       status: json['status']?.toString() ?? 'HELD',
-      providerTrxId: json['providerTrxId']?.toString() ?? payment?['providerTrxId']?.toString(),
-      snapToken: payment?['snapToken']?.toString(),
-      snapRedirectUrl: payment?['snapRedirectUrl']?.toString(),
-      checkoutUrl: json['checkoutUrl']?.toString() ?? payment?['checkoutUrl']?.toString(),
+      providerTrxId: providerTrxId,
+      snapToken: snapToken,
+      snapRedirectUrl: snapRedirectUrl,
+      checkoutUrl: checkoutUrl,
     );
   }
 }

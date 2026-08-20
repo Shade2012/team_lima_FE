@@ -533,18 +533,18 @@ class _CustomerEventDetailPageState
               ),
               child: Row(
                 children: [
-                  Radio<int>(
-                    value: index,
-                    groupValue: _selectedCategoryIndex,
-                    onChanged: (val) {
-                      if (val != null) {
-                        setState(() => _selectedCategoryIndex = val);
-                      }
-                    },
-                    fillColor: WidgetStateProperty.resolveWith(
-                      (states) => states.contains(WidgetState.selected)
-                          ? AppColors.primary
-                          : null,
+                  Container(
+                    width: 20,
+                    height: 20,
+                    margin: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isSelected
+                            ? AppColors.primary
+                            : Colors.grey.shade400,
+                        width: isSelected ? 6 : 2,
+                      ),
                     ),
                   ),
                   Expanded(
@@ -676,18 +676,18 @@ class _CustomerEventDetailPageState
               ),
               child: Row(
                 children: [
-                  Radio<int>(
-                    value: index,
-                    groupValue: _selectedCategoryIndex,
-                    onChanged: (val) {
-                      if (val != null) {
-                        setState(() => _selectedCategoryIndex = val);
-                      }
-                    },
-                    fillColor: WidgetStateProperty.resolveWith(
-                      (states) => states.contains(WidgetState.selected)
-                          ? AppColors.primary
-                          : null,
+                  Container(
+                    width: 20,
+                    height: 20,
+                    margin: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isSelected
+                            ? AppColors.primary
+                            : Colors.grey.shade400,
+                        width: isSelected ? 6 : 2,
+                      ),
                     ),
                   ),
                   Expanded(
