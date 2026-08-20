@@ -319,7 +319,8 @@ class _CustomerProfilePageState extends ConsumerState<CustomerProfilePage> {
                 ],
               ),
               IconButton(
-                onPressed: () => _showWalletTransactionsSheet(context, walletState),
+                onPressed: () =>
+                    _showWalletTransactionsSheet(context, walletState),
                 icon: const Icon(
                   Icons.history,
                   color: AppColors.primary,
@@ -469,18 +470,23 @@ class _CustomerProfilePageState extends ConsumerState<CustomerProfilePage> {
                             vertical: 12,
                           ),
                           itemCount: transactions.length,
-                          separatorBuilder: (_, _) =>
-                              const Divider(height: 1, color: Color(0xFFF0F0F5)),
+                          separatorBuilder: (_, _) => const Divider(
+                            height: 1,
+                            color: Color(0xFFF0F0F5),
+                          ),
                           itemBuilder: (context, index) {
                             final tx = transactions[index];
-                            final isPositive = tx.isTopUp || tx.type == 'REFUND';
+                            final isPositive =
+                                tx.isTopUp || tx.type == 'REFUND';
                             final typeLabel = tx.type;
 
                             Color badgeColor;
                             Color badgeBg;
                             if (tx.type == 'TOPUP') {
                               badgeColor = AppColors.success;
-                              badgeBg = AppColors.success.withValues(alpha: 0.1);
+                              badgeBg = AppColors.success.withValues(
+                                alpha: 0.1,
+                              );
                             } else if (tx.type == 'REFUND') {
                               badgeColor = Colors.blue;
                               badgeBg = Colors.blue.withValues(alpha: 0.1);
@@ -490,8 +496,9 @@ class _CustomerProfilePageState extends ConsumerState<CustomerProfilePage> {
                             }
 
                             final dateStr = tx.createdAt != null
-                                ? DateFormat('dd MMM yyyy, HH:mm')
-                                    .format(tx.createdAt!)
+                                ? DateFormat(
+                                    'dd MMM yyyy, HH:mm',
+                                  ).format(tx.createdAt!)
                                 : 'Recent';
 
                             return Padding(
@@ -508,8 +515,8 @@ class _CustomerProfilePageState extends ConsumerState<CustomerProfilePage> {
                                       tx.type == 'TOPUP'
                                           ? Icons.add_circle_outline
                                           : (tx.type == 'REFUND'
-                                              ? Icons.replay
-                                              : Icons.shopping_bag_outlined),
+                                                ? Icons.replay
+                                                : Icons.shopping_bag_outlined),
                                       color: badgeColor,
                                       size: 20,
                                     ),
@@ -530,9 +537,10 @@ class _CustomerProfilePageState extends ConsumerState<CustomerProfilePage> {
                                                         : 'Ticket Purchase'),
                                                 style: AppTextStyles.bodyMedium
                                                     .copyWith(
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 13,
-                                                ),
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontSize: 13,
+                                                    ),
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                               ),
@@ -541,9 +549,9 @@ class _CustomerProfilePageState extends ConsumerState<CustomerProfilePage> {
                                             Container(
                                               padding:
                                                   const EdgeInsets.symmetric(
-                                                horizontal: 6,
-                                                vertical: 2,
-                                              ),
+                                                    horizontal: 6,
+                                                    vertical: 2,
+                                                  ),
                                               decoration: BoxDecoration(
                                                 color: badgeBg,
                                                 borderRadius:
@@ -563,11 +571,11 @@ class _CustomerProfilePageState extends ConsumerState<CustomerProfilePage> {
                                         const SizedBox(height: 2),
                                         Text(
                                           dateStr,
-                                          style:
-                                              AppTextStyles.bodySmall.copyWith(
-                                            color: Colors.black45,
-                                            fontSize: 11,
-                                          ),
+                                          style: AppTextStyles.bodySmall
+                                              .copyWith(
+                                                color: Colors.black45,
+                                                fontSize: 11,
+                                              ),
                                         ),
                                       ],
                                     ),

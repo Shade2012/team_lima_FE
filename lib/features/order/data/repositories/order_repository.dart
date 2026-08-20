@@ -48,13 +48,13 @@ class CreateOrderResponse {
     final totalPrice = json['totalAmount'] is num
         ? (json['totalAmount'] as num).toDouble()
         : json['totalPrice'] is num
-            ? (json['totalPrice'] as num).toDouble()
-            : double.tryParse(
-                  json['totalAmount']?.toString() ??
-                      json['totalPrice']?.toString() ??
-                      '',
-                ) ??
-                0.0;
+        ? (json['totalPrice'] as num).toDouble()
+        : double.tryParse(
+                json['totalAmount']?.toString() ??
+                    json['totalPrice']?.toString() ??
+                    '',
+              ) ??
+              0.0;
 
     final providerTrxId =
         json['providerTrxId']?.toString() ??

@@ -122,10 +122,7 @@ class CustomerWalletNotifier extends Notifier<CustomerWalletState> {
       return true;
     } catch (e) {
       final errStr = e.toString().replaceAll('Exception: ', '');
-      state = state.copyWith(
-        isLoading: false,
-        error: errStr,
-      );
+      state = state.copyWith(isLoading: false, error: errStr);
       throw Exception(errStr);
     }
   }
@@ -143,10 +140,7 @@ class CustomerWalletNotifier extends Notifier<CustomerWalletState> {
             updatedAt: DateTime.now(),
           )
         : null;
-    state = state.copyWith(
-      wallet: updatedWallet,
-      localBalance: newBal,
-    );
+    state = state.copyWith(wallet: updatedWallet, localBalance: newBal);
     return true;
   }
 }
@@ -675,9 +669,7 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
             .deduct(totalAmount, 'Ticket Purchase: $eventName');
       }
       // Refresh wallet balance and transactions from server
-      ref
-          .read(customerWalletProvider.notifier)
-          .loadWallet(forceRefresh: true);
+      ref.read(customerWalletProvider.notifier).loadWallet(forceRefresh: true);
 
       // Try fetching the real tickets from backend after successful payment
       try {

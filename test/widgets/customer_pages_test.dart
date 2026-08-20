@@ -65,7 +65,9 @@ void main() {
               customerExploreProvider.overrideWith(
                 () => MockCustomerExploreNotifier(),
               ),
-              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
+              customerWalletRepositoryProvider.overrideWithValue(
+                mockWalletRepo,
+              ),
             ],
             child: const MaterialApp(home: CustomerMainScreen()),
           ),
@@ -88,7 +90,9 @@ void main() {
         await tester.pumpWidget(
           ProviderScope(
             overrides: [
-              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
+              customerWalletRepositoryProvider.overrideWithValue(
+                mockWalletRepo,
+              ),
             ],
             child: const MaterialApp(
               home: CustomerEventDetailPage(
@@ -115,7 +119,9 @@ void main() {
         await tester.pumpWidget(
           ProviderScope(
             overrides: [
-              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
+              customerWalletRepositoryProvider.overrideWithValue(
+                mockWalletRepo,
+              ),
             ],
             child: const MaterialApp(
               home: SeatSelectionPage(
@@ -146,7 +152,9 @@ void main() {
         await tester.pumpWidget(
           ProviderScope(
             overrides: [
-              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
+              customerWalletRepositoryProvider.overrideWithValue(
+                mockWalletRepo,
+              ),
             ],
             child: const MaterialApp(
               home: CheckoutPage(
@@ -173,7 +181,9 @@ void main() {
         await tester.pumpWidget(
           ProviderScope(
             overrides: [
-              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
+              customerWalletRepositoryProvider.overrideWithValue(
+                mockWalletRepo,
+              ),
             ],
             child: const MaterialApp(
               home: CheckoutPage(
@@ -203,7 +213,9 @@ void main() {
         await tester.pumpWidget(
           ProviderScope(
             overrides: [
-              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
+              customerWalletRepositoryProvider.overrideWithValue(
+                mockWalletRepo,
+              ),
             ],
             child: const MaterialApp(home: Scaffold(body: TopUpDialog())),
           ),
@@ -228,7 +240,9 @@ void main() {
         await tester.pumpWidget(
           ProviderScope(
             overrides: [
-              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
+              customerWalletRepositoryProvider.overrideWithValue(
+                mockWalletRepo,
+              ),
             ],
             child: const MaterialApp(home: Scaffold(body: TopUpDialog())),
           ),
@@ -255,7 +269,9 @@ void main() {
               customerExploreProvider.overrideWith(
                 () => MockCustomerExploreNotifier(),
               ),
-              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
+              customerWalletRepositoryProvider.overrideWithValue(
+                mockWalletRepo,
+              ),
             ],
             child: const MaterialApp(
               home: Scaffold(body: CustomerExplorePage()),
@@ -277,7 +293,9 @@ void main() {
         await tester.pumpWidget(
           ProviderScope(
             overrides: [
-              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
+              customerWalletRepositoryProvider.overrideWithValue(
+                mockWalletRepo,
+              ),
             ],
             child: const MaterialApp(home: CustomerProfilePage()),
           ),
@@ -298,7 +316,9 @@ void main() {
         await tester.pumpWidget(
           ProviderScope(
             overrides: [
-              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
+              customerWalletRepositoryProvider.overrideWithValue(
+                mockWalletRepo,
+              ),
             ],
             child: const MaterialApp(home: TicketDetailPage()),
           ),
@@ -318,9 +338,13 @@ void main() {
         await tester.pumpWidget(
           ProviderScope(
             overrides: [
-              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
+              customerWalletRepositoryProvider.overrideWithValue(
+                mockWalletRepo,
+              ),
             ],
-            child: const MaterialApp(home: TicketDetailPage(isFromCheckout: true)),
+            child: const MaterialApp(
+              home: TicketDetailPage(isFromCheckout: true),
+            ),
           ),
         );
 
