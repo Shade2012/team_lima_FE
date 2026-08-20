@@ -8,6 +8,7 @@ import '../../data/repositories/customer_refund_repository.dart';
 import '../../../event/data/models/event_model.dart';
 import '../../../event/presentation/providers/event_provider.dart';
 import '../../../order/data/repositories/order_repository.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 
 final orderRepositoryProvider = Provider<OrderRepository>((ref) {
   return OrderRepository();
@@ -78,8 +79,27 @@ class CustomerWalletState {
 }
 
 class CustomerWalletNotifier extends Notifier<CustomerWalletState> {
+  static final Map<String, CustomerWalletState> _userWallets = {};
+  String? _currentUserKey;
+
   @override
   CustomerWalletState build() {
+    final authState = ref.watch(authProvider);
+    final user = authState.currentUser;
+    final userKey =
+        (user?.email != null && user!.email.isNotEmpty)
+            ? user.email
+            : (user?.username != null && user!.username.isNotEmpty)
+            ? user.username
+            : (user?.id != null && user!.id.isNotEmpty)
+            ? user.id
+            : null;
+
+    if (userKey != null && userKey.isNotEmpty) {
+      _currentUserKey = userKey;
+      return _userWallets[userKey] ?? CustomerWalletState();
+    }
+    _currentUserKey = null;
     return CustomerWalletState();
   }
 
@@ -96,6 +116,9 @@ class CustomerWalletNotifier extends Notifier<CustomerWalletState> {
       balance: state.balance + amount,
       transactions: [newTx, ...state.transactions],
     );
+    if (_currentUserKey != null) {
+      _userWallets[_currentUserKey!] = state;
+    }
   }
 
   bool deduct(double amount, String description) {
@@ -111,6 +134,9 @@ class CustomerWalletNotifier extends Notifier<CustomerWalletState> {
       balance: state.balance - amount,
       transactions: [newTx, ...state.transactions],
     );
+    if (_currentUserKey != null) {
+      _userWallets[_currentUserKey!] = state;
+    }
     return true;
   }
 }
