@@ -427,12 +427,16 @@ class _CustomerEventDetailPageState
             children: [
               const Icon(Icons.map, size: 18, color: AppColors.primary),
               const SizedBox(width: 8),
-              Text(
-                'Venue Floor Plan & Layout Overview',
-                style: AppTextStyles.title.copyWith(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.black,
+              Expanded(
+                child: Text(
+                  'Venue Floor Plan & Layout Overview',
+                  style: AppTextStyles.title.copyWith(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.black,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -544,20 +548,22 @@ class _CustomerEventDetailPageState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 6,
+                          runSpacing: 4,
                           children: [
                             Text(
                               category.name,
                               style: AppTextStyles.bodyLarge.copyWith(
                                 fontWeight: FontWeight.w700,
-                                fontSize: 15,
+                                fontSize: 14,
                                 color: AppColors.black,
                               ),
                             ),
-                            const SizedBox(width: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
+                                horizontal: 6,
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
@@ -599,18 +605,22 @@ class _CustomerEventDetailPageState
                           '${category.totalQuota} Quota Available',
                           style: AppTextStyles.bodySmall.copyWith(
                             color: Colors.black45,
-                            fontSize: 12,
+                            fontSize: 11,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  Text(
-                    'Rp ${NumberFormat('#,###', 'id_ID').format(category.price)}',
-                    style: AppTextStyles.title.copyWith(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.primary,
+                  const SizedBox(width: 6),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      'Rp ${NumberFormat('#,###', 'id_ID').format(category.price)}',
+                      style: AppTextStyles.title.copyWith(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.primary,
+                      ),
                     ),
                   ),
                 ],
@@ -671,20 +681,22 @@ class _CustomerEventDetailPageState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 6,
+                          runSpacing: 4,
                           children: [
                             Text(
                               item['name'] as String,
                               style: AppTextStyles.bodyLarge.copyWith(
                                 fontWeight: FontWeight.w700,
-                                fontSize: 15,
+                                fontSize: 14,
                                 color: AppColors.black,
                               ),
                             ),
-                            const SizedBox(width: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
+                                horizontal: 6,
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
@@ -711,18 +723,22 @@ class _CustomerEventDetailPageState
                           '${item['quota']} Quota Left',
                           style: AppTextStyles.bodySmall.copyWith(
                             color: Colors.black45,
-                            fontSize: 12,
+                            fontSize: 11,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  Text(
-                    'Rp ${NumberFormat('#,###', 'id_ID').format(item['price'] as int)}',
-                    style: AppTextStyles.title.copyWith(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.primary,
+                  const SizedBox(width: 6),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      'Rp ${NumberFormat('#,###', 'id_ID').format(item['price'] as int)}',
+                      style: AppTextStyles.title.copyWith(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.primary,
+                      ),
                     ),
                   ),
                 ],

@@ -375,43 +375,52 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF00A86B).withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.stadium,
-                    size: 18,
-                    color: Color(0xFF00A86B),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      category.name,
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.black,
-                      ),
+            Expanded(
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF00A86B).withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Standing Zone • Free Standing (No Reserved Seat)',
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: Colors.black54,
-                        fontSize: 11,
-                      ),
+                    child: const Icon(
+                      Icons.stadium,
+                      size: 18,
+                      color: Color(0xFF00A86B),
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          category.name,
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.black,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Standing Zone • Free Standing',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: Colors.black54,
+                            fontSize: 11,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
+            const SizedBox(width: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
@@ -444,50 +453,63 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: color,
-                      borderRadius: BorderRadius.circular(3),
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: color,
+                        borderRadius: BorderRadius.circular(3),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        category.name,
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.black,
-                        ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            category.name,
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.black,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Seated Category • $totalGridSeats Seats',
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.grey,
+                              fontSize: 11,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Seated Category • $totalGridSeats Seats',
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.grey,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: 6),
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    _formatPrice(category.price),
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: color,
-                      fontSize: 13,
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      _formatPrice(category.price),
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: color,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
@@ -542,15 +564,19 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
               Expanded(
                 child: Row(
                   children: [
-                    Text(
-                      category.name,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.black,
-                        fontSize: 14,
+                    Flexible(
+                      child: Text(
+                        category.name,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.black,
+                          fontSize: 13,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 6,
@@ -572,11 +598,18 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
                   ],
                 ),
               ),
-              Text(
-                '${_formatPrice(category.price)} • $totalGridSeats seats (${category.blockedSeats.length} blocked)',
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.grey,
-                  fontSize: 11,
+              const SizedBox(width: 6),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    '${_formatPrice(category.price)} • $totalGridSeats seats (${category.blockedSeats.length} blocked)',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.grey,
+                      fontSize: 11,
+                    ),
+                  ),
                 ),
               ),
             ],

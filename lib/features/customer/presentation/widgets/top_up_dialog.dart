@@ -107,7 +107,12 @@ class _TopUpDialogState extends ConsumerState<TopUpDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final rawText = _amountController.text.replaceAll(RegExp(r'[^0-9]'), '');
+    final currentAmount = double.tryParse(rawText) ?? 0.0;
+
     return AlertDialog(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       title: Row(
         children: [
@@ -124,9 +129,17 @@ class _TopUpDialogState extends ConsumerState<TopUpDialog> {
             ),
           ),
           const SizedBox(width: 12),
-          Text(
-            'Top Up Veloce Wallet',
-            style: AppTextStyles.title.copyWith(fontSize: 18),
+          Expanded(
+            child: Text(
+              'Top Up Veloce Wallet',
+              style: AppTextStyles.title.copyWith(
+                fontSize: 17,
+                fontWeight: FontWeight.w800,
+                color: AppColors.black,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),
@@ -137,25 +150,41 @@ class _TopUpDialogState extends ConsumerState<TopUpDialog> {
           children: [
             Text(
               'Enter top-up amount:',
-              style: AppTextStyles.bodyMedium.copyWith(color: Colors.black54),
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: Colors.black87,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _amountController,
               keyboardType: TextInputType.number,
-              style: AppTextStyles.title.copyWith(fontSize: 18),
+              style: AppTextStyles.title.copyWith(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: AppColors.black,
+              ),
+              onChanged: (_) => setState(() {}),
               decoration: InputDecoration(
+                filled: true,
+                fillColor: const Color(0xFFF8F9FD),
                 prefixText: 'Rp ',
                 prefixStyle: AppTextStyles.title.copyWith(
                   fontSize: 18,
+                  fontWeight: FontWeight.w800,
                   color: AppColors.primary,
                 ),
                 hintText: '50.000',
+                hintStyle: const TextStyle(color: Colors.black38),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 14,
                   vertical: 12,
                 ),
                 border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+                ),
+                enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
                 ),
@@ -168,33 +197,56 @@ class _TopUpDialogState extends ConsumerState<TopUpDialog> {
                 ),
               ),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 16),
             Text(
               'Quick Nominal:',
               style: AppTextStyles.bodySmall.copyWith(
-                color: Colors.black54,
-                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+                fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [50000, 100000, 250000, 500000].map((amt) {
-                return ActionChip(
-                  label: Text(
-                    'Rp ${amt ~/ 1000}k',
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                  backgroundColor: const Color(0xFFF4F5F9),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  onPressed: () {
+                final isSelected = currentAmount == amt.toDouble();
+
+                return InkWell(
+                  onTap: () {
                     setState(() {
                       _amountController.text = amt.toString();
                     });
                   },
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color(0xFFF6E8FF)
+                          : const Color(0xFFF4F5F9),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isSelected
+                            ? AppColors.primary
+                            : const Color(0xFFE0E0E5),
+                        width: isSelected ? 1.5 : 1,
+                      ),
+                    ),
+                    child: Text(
+                      'Rp ${amt ~/ 1000}k',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13,
+                        color: isSelected
+                            ? AppColors.primaryDark
+                            : AppColors.black,
+                      ),
+                    ),
+                  ),
                 );
               }).toList(),
             ),
@@ -206,7 +258,10 @@ class _TopUpDialogState extends ConsumerState<TopUpDialog> {
           onPressed: _isSubmitting ? null : () => Navigator.pop(context),
           child: Text(
             'Cancel',
-            style: AppTextStyles.bodyMedium.copyWith(color: Colors.black54),
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: Colors.black54,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
         ElevatedButton(
@@ -218,6 +273,7 @@ class _TopUpDialogState extends ConsumerState<TopUpDialog> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
+            elevation: 0,
           ),
           child: _isSubmitting
               ? const SizedBox(
