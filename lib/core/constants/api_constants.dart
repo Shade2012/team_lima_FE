@@ -4,18 +4,22 @@ import 'package:flutter/foundation.dart';
 class ApiConstants {
   ApiConstants._();
 
-  static const bool isPhysicalDevice = true;
-  static const String physicalDeviceIp = 'http://10.127.76.48:3000';
+  /// Set to true to connect to deployed backend, or false for local mock server.
+  static const bool useLiveBackend = true;
+
+  /// Deployed production backend URL on Render.
+  static const String liveBaseUrl = 'https://team-lima-be.onrender.com';
 
   /// Default local mock server base URL.
-  /// On Android emulator, localhost is 10.0.2.2.
+  static const String localBaseUrl = 'http://localhost:3000';
+
   static String get baseUrl {
-    if (kIsWeb) return 'http://localhost:3000';
+    if (useLiveBackend) return liveBaseUrl;
+    if (kIsWeb) return localBaseUrl;
     if (Platform.isAndroid) {
-      if (isPhysicalDevice) return physicalDeviceIp;
       return 'http://10.0.2.2:3000';
     }
-    return 'http://localhost:3000';
+    return localBaseUrl;
   }
 
   // Feature: Account & Authentication (/users)
