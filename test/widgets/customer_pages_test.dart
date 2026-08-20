@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:team_five_fe/features/customer/data/models/customer_wallet_model.dart';
+import 'package:team_five_fe/features/customer/data/repositories/customer_wallet_repository.dart';
 import 'package:team_five_fe/features/customer/presentation/pages/customer_main_screen.dart';
 import 'package:team_five_fe/features/customer/presentation/pages/checkout_page.dart';
 import 'package:team_five_fe/features/customer/presentation/pages/customer_event_detail_page.dart';
@@ -23,7 +25,35 @@ class MockCustomerExploreNotifier extends CustomerExploreNotifier {
   }
 }
 
+class MockCustomerWalletRepository implements CustomerWalletRepository {
+  double balance;
+  List<CustomerWalletTransactionModel> trxs;
+
+  MockCustomerWalletRepository({
+    this.balance = 0.0,
+    List<CustomerWalletTransactionModel>? trxs,
+  }) : trxs = trxs ?? [];
+
+  @override
+  Future<CustomerWalletModel> getWallet() async {
+    return CustomerWalletModel(id: 'w1', userId: 'u1', balance: balance);
+  }
+
+  @override
+  Future<CustomerWalletModel> topUpWallet(int amount) async {
+    balance += amount;
+    return CustomerWalletModel(id: 'w1', userId: 'u1', balance: balance);
+  }
+
+  @override
+  Future<List<CustomerWalletTransactionModel>> getWalletTransactions() async {
+    return trxs;
+  }
+}
+
 void main() {
+  final mockWalletRepo = MockCustomerWalletRepository(balance: 0.0);
+
   group('Customer Pages Widget Tests', () {
     // ==================== MAIN SCREEN & NAVIGATION ====================
     testWidgets(
@@ -35,6 +65,7 @@ void main() {
               customerExploreProvider.overrideWith(
                 () => MockCustomerExploreNotifier(),
               ),
+              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
             ],
             child: const MaterialApp(home: CustomerMainScreen()),
           ),
@@ -55,8 +86,11 @@ void main() {
       'Happy Path: CustomerEventDetailPage renders details and category selection',
       (tester) async {
         await tester.pumpWidget(
-          const ProviderScope(
-            child: MaterialApp(
+          ProviderScope(
+            overrides: [
+              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
+            ],
+            child: const MaterialApp(
               home: CustomerEventDetailPage(
                 eventName: 'Sonic Resonance Festival 2024',
                 categoryName: 'ELECTRONIC',
@@ -79,8 +113,11 @@ void main() {
       'Happy Path: SeatSelectionPage renders stage indicator and seat grid',
       (tester) async {
         await tester.pumpWidget(
-          const ProviderScope(
-            child: MaterialApp(
+          ProviderScope(
+            overrides: [
+              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
+            ],
+            child: const MaterialApp(
               home: SeatSelectionPage(
                 eventName: 'Sonic Resonance Festival 2024',
                 categoryName: 'VIP PASS',
@@ -107,8 +144,11 @@ void main() {
       'Happy Path: CheckoutPage renders order summary and payment methods',
       (tester) async {
         await tester.pumpWidget(
-          const ProviderScope(
-            child: MaterialApp(
+          ProviderScope(
+            overrides: [
+              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
+            ],
+            child: const MaterialApp(
               home: CheckoutPage(
                 eventName: 'Neon Jungle Festival',
                 eventCategory: 'LIVE EVENT',
@@ -131,8 +171,11 @@ void main() {
       'Unhappy Path: CheckoutPage displays wallet warning when balance is insufficient',
       (tester) async {
         await tester.pumpWidget(
-          const ProviderScope(
-            child: MaterialApp(
+          ProviderScope(
+            overrides: [
+              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
+            ],
+            child: const MaterialApp(
               home: CheckoutPage(
                 eventName: 'Neon Jungle Festival',
                 eventCategory: 'LIVE EVENT',
@@ -158,8 +201,11 @@ void main() {
       'Happy Path: TopUpDialog populates text when preset chip is tapped',
       (tester) async {
         await tester.pumpWidget(
-          const ProviderScope(
-            child: MaterialApp(home: Scaffold(body: TopUpDialog())),
+          ProviderScope(
+            overrides: [
+              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
+            ],
+            child: const MaterialApp(home: Scaffold(body: TopUpDialog())),
           ),
         );
 
@@ -180,8 +226,11 @@ void main() {
       'Unhappy Path: TopUpDialog shows error when top up amount is zero',
       (tester) async {
         await tester.pumpWidget(
-          const ProviderScope(
-            child: MaterialApp(home: Scaffold(body: TopUpDialog())),
+          ProviderScope(
+            overrides: [
+              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
+            ],
+            child: const MaterialApp(home: Scaffold(body: TopUpDialog())),
           ),
         );
 
@@ -206,6 +255,7 @@ void main() {
               customerExploreProvider.overrideWith(
                 () => MockCustomerExploreNotifier(),
               ),
+              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
             ],
             child: const MaterialApp(
               home: Scaffold(body: CustomerExplorePage()),
@@ -225,7 +275,12 @@ void main() {
       'Happy Path: CustomerProfilePage renders Veloce E-Wallet section',
       (tester) async {
         await tester.pumpWidget(
-          const ProviderScope(child: MaterialApp(home: CustomerProfilePage())),
+          ProviderScope(
+            overrides: [
+              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
+            ],
+            child: const MaterialApp(home: CustomerProfilePage()),
+          ),
         );
 
         await tester.pumpAndSettle();
@@ -241,7 +296,12 @@ void main() {
       'Happy Path: TicketDetailPage renders ticket stub and QR code',
       (tester) async {
         await tester.pumpWidget(
-          const ProviderScope(child: MaterialApp(home: TicketDetailPage())),
+          ProviderScope(
+            overrides: [
+              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
+            ],
+            child: const MaterialApp(home: TicketDetailPage()),
+          ),
         );
 
         await tester.pumpAndSettle();
@@ -256,8 +316,11 @@ void main() {
       'Happy Path: TicketDetailPage from checkout renders Ticket Confirmed and Back to Home button',
       (tester) async {
         await tester.pumpWidget(
-          const ProviderScope(
-            child: MaterialApp(home: TicketDetailPage(isFromCheckout: true)),
+          ProviderScope(
+            overrides: [
+              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
+            ],
+            child: const MaterialApp(home: TicketDetailPage(isFromCheckout: true)),
           ),
         );
 

@@ -2,9 +2,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/customer_ticket_model.dart';
 import '../../data/models/customer_order_model.dart';
 import '../../data/models/customer_refund_model.dart';
+import '../../data/models/customer_wallet_model.dart';
 import '../../data/repositories/customer_ticket_repository.dart';
 import '../../data/repositories/customer_order_repository.dart';
 import '../../data/repositories/customer_refund_repository.dart';
+import '../../data/repositories/customer_wallet_repository.dart';
 import '../../../event/data/models/event_model.dart';
 import '../../../event/presentation/providers/event_provider.dart';
 import '../../../order/data/repositories/order_repository.dart';
@@ -31,46 +33,42 @@ final customerRefundRepositoryProvider = Provider<CustomerRefundRepository>((
   return CustomerRefundRepository();
 });
 
+final customerWalletRepositoryProvider = Provider<CustomerWalletRepository>((
+  ref,
+) {
+  return CustomerWalletRepository();
+});
+
 // ==================== Customer Wallet State ====================
 
-class WalletTransaction {
-  final String id;
-  final String title;
-  final double amount;
-  final DateTime date;
-  final bool isTopUp;
-
-  WalletTransaction({
-    required this.id,
-    required this.title,
-    required this.amount,
-    required this.date,
-    required this.isTopUp,
-  });
-}
-
 class CustomerWalletState {
-  final double balance;
-  final List<WalletTransaction> transactions;
+  final CustomerWalletModel? wallet;
+  final List<CustomerWalletTransactionModel> transactions;
+  final double localBalance;
   final bool isLoading;
   final String? error;
 
   CustomerWalletState({
-    this.balance = 0.0,
+    this.wallet,
     this.transactions = const [],
+    this.localBalance = 0.0,
     this.isLoading = false,
     this.error,
   });
 
+  double get balance => wallet?.balance ?? localBalance;
+
   CustomerWalletState copyWith({
-    double? balance,
-    List<WalletTransaction>? transactions,
+    CustomerWalletModel? wallet,
+    List<CustomerWalletTransactionModel>? transactions,
+    double? localBalance,
     bool? isLoading,
     String? error,
   }) {
     return CustomerWalletState(
-      balance: balance ?? this.balance,
+      wallet: wallet ?? this.wallet,
       transactions: transactions ?? this.transactions,
+      localBalance: localBalance ?? this.localBalance,
       isLoading: isLoading ?? this.isLoading,
       error: error,
     );
@@ -83,33 +81,71 @@ class CustomerWalletNotifier extends Notifier<CustomerWalletState> {
     return CustomerWalletState();
   }
 
-  void topUp(double amount) {
-    if (amount <= 0) return;
-    final newTx = WalletTransaction(
-      id: 'tx_${DateTime.now().millisecondsSinceEpoch}',
-      title: 'Wallet Top Up',
-      amount: amount,
-      date: DateTime.now(),
-      isTopUp: true,
-    );
-    state = state.copyWith(
-      balance: state.balance + amount,
-      transactions: [newTx, ...state.transactions],
-    );
+  Future<void> loadWallet({bool forceRefresh = false}) async {
+    if (!forceRefresh && (state.isLoading || state.wallet != null)) {
+      return;
+    }
+    try {
+      state = state.copyWith(isLoading: true, error: null);
+      final repo = ref.read(customerWalletRepositoryProvider);
+      final fetchedWallet = await repo.getWallet();
+      final fetchedTrxs = await repo.getWalletTransactions();
+      state = state.copyWith(
+        wallet: fetchedWallet,
+        transactions: fetchedTrxs,
+        localBalance: fetchedWallet.balance,
+        isLoading: false,
+      );
+    } catch (e) {
+      try {
+        state = state.copyWith(
+          isLoading: false,
+          error: e.toString().replaceAll('Exception: ', ''),
+        );
+      } catch (_) {}
+    }
+  }
+
+  Future<bool> topUp(double amount) async {
+    if (amount <= 0) return false;
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final repo = ref.read(customerWalletRepositoryProvider);
+      final updatedWallet = await repo.topUpWallet(amount.toInt());
+      final fetchedTrxs = await repo.getWalletTransactions();
+      state = state.copyWith(
+        wallet: updatedWallet,
+        transactions: fetchedTrxs,
+        localBalance: updatedWallet.balance,
+        isLoading: false,
+      );
+      return true;
+    } catch (e) {
+      final errStr = e.toString().replaceAll('Exception: ', '');
+      state = state.copyWith(
+        isLoading: false,
+        error: errStr,
+      );
+      throw Exception(errStr);
+    }
   }
 
   bool deduct(double amount, String description) {
     if (state.balance < amount) return false;
-    final newTx = WalletTransaction(
-      id: 'tx_${DateTime.now().millisecondsSinceEpoch}',
-      title: description,
-      amount: amount,
-      date: DateTime.now(),
-      isTopUp: false,
-    );
+    final newBal = state.balance - amount;
+    final updatedWallet = state.wallet != null
+        ? CustomerWalletModel(
+            id: state.wallet!.id,
+            userId: state.wallet!.userId,
+            balance: newBal,
+            currency: state.wallet!.currency,
+            createdAt: state.wallet!.createdAt,
+            updatedAt: DateTime.now(),
+          )
+        : null;
     state = state.copyWith(
-      balance: state.balance - amount,
-      transactions: [newTx, ...state.transactions],
+      wallet: updatedWallet,
+      localBalance: newBal,
     );
     return true;
   }
@@ -633,11 +669,10 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
         );
       } catch (_) {}
 
-      if (state.paymentMethod == 'E_WALLET') {
-        ref
-            .read(customerWalletProvider.notifier)
-            .deduct(totalAmount, 'Ticket Purchase: $eventName');
-      }
+      // Refresh wallet balance and transactions from server
+      ref
+          .read(customerWalletProvider.notifier)
+          .loadWallet(forceRefresh: true);
 
       final displayCategory = categoryName ?? 'General Admission';
       final displaySeat = (seatCode != null && seatCode.isNotEmpty)

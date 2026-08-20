@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:team_five_fe/features/customer/data/models/customer_wallet_model.dart';
+import 'package:team_five_fe/features/customer/data/repositories/customer_wallet_repository.dart';
 import 'package:team_five_fe/features/customer/presentation/pages/customer_profile_page.dart';
 import 'package:team_five_fe/features/auth/presentation/providers/auth_provider.dart';
 import 'package:team_five_fe/features/auth/data/models/user_model.dart';
@@ -51,7 +53,35 @@ class MockCustomerTicketsNotifier extends CustomerTicketsNotifier {
   Future<void> loadTickets({bool forceRefresh = false}) async {}
 }
 
+class MockCustomerWalletRepository implements CustomerWalletRepository {
+  double balance;
+  List<CustomerWalletTransactionModel> trxs;
+
+  MockCustomerWalletRepository({
+    this.balance = 0.0,
+    List<CustomerWalletTransactionModel>? trxs,
+  }) : trxs = trxs ?? [];
+
+  @override
+  Future<CustomerWalletModel> getWallet() async {
+    return CustomerWalletModel(id: 'w1', userId: 'u1', balance: balance);
+  }
+
+  @override
+  Future<CustomerWalletModel> topUpWallet(int amount) async {
+    balance += amount;
+    return CustomerWalletModel(id: 'w1', userId: 'u1', balance: balance);
+  }
+
+  @override
+  Future<List<CustomerWalletTransactionModel>> getWalletTransactions() async {
+    return trxs;
+  }
+}
+
 void main() {
+  final mockWalletRepo = MockCustomerWalletRepository(balance: 0.0);
+
   group('CustomerProfilePage Actions Widget Tests', () {
     testWidgets(
       'Happy Path: CustomerProfilePage renders profile header with initials avatar and options',
@@ -74,6 +104,7 @@ void main() {
               customerTicketsProvider.overrideWith(
                 () => MockCustomerTicketsNotifier(),
               ),
+              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
             ],
             child: const MaterialApp(home: CustomerProfilePage()),
           ),
@@ -112,6 +143,7 @@ void main() {
               customerTicketsProvider.overrideWith(
                 () => MockCustomerTicketsNotifier(),
               ),
+              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
             ],
             child: const MaterialApp(home: CustomerProfilePage()),
           ),
@@ -159,6 +191,7 @@ void main() {
             customerTicketsProvider.overrideWith(
               () => MockCustomerTicketsNotifier(),
             ),
+            customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
           ],
           child: const MaterialApp(home: CustomerProfilePage()),
         ),
