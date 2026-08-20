@@ -109,11 +109,7 @@ class TicketDetailPage extends ConsumerWidget {
 
   // ==================== Header Bar ====================
 
-  Widget _buildAppBar(
-    BuildContext context,
-    WidgetRef ref,
-    String ticketId,
-  ) {
+  Widget _buildAppBar(BuildContext context, WidgetRef ref, String ticketId) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(

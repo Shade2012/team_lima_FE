@@ -41,30 +41,25 @@ class CreateOrderResponse {
   factory CreateOrderResponse.fromJson(Map<String, dynamic> json) {
     final payment = json['payment'] as Map<String, dynamic>?;
 
-    final id =
-        json['id']?.toString() ??
-        json['orderId']?.toString() ??
-        '';
+    final id = json['id']?.toString() ?? json['orderId']?.toString() ?? '';
 
-    final totalPrice =
-        json['totalAmount'] is num
-            ? (json['totalAmount'] as num).toDouble()
-            : json['totalPrice'] is num
-            ? (json['totalPrice'] as num).toDouble()
-            : double.tryParse(
-                  json['totalAmount']?.toString() ??
-                      json['totalPrice']?.toString() ??
-                      '',
-                ) ??
-                0.0;
+    final totalPrice = json['totalAmount'] is num
+        ? (json['totalAmount'] as num).toDouble()
+        : json['totalPrice'] is num
+        ? (json['totalPrice'] as num).toDouble()
+        : double.tryParse(
+                json['totalAmount']?.toString() ??
+                    json['totalPrice']?.toString() ??
+                    '',
+              ) ??
+              0.0;
 
     final providerTrxId =
         json['providerTrxId']?.toString() ??
         payment?['providerTrxId']?.toString();
 
     final snapToken =
-        json['snapToken']?.toString() ??
-        payment?['snapToken']?.toString();
+        json['snapToken']?.toString() ?? payment?['snapToken']?.toString();
 
     final snapRedirectUrl =
         json['checkoutUrl']?.toString() ??
@@ -109,7 +104,8 @@ class OrderRepository {
   /// POST /mock-pg/simulate-payment
   Future<bool> simulatePayment({
     required String providerTrxId,
-    required String paymentMethod, // VIRTUAL_ACCOUNT, GOPAY, SHOPPE_PAY, OVO, VELOCE_PAY
+    required String
+    paymentMethod, // VIRTUAL_ACCOUNT, GOPAY, SHOPPE_PAY, OVO, VELOCE_PAY
   }) async {
     try {
       final response = await _dioClient.dio.post(

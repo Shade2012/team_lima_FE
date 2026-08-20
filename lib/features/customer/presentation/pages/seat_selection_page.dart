@@ -370,7 +370,9 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
           color: const Color(0xFFE6F9ED),
-          border: Border.all(color: const Color(0xFF00A86B).withValues(alpha: 0.3)),
+          border: Border.all(
+            color: const Color(0xFF00A86B).withValues(alpha: 0.3),
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

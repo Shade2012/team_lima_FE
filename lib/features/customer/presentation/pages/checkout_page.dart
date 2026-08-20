@@ -219,7 +219,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     CustomerWalletNotifier walletNotifier,
   ) {
     final isWalletInsufficient =
-        state.paymentMethod == 'VELOCE_PAY' && walletState.balance < state.total;
+        state.paymentMethod == 'VELOCE_PAY' &&
+        walletState.balance < state.total;
 
     return Column(
       children: [
@@ -401,8 +402,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     );
   }
 
-
-
   Widget _buildPaymentOptionBox({
     required String title,
     required String value,
@@ -458,8 +457,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       ),
     );
   }
-
-
 
   // ==================== Order Summary Section ====================
 

@@ -645,7 +645,9 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
         final realTickets = await ticketRepo.getMyTickets();
         if (realTickets.isNotEmpty) {
           final fetchedTicket = realTickets.first;
-          ref.read(customerTicketsProvider.notifier).loadTickets(forceRefresh: true);
+          ref
+              .read(customerTicketsProvider.notifier)
+              .loadTickets(forceRefresh: true);
           ref.read(customerOrdersProvider.notifier).loadOrders();
           state = state.copyWith(isProcessing: false, error: null);
           return fetchedTicket;
@@ -657,7 +659,8 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
           ? seatCode
           : '#TKN-${(1000 + DateTime.now().millisecond % 9000)}';
 
-      final fallbackTicketId = '019146a0-${DateTime.now().millisecondsSinceEpoch}';
+      final fallbackTicketId =
+          '019146a0-${DateTime.now().millisecondsSinceEpoch}';
 
       final newTicket = CustomerTicket(
         id: fallbackTicketId,

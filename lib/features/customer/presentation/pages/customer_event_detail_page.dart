@@ -453,7 +453,10 @@ class _CustomerEventDetailPageState
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primary,
                     borderRadius: BorderRadius.circular(8),
@@ -634,8 +637,18 @@ class _CustomerEventDetailPageState
 
   Widget _buildFallbackCategoryList() {
     final fallbackList = [
-      {'name': 'VIP Front Row', 'price': 1500000, 'quota': 100, 'isSeated': true},
-      {'name': 'Regular Admission', 'price': 750000, 'quota': 300, 'isSeated': false},
+      {
+        'name': 'VIP Front Row',
+        'price': 1500000,
+        'quota': 100,
+        'isSeated': true,
+      },
+      {
+        'name': 'Regular Admission',
+        'price': 750000,
+        'quota': 300,
+        'isSeated': false,
+      },
     ];
 
     return Column(
@@ -762,7 +775,8 @@ class _CustomerEventDetailPageState
     final categoryName = selectedCategory?.name ?? 'VIP Front Row';
     final categoryPrice = selectedCategory?.price.toDouble() ?? 1500000.0;
     final categoryId = selectedCategory?.id ?? 'cat_vip';
-    final isCategorySeated = selectedCategory?.isSeated ?? (_selectedCategoryIndex == 0);
+    final isCategorySeated =
+        selectedCategory?.isSeated ?? (_selectedCategoryIndex == 0);
 
     final formatter = NumberFormat.currency(
       locale: 'id_ID',
