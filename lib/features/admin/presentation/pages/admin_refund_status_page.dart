@@ -77,8 +77,7 @@ class _AdminRefundStatusPageState extends ConsumerState<AdminRefundStatusPage>
     if (_searchQuery.isNotEmpty) {
       final q = _searchQuery.toLowerCase();
       filtered = filtered.where((r) {
-        return (r.customerName?.toLowerCase().contains(q) ?? false) ||
-            (r.eventName?.toLowerCase().contains(q) ?? false) ||
+        return (r.eventName?.toLowerCase().contains(q) ?? false) ||
             (r.ticketCategoryName?.toLowerCase().contains(q) ?? false);
       }).toList();
     }
@@ -335,7 +334,7 @@ class _AdminRefundStatusPageState extends ConsumerState<AdminRefundStatusPage>
                     children: [
                       Flexible(
                         child: Text(
-                          refund.customerName ?? '-',
+                          refund.eventName ?? '-',
                           style: AppTextStyles.bodyMedium.copyWith(
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
@@ -367,7 +366,7 @@ class _AdminRefundStatusPageState extends ConsumerState<AdminRefundStatusPage>
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    refund.eventName ?? '-',
+                    refund.ticketCategoryName ?? '-',
                     style: AppTextStyles.bodySmall.copyWith(
                       color: AppColors.grey,
                       fontSize: 11,

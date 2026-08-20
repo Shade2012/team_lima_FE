@@ -20,7 +20,7 @@ class Event {
     required this.name,
     this.imageUrl,
     this.description,
-    required this.isSeated,
+    this.isSeated = false,
     required this.salesStartTime,
     required this.salesEndTime,
     required this.eventDate,

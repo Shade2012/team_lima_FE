@@ -5,7 +5,7 @@ class ApiConstants {
   ApiConstants._();
 
   static const bool isPhysicalDevice = true;
-  static const String physicalDeviceIp = 'http://10.127.76.43:3000';
+  static const String physicalDeviceIp = 'http://10.127.76.48:3000';
 
   /// Default local mock server base URL.
   /// On Android emulator, localhost is 10.0.2.2.

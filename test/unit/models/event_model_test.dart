@@ -95,7 +95,6 @@ void main() {
       final request = CreateEventRequest(
         name: 'New Festival',
         description: 'A great festival',
-        isSeated: true,
         salesStartTime: DateTime(2026, 8, 1),
         salesEndTime: DateTime(2026, 8, 30),
         eventDate: DateTime(2026, 9, 1),
@@ -108,7 +107,7 @@ void main() {
 
       expect(json['name'], 'New Festival');
       expect(json['description'], 'A great festival');
-      expect(json['isSeated'], true);
+      expect(json.containsKey('isSeated'), false);
       expect(json['refundEndDate'], isNotNull);
       expect(json['refundPolicy'], 'Full refund');
       expect(json['refundPercentage'], 100);
@@ -118,7 +117,6 @@ void main() {
       final request = CreateEventRequest(
         name: 'Minimal Event',
         description: 'Minimal description',
-        isSeated: false,
         salesStartTime: DateTime(2026, 8, 1),
         salesEndTime: DateTime(2026, 8, 30),
         eventDate: DateTime(2026, 9, 1),
@@ -131,7 +129,7 @@ void main() {
 
       expect(json['name'], 'Minimal Event');
       expect(json['description'], 'Minimal description');
-      expect(json['isSeated'], false);
+      expect(json.containsKey('isSeated'), false);
       expect(json['refundEndDate'], isNotNull);
       expect(json['refundPolicy'], 'No refund');
       expect(json['refundPercentage'], 0);

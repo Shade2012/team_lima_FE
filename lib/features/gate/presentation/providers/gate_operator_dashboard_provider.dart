@@ -17,6 +17,14 @@ class GateOperatorEvent {
   String get id => gate.id;
   String get gateName => gate.name;
   String get eventName => event.name;
+  String get eventInitials {
+    final words = event.name.split(' ').where((w) => w.isNotEmpty).toList();
+    if (words.length >= 2) {
+      return '${words[0][0]}${words[1][0]}'.toUpperCase();
+    }
+    return words.isNotEmpty ? words[0][0].toUpperCase() : '';
+  }
+
   DateTime get eventDate => event.eventDate;
   bool get isActive {
     final now = DateTime.now();

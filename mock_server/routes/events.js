@@ -192,7 +192,7 @@ module.exports = function (db) {
 
     const { name, description, isSeated, salesStartTime, salesEndTime, eventDate, refundEndDate, refundPolicy, refundPercentage } = req.body;
 
-    if (!name || isSeated === undefined || !salesStartTime || !salesEndTime || !eventDate) {
+    if (!name || !salesStartTime || !salesEndTime || !eventDate) {
       return res.status(400).json({
         status_code: 400,
         message: ['Missing required event fields']
@@ -237,7 +237,7 @@ module.exports = function (db) {
       name,
       imageUrl,
       description: description || null,
-      isSeated: isSeated === 'true' || isSeated === true,
+      isSeated: false,
       salesStartTime,
       salesEndTime,
       eventDate,

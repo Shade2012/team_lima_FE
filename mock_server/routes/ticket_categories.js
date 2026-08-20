@@ -40,6 +40,7 @@ function formatCategoryResponse(c, db) {
     price: c.price,
     totalQuota: c.totalQuota,
     posIndex: c.posIndex || 0,
+    isSeated: c.isSeated || false,
     rows: c.rows !== undefined ? c.rows : null,
     columns: c.columns !== undefined ? c.columns : null,
     blockedSeats: c.blockedSeats || [],
@@ -98,7 +99,7 @@ module.exports = function (db) {
       });
     }
 
-    const { eventId, name, price, totalQuota, posIndex, rows, columns, blockedSeats } = req.body || {};
+    const { eventId, name, price, totalQuota, posIndex, isSeated, rows, columns, blockedSeats } = req.body || {};
 
     if (!eventId || !name || price === undefined) {
       return res.status(400).json({
@@ -122,12 +123,14 @@ module.exports = function (db) {
       });
     }
 
+    const categoryIsSeated = isSeated === true || isSeated === 'true';
+
     let calculatedQuota = totalQuota;
-    if (event.isSeated) {
+    if (categoryIsSeated) {
       if (!rows || !columns) {
         return res.status(400).json({
           status_code: 400,
-          message: 'Seated events must provide rows and columns for category'
+          message: 'Seated categories must provide rows and columns'
         });
       }
       const blockedCount = Array.isArray(blockedSeats) ? blockedSeats.length : 0;
@@ -136,7 +139,7 @@ module.exports = function (db) {
       if (!totalQuota) {
         return res.status(400).json({
           status_code: 400,
-          message: 'Non-seated events must provide totalQuota for category'
+          message: 'Non-seated categories must provide totalQuota'
         });
       }
     }
@@ -148,9 +151,10 @@ module.exports = function (db) {
       price: Number(price),
       totalQuota: Number(calculatedQuota),
       posIndex: posIndex !== undefined ? Number(posIndex) : 0,
-      rows: event.isSeated ? Number(rows) : null,
-      columns: event.isSeated ? Number(columns) : null,
-      blockedSeats: event.isSeated ? (Array.isArray(blockedSeats) ? blockedSeats : []) : [],
+      isSeated: categoryIsSeated,
+      rows: categoryIsSeated ? Number(rows) : null,
+      columns: categoryIsSeated ? Number(columns) : null,
+      blockedSeats: categoryIsSeated ? (Array.isArray(blockedSeats) ? blockedSeats : []) : [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -188,10 +192,10 @@ module.exports = function (db) {
       });
     }
 
-    const { name, price, totalQuota, posIndex, rows, columns, blockedSeats } = req.body || {};
+    const { name, price, totalQuota, posIndex, isSeated, rows, columns, blockedSeats } = req.body || {};
 
     if (totalQuota !== undefined && Number(totalQuota) < category.totalQuota) {
-      if (event.isSeated) {
+      if (category.isSeated) {
         const existingSeatsCount = (db.seats || []).filter(s => s.categoryId === category.id).length;
         if (Number(totalQuota) < existingSeatsCount) {
           return res.status(400).json({
@@ -213,6 +217,7 @@ module.exports = function (db) {
     if (price !== undefined) category.price = Number(price);
     if (totalQuota !== undefined) category.totalQuota = Number(totalQuota);
     if (posIndex !== undefined) category.posIndex = Number(posIndex);
+    if (isSeated !== undefined) category.isSeated = isSeated === true || isSeated === 'true';
     if (rows !== undefined) category.rows = Number(rows);
     if (columns !== undefined) category.columns = Number(columns);
     if (blockedSeats !== undefined) category.blockedSeats = Array.isArray(blockedSeats) ? blockedSeats : [];

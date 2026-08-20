@@ -5,6 +5,7 @@ class TicketCategory {
   final int price;
   final int totalQuota;
   final int posIndex;
+  final bool isSeated;
   final int? rows;
   final int? columns;
   final int? availableQuota;
@@ -18,6 +19,7 @@ class TicketCategory {
     required this.price,
     required this.totalQuota,
     this.posIndex = 0,
+    this.isSeated = false,
     this.rows,
     this.columns,
     this.availableQuota,
@@ -39,6 +41,7 @@ class TicketCategory {
       posIndex: json['posIndex'] is int
           ? json['posIndex']
           : int.tryParse(json['posIndex']?.toString() ?? '') ?? 0,
+      isSeated: json['isSeated'] == true,
       rows: json['rows'] is int
           ? json['rows']
           : int.tryParse(json['rows']?.toString() ?? ''),
@@ -67,6 +70,7 @@ class TicketCategory {
       'price': price,
       'totalQuota': totalQuota,
       'posIndex': posIndex,
+      'isSeated': isSeated,
     };
     if (rows != null) {
       map['rows'] = rows;

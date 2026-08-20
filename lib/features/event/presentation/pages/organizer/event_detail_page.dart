@@ -1325,7 +1325,6 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage>
                       builder: (_) => TicketCategoryPage(
                         eventId: widget.eventId,
                         eventName: event.name,
-                        isSeated: event.isSeated,
                         eventDate: event.eventDate,
                       ),
                     ),
