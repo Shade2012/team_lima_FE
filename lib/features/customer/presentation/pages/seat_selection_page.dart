@@ -164,8 +164,9 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
         id: 'cat_vip1',
         eventId: widget.eventId ?? '019146a0-event',
         name: 'VIP-1',
-        price: 200000,
+        price: 1500000,
         totalQuota: 30,
+        isSeated: true,
         rows: 5,
         columns: 6,
         blockedSeats: ['A-5', 'A-6'],
@@ -174,11 +175,20 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
         id: 'cat_vip2',
         eventId: widget.eventId ?? '019146a0-event',
         name: 'VIP-2',
-        price: 180000,
+        price: 1000000,
         totalQuota: 40,
+        isSeated: true,
         rows: 5,
         columns: 8,
         blockedSeats: ['B-1'],
+      ),
+      TicketCategory(
+        id: 'cat_fest',
+        eventId: widget.eventId ?? '019146a0-event',
+        name: 'FESTIVAL ZONE',
+        price: 750000,
+        totalQuota: 200,
+        isSeated: false,
       ),
     ];
   }
@@ -353,6 +363,75 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
 
     final totalGridSeats = rowsCount * colsCount;
 
+    if (!category.isSeated) {
+      // Non-seated Category static zone placeholder (e.g. Festival / Standing Area)
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE6F9ED),
+          border: Border.all(color: const Color(0xFF00A86B).withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00A86B).withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.stadium,
+                    size: 18,
+                    color: Color(0xFF00A86B),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      category.name,
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Standing Zone • Free Standing (No Reserved Seat)',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: Colors.black54,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFF00A86B).withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                _formatPrice(category.price),
+                style: AppTextStyles.bodyMedium.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF00A86B),
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     if (!isSelectedCategory) {
       // Inactive / Unselected Category placeholder card
       return InkWell(
@@ -388,7 +467,7 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Other Category • $totalGridSeats Seats',
+                        'Seated Category • $totalGridSeats Seats',
                         style: AppTextStyles.bodySmall.copyWith(
                           color: AppColors.grey,
                           fontSize: 11,

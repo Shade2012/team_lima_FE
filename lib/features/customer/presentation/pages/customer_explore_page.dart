@@ -285,13 +285,11 @@ class CustomerExplorePage extends ConsumerWidget {
       return {
         'id': e.id,
         'event': e,
-        'category': e.isSeated ? 'SEATED' : 'GENERAL',
+        'category': 'EVENT',
         'timeBadge': dateBadge,
         'title': e.name.length > 18 ? '${e.name.substring(0, 15)}...' : e.name,
         'fullTitle': e.name,
-        'venue': e.isSeated ? 'Seated Venue' : 'General Venue',
-        'price': 150.0,
-        'isSeated': e.isSeated,
+        'venue': 'Main Venue',
         'gradient': gradients[index % gradients.length],
       };
     }).toList();
@@ -353,8 +351,6 @@ class CustomerExplorePage extends ConsumerWidget {
                 title: item['title'] as String,
                 fullTitle: item['fullTitle'] as String,
                 venue: item['venue'] as String,
-                price: item['price'] as double,
-                isSeated: item['isSeated'] as bool,
                 isSaved: isSaved,
                 gradientColors: item['gradient'] as List<Color>,
                 onToggleSave: () =>
@@ -378,8 +374,6 @@ class CustomerExplorePage extends ConsumerWidget {
     required String title,
     required String fullTitle,
     required String venue,
-    required double price,
-    required bool isSeated,
     required bool isSaved,
     required List<Color> gradientColors,
     required VoidCallback onToggleSave,
@@ -516,17 +510,65 @@ class CustomerExplorePage extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Flexible(
+                    Expanded(
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
-                        child: Text(
-                          '\$${price.toInt()}',
-                          style: AppTextStyles.title.copyWith(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.black,
-                          ),
+                        child: Consumer(
+                          builder: (context, ref, child) {
+                            final categoriesAsync = ref.watch(
+                              customerCategoriesByEventProvider(id),
+                            );
+                            final formatter = NumberFormat.currency(
+                              locale: 'id_ID',
+                              symbol: 'Rp ',
+                              decimalDigits: 0,
+                            );
+
+                            return categoriesAsync.when(
+                              data: (cats) {
+                                if (cats.isEmpty) {
+                                  return Text(
+                                    'Rp 0',
+                                    style: AppTextStyles.title.copyWith(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w800,
+                                      color: AppColors.primary,
+                                    ),
+                                  );
+                                }
+                                final prices = cats.map((c) => c.price).toList();
+                                final minP = prices.reduce((a, b) => a < b ? a : b);
+                                final maxP = prices.reduce((a, b) => a > b ? a : b);
+                                final text = minP == maxP
+                                    ? formatter.format(minP)
+                                    : '${formatter.format(minP)} - ${formatter.format(maxP)}';
+                                return Text(
+                                  text,
+                                  style: AppTextStyles.title.copyWith(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.primary,
+                                  ),
+                                );
+                              },
+                              loading: () => Text(
+                                'Loading...',
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  fontSize: 11,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              error: (_, __) => Text(
+                                'Rp 500.000+',
+                                style: AppTextStyles.title.copyWith(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -541,9 +583,7 @@ class CustomerExplorePage extends ConsumerWidget {
                               eventId: id,
                               eventName: fullTitle,
                               categoryName: category,
-                              price: price,
                               location: venue,
-                              isSeated: isSeated,
                             ),
                           ),
                         );

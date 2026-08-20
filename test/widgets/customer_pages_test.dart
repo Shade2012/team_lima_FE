@@ -60,7 +60,7 @@ void main() {
               home: CustomerEventDetailPage(
                 eventName: 'Sonic Resonance Festival 2024',
                 categoryName: 'ELECTRONIC',
-                price: 150.0,
+                price: 1500000.0,
               ),
             ),
           ),
@@ -85,7 +85,7 @@ void main() {
                 eventName: 'Sonic Resonance Festival 2024',
                 categoryName: 'VIP PASS',
                 categoryId: 'cat_vip',
-                price: 150.0,
+                price: 1500000.0,
               ),
             ),
           ),

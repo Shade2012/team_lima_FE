@@ -31,7 +31,7 @@ class CheckoutPage extends ConsumerStatefulWidget {
     this.seatCode,
     this.eventName = 'Event Ticket',
     this.eventCategory = 'General Admission',
-    this.price = 150.0,
+    this.price = 750000.0,
     this.location = 'Main Stage Pavilion',
     this.eventDate,
     this.eventTimeRange,
@@ -68,15 +68,12 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   }
 
   String _formatCurrency(double amount) {
-    if (amount > 10000) {
-      final formatter = NumberFormat.currency(
-        locale: 'id_ID',
-        symbol: 'Rp',
-        decimalDigits: 0,
-      );
-      return formatter.format(amount);
-    }
-    return '\$${amount.toStringAsFixed(2)}';
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+    return formatter.format(amount);
   }
 
   @override
