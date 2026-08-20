@@ -490,12 +490,15 @@ class _GateOperatorDashboardPageState
         ),
       ),
       child: Center(
-        child: Icon(
-          Icons.image_outlined,
-          size: 40,
-          color: event.isActive
-              ? AppColors.white.withValues(alpha: 0.7)
-              : AppColors.grey.withValues(alpha: 0.5),
+        child: Text(
+          event.eventInitials,
+          style: TextStyle(
+            fontSize: 48,
+            fontWeight: FontWeight.w700,
+            color: event.isActive
+                ? AppColors.white.withValues(alpha: 0.7)
+                : AppColors.grey.withValues(alpha: 0.5),
+          ),
         ),
       ),
     );

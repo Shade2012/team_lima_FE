@@ -45,14 +45,6 @@ class _ScannerPageState extends ConsumerState<ScannerPage> {
   Widget build(BuildContext context) {
     final scannerState = ref.watch(scannerProvider);
 
-    if (_isProcessing &&
-        !scannerState.isProcessing &&
-        scannerState.currentResult != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) setState(() => _isProcessing = false);
-      });
-    }
-
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -62,7 +54,9 @@ class _ScannerPageState extends ConsumerState<ScannerPage> {
           _buildOverlay(scannerState),
           _buildHeader(),
           if (scannerState.currentResult != null)
-            _buildResultBottomSheet(scannerState),
+            _buildResultBottomSheet(scannerState, () {
+              setState(() => _isProcessing = false);
+            }),
         ],
       ),
     );
@@ -240,7 +234,10 @@ class _ScannerPageState extends ConsumerState<ScannerPage> {
     );
   }
 
-  Widget _buildResultBottomSheet(ScannerState scannerState) {
+  Widget _buildResultBottomSheet(
+    ScannerState scannerState,
+    VoidCallback onScanNext,
+  ) {
     final result = scannerState.currentResult!;
 
     return Positioned(
@@ -318,8 +315,10 @@ class _ScannerPageState extends ConsumerState<ScannerPage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () =>
-                    ref.read(scannerProvider.notifier).resetScanner(),
+                onPressed: () {
+                  ref.read(scannerProvider.notifier).resetScanner();
+                  onScanNext();
+                },
                 icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
                 label: Text(
                   'Scan Next Ticket',

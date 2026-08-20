@@ -24,7 +24,6 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
   final _refundPolicyController = TextEditingController();
   final _refundPercentageController = TextEditingController();
 
-  bool _isSeated = false;
   DateTime? _salesStartTime;
   DateTime? _salesEndTime;
   DateTime? _eventDate;
@@ -65,7 +64,6 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
             builder: (_) => TicketCategoryPage(
               eventId: event.id,
               eventName: event.name,
-              isSeated: event.isSeated,
               eventDate: event.eventDate,
             ),
           ),
@@ -209,8 +207,6 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
                       _buildNameField(),
                       const SizedBox(height: 12),
                       _buildDescriptionField(),
-                      const SizedBox(height: 12),
-                      _buildIsSeatedSwitch(),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -452,72 +448,6 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
         _selectedImage = File(pickedFile.path);
       });
     }
-  }
-
-  Widget _buildIsSeatedSwitch() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        color: _isSeated
-            ? AppColors.primary.withValues(alpha: 0.06)
-            : AppColors.background,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: _isSeated
-              ? AppColors.primary.withValues(alpha: 0.3)
-              : AppColors.greyLight,
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: _isSeated
-                  ? AppColors.primary.withValues(alpha: 0.12)
-                  : AppColors.grey.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(
-              _isSeated ? Icons.event_seat : Icons.stadium,
-              size: 18,
-              color: _isSeated ? AppColors.primary : AppColors.grey,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Seated Event',
-                  style: AppTextStyles.bodyLarge.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  _isSeated
-                      ? 'Seats will be generated'
-                      : 'Standing / general admission',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.grey,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Switch(
-            value: _isSeated,
-            onChanged: (value) => setState(() => _isSeated = value),
-            activeThumbColor: AppColors.white,
-            activeTrackColor: AppColors.primary,
-            inactiveThumbColor: AppColors.white,
-            inactiveTrackColor: AppColors.greyLight,
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _buildDateTimeField({
@@ -783,7 +713,6 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
     final request = CreateEventRequest(
       name: _nameController.text.trim(),
       description: _descriptionController.text.trim(),
-      isSeated: _isSeated,
       salesStartTime: _salesStartTime!,
       salesEndTime: _salesEndTime!,
       eventDate: _eventDate!,

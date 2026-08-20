@@ -53,8 +53,7 @@ class _AdminRefundRequestPageState
     if (_searchQuery.isNotEmpty) {
       final q = _searchQuery.toLowerCase();
       filtered = filtered.where((r) {
-        return (r.customerName?.toLowerCase().contains(q) ?? false) ||
-            (r.eventName?.toLowerCase().contains(q) ?? false) ||
+        return (r.eventName?.toLowerCase().contains(q) ?? false) ||
             (r.ticketCategoryName?.toLowerCase().contains(q) ?? false);
       }).toList();
     }
@@ -267,14 +266,11 @@ class _AdminRefundRequestPageState
                     color: AppColors.primary.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: Center(
-                    child: Text(
-                      refund.initials,
-                      style: const TextStyle(
-                        color: AppColors.primary,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.receipt_long,
+                      size: 20,
+                      color: AppColors.primary,
                     ),
                   ),
                 ),
@@ -287,7 +283,7 @@ class _AdminRefundRequestPageState
                         children: [
                           Flexible(
                             child: Text(
-                              refund.customerName ?? '-',
+                              refund.eventName ?? '-',
                               style: AppTextStyles.bodyMedium.copyWith(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
@@ -319,7 +315,7 @@ class _AdminRefundRequestPageState
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        refund.eventName ?? '-',
+                        refund.ticketCategoryName ?? '-',
                         style: AppTextStyles.bodySmall.copyWith(
                           color: AppColors.grey,
                           fontSize: 11,
@@ -419,7 +415,7 @@ class _AdminRefundRequestPageState
           ],
         ),
         content: Text(
-          'Approve refund for ${refund.customerName ?? '-'}?',
+          'Approve this refund request?',
           style: AppTextStyles.bodyMedium,
         ),
         actions: [
@@ -496,7 +492,7 @@ class _AdminRefundRequestPageState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Reject refund for ${refund.customerName ?? '-'}?',
+              'Reject this refund request?',
               style: AppTextStyles.bodyMedium,
             ),
             const SizedBox(height: 12),

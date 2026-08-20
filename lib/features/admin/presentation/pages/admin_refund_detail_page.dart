@@ -170,12 +170,12 @@ class _AdminRefundDetailPageState extends ConsumerState<AdminRefundDetailPage> {
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.all(20),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildDetailCard(refund),
                   const SizedBox(height: 16),
                   _buildReasonCard(refund),
                   const SizedBox(height: 16),
-                  _buildNoteInput(),
                   if (isPending) ...[
                     const SizedBox(height: 24),
                     _buildActionButtons(),
@@ -259,15 +259,6 @@ class _AdminRefundDetailPageState extends ConsumerState<AdminRefundDetailPage> {
           ),
           const SizedBox(height: 16),
           Text(
-            refund.customerName ?? '-',
-            style: AppTextStyles.title.copyWith(
-              color: AppColors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
             refund.eventName ?? '-',
             style: AppTextStyles.bodySmall.copyWith(
               color: Colors.white70,
@@ -305,13 +296,10 @@ class _AdminRefundDetailPageState extends ConsumerState<AdminRefundDetailPage> {
             ),
           ),
           const SizedBox(height: 16),
-          _buildDetailRow('Customer', refund.customerName ?? '-'),
           _buildDetailRow('Event', refund.eventName ?? '-'),
-          if (refund.ticketCategoryName != null)
-            _buildDetailRow('Category', refund.ticketCategoryName!),
-          if (refund.seatCode != null)
-            _buildDetailRow('Seat', refund.seatCode!),
-          _buildDetailRow('Ticket Status', refund.ticketStatus ?? '-'),
+          _buildDetailRow('Event Date', _formatDate(refund.eventDate)),
+          _buildDetailRow('Category', refund.ticketCategoryName ?? '-'),
+          _buildDetailRow('Seat', refund.seatCode ?? '-'),
           _buildDetailRow('Order Status', refund.orderStatus ?? '-'),
           const Divider(height: 24),
           Row(
@@ -415,56 +403,6 @@ class _AdminRefundDetailPageState extends ConsumerState<AdminRefundDetailPage> {
             style: AppTextStyles.bodySmall.copyWith(
               color: AppColors.grey,
               fontSize: 11,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNoteInput() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Admin Notes (optional)',
-            style: AppTextStyles.bodyMedium.copyWith(
-              fontWeight: FontWeight.w600,
-              fontSize: 13,
-              color: AppColors.black,
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _noteController,
-            maxLines: 3,
-            decoration: InputDecoration(
-              hintText: 'Add notes about this refund decision...',
-              hintStyle: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.grey,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.greyLight),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.primary),
-              ),
-              contentPadding: const EdgeInsets.all(12),
             ),
           ),
         ],

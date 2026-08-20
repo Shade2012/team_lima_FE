@@ -38,6 +38,7 @@ class OrganizerRefundDetailPage extends StatelessWidget {
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.all(20),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildDetailCard(),
                     const SizedBox(height: 16),
@@ -54,64 +55,79 @@ class OrganizerRefundDetailPage extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context, _StatusConfig statusConfig) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-      child: Row(
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 12,
+        left: 20,
+        right: 20,
+        bottom: 24,
+      ),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF6B0096), AppColors.primary],
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.black.withValues(alpha: 0.04),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+          Row(
+            children: [
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.white.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
                   ),
-                ],
+                  child: const Icon(
+                    Icons.arrow_back,
+                    color: AppColors.white,
+                    size: 20,
+                  ),
+                ),
               ),
-              child: const Icon(
-                Icons.arrow_back,
-                color: AppColors.black,
-                size: 20,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
                   'Refund Detail',
-                  style: AppTextStyles.title.copyWith(fontSize: 20),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  refund.customerName ?? '-',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.grey,
+                  style: AppTextStyles.title.copyWith(
+                    color: AppColors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-            decoration: BoxDecoration(
-              color: statusConfig.color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              statusConfig.label,
-              style: TextStyle(
-                color: statusConfig.color,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
               ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 5,
+                ),
+                decoration: BoxDecoration(
+                  color: statusConfig.color,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  statusConfig.label,
+                  style: const TextStyle(
+                    color: AppColors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            refund.eventName ?? '-',
+            style: AppTextStyles.title.copyWith(
+              color: AppColors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ],
@@ -145,12 +161,11 @@ class OrganizerRefundDetailPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          _buildDetailRow('Customer', refund.customerName ?? '-'),
           _buildDetailRow('Event', refund.eventName ?? '-'),
-          if (refund.ticketCategoryName != null)
-            _buildDetailRow('Category', refund.ticketCategoryName!),
-          if (refund.seatCode != null)
-            _buildDetailRow('Seat', refund.seatCode!),
+          _buildDetailRow('Event Date', _formatDate(refund.eventDate)),
+          _buildDetailRow('Category', refund.ticketCategoryName ?? '-'),
+          _buildDetailRow('Seat', refund.seatCode ?? '-'),
+          _buildDetailRow('Order Status', refund.orderStatus ?? '-'),
           const Divider(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

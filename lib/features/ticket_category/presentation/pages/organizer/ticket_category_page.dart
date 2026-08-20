@@ -15,14 +15,12 @@ import 'package:team_five_fe/features/seat/presentation/providers/seat_provider.
 class TicketCategoryPage extends ConsumerStatefulWidget {
   final String eventId;
   final String eventName;
-  final bool isSeated;
   final DateTime? eventDate;
 
   const TicketCategoryPage({
     super.key,
     required this.eventId,
     required this.eventName,
-    required this.isSeated,
     this.eventDate,
   });
 
@@ -208,10 +206,10 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
     );
   }
 
-  Widget _buildCategoryCard(dynamic category, int? seatsCount) {
+  Widget _buildCategoryCard(TicketCategory category, int? seatsCount) {
     try {
       return GestureDetector(
-        onTap: widget.isSeated
+        onTap: category.isSeated
             ? () {
                 Navigator.push(
                   context,
@@ -284,7 +282,7 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                                   ),
                                 ),
                               ),
-                              if (widget.isSeated)
+                              if (category.isSeated)
                                 Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 8,
@@ -370,7 +368,7 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                         color: AppColors.warning,
                       ),
                       const SizedBox(width: 8),
-                      if (widget.isSeated) ...[
+                      if (category.isSeated) ...[
                         if (category.rows != null &&
                             category.columns != null) ...[
                           _buildStatChip(
@@ -453,6 +451,7 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
     final columnsController = TextEditingController();
     final formKey = GlobalKey<FormState>();
     List<String> blockedSeats = [];
+    bool isSeated = false;
 
     showModalBottomSheet(
       context: context,
@@ -547,7 +546,78 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                     ),
                     const SizedBox(height: 12),
 
-                    if (widget.isSeated) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSeated
+                            ? AppColors.primary.withValues(alpha: 0.06)
+                            : AppColors.background,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isSeated
+                              ? AppColors.primary.withValues(alpha: 0.3)
+                              : AppColors.greyLight,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: isSeated
+                                  ? AppColors.primary.withValues(alpha: 0.12)
+                                  : AppColors.grey.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              isSeated ? Icons.event_seat : Icons.stadium,
+                              size: 18,
+                              color: isSeated
+                                  ? AppColors.primary
+                                  : AppColors.grey,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Seated Category',
+                                  style: AppTextStyles.bodyLarge.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  isSeated
+                                      ? 'Seats will be generated'
+                                      : 'Standing / general admission',
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: AppColors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Switch(
+                            value: isSeated,
+                            onChanged: (value) =>
+                                setStateModal(() => isSeated = value),
+                            activeThumbColor: AppColors.white,
+                            activeTrackColor: AppColors.primary,
+                            inactiveThumbColor: AppColors.white,
+                            inactiveTrackColor: AppColors.greyLight,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    if (isSeated) ...[
                       Row(
                         children: [
                           Expanded(
@@ -794,7 +864,7 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                               int? columns;
                               int? totalQuota;
 
-                              if (widget.isSeated) {
+                              if (isSeated) {
                                 rows = int.parse(rowsController.text.trim());
                                 columns = int.parse(
                                   columnsController.text.trim(),
@@ -813,6 +883,7 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                                 name: nameController.text.trim(),
                                 price: int.parse(priceController.text.trim()),
                                 totalQuota: totalQuota,
+                                isSeated: isSeated,
                                 rows: rows,
                                 columns: columns,
                                 blockedSeats: blockedSeats.isNotEmpty
@@ -821,10 +892,7 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                               );
                               final success = await ref
                                   .read(categoriesProvider.notifier)
-                                  .createCategory(
-                                    request,
-                                    isSeated: widget.isSeated,
-                                  );
+                                  .createCategory(request);
                               if (!context.mounted) return;
                               if (success) {
                                 Navigator.pop(context);
@@ -939,6 +1007,7 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
     );
     final formKey = GlobalKey<FormState>();
     List<String> blockedSeats = List.from(category.blockedSeats);
+    bool isSeated = category.isSeated;
 
     showModalBottomSheet(
       context: context,
@@ -1032,7 +1101,78 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                     ),
                     const SizedBox(height: 12),
 
-                    if (widget.isSeated) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSeated
+                            ? AppColors.primary.withValues(alpha: 0.06)
+                            : AppColors.background,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isSeated
+                              ? AppColors.primary.withValues(alpha: 0.3)
+                              : AppColors.greyLight,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: isSeated
+                                  ? AppColors.primary.withValues(alpha: 0.12)
+                                  : AppColors.grey.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              isSeated ? Icons.event_seat : Icons.stadium,
+                              size: 18,
+                              color: isSeated
+                                  ? AppColors.primary
+                                  : AppColors.grey,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Seated Category',
+                                  style: AppTextStyles.bodyLarge.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  isSeated
+                                      ? 'Seats will be generated'
+                                      : 'Standing / general admission',
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: AppColors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Switch(
+                            value: isSeated,
+                            onChanged: (value) =>
+                                setStateModal(() => isSeated = value),
+                            activeThumbColor: AppColors.white,
+                            activeTrackColor: AppColors.primary,
+                            inactiveThumbColor: AppColors.white,
+                            inactiveTrackColor: AppColors.greyLight,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    if (isSeated) ...[
                       Row(
                         children: [
                           Expanded(
@@ -1279,7 +1419,7 @@ class _TicketCategoryPageState extends ConsumerState<TicketCategoryPage> {
                               int? columns;
                               int? totalQuota;
 
-                              if (widget.isSeated) {
+                              if (isSeated) {
                                 final rText = rowsController.text.trim();
                                 final cText = columnsController.text.trim();
                                 if (rText.isNotEmpty && cText.isNotEmpty) {

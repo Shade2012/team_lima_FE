@@ -4,6 +4,7 @@ class CreateTicketCategoryRequest {
   final int price;
   final int? totalQuota;
   final int posIndex;
+  final bool isSeated;
   final int? rows;
   final int? columns;
   final List<String>? blockedSeats;
@@ -14,6 +15,7 @@ class CreateTicketCategoryRequest {
     required this.price,
     this.totalQuota,
     this.posIndex = 0,
+    this.isSeated = false,
     this.rows,
     this.columns,
     this.blockedSeats,
@@ -25,6 +27,7 @@ class CreateTicketCategoryRequest {
       'name': name,
       'price': price,
       'posIndex': posIndex,
+      'isSeated': isSeated,
     };
     if (totalQuota != null) {
       map['totalQuota'] = totalQuota;

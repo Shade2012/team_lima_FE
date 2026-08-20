@@ -181,8 +181,6 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.text('John Doe'), findsOneWidget);
-      expect(find.text('Jane Smith'), findsOneWidget);
       expect(find.text('Neon Festival'), findsOneWidget);
       expect(find.text('Sonic Resonance'), findsOneWidget);
     });

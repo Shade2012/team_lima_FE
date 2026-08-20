@@ -66,17 +66,14 @@ class CategoriesNotifier extends Notifier<CategoriesState> {
     }
   }
 
-  Future<bool> createCategory(
-    CreateTicketCategoryRequest request, {
-    required bool isSeated,
-  }) async {
+  Future<bool> createCategory(CreateTicketCategoryRequest request) async {
     state = state.copyWith(error: null);
     try {
       final repository = ref.read(ticketCategoryRepositoryProvider);
       final category = await repository.createCategory(request);
       state = state.copyWith(categories: [...state.categories, category]);
 
-      if (isSeated) {
+      if (request.isSeated) {
         final prefix = request.name.split(' ').first.toUpperCase();
         final seatRepo = ref.read(seatRepositoryProvider);
         await seatRepo.bulkGenerateSeats(

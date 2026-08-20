@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/gate_repository.dart';
 
@@ -55,19 +56,25 @@ class ScannerNotifier extends Notifier<ScannerState> {
   Future<void> processQrCode(String qrData) async {
     if (state.isProcessing) return;
 
+    final trimmedId = qrData.trim();
+    debugPrint('🎫 Scanned ticket UUID: $trimmedId');
+
     state = state.copyWith(isProcessing: true);
 
     try {
       final repo = ref.read(gateRepositoryProvider);
-      final responseMessage = await repo.scanTicket(qrData);
+      final responseMessage = await repo.scanTicket(trimmedId);
 
       final result = ScanResult(isValid: true, message: responseMessage);
 
       state = state.copyWith(isProcessing: false, currentResult: result);
     } catch (e) {
-      final cleanMessage = e.toString().replaceAll('Exception: ', '');
+      final rawMessage = e.toString().replaceAll('Exception: ', '');
+      final displayMessage = rawMessage.contains('UUID')
+          ? 'Invalid ticket'
+          : rawMessage;
 
-      final result = ScanResult(isValid: false, errorMessage: cleanMessage);
+      final result = ScanResult(isValid: false, errorMessage: displayMessage);
 
       state = state.copyWith(isProcessing: false, currentResult: result);
     }

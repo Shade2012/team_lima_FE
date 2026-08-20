@@ -75,8 +75,7 @@ class _OrganizerRefundPageState extends ConsumerState<OrganizerRefundPage>
     if (_searchQuery.isNotEmpty) {
       final q = _searchQuery.toLowerCase();
       filtered = filtered.where((r) {
-        return (r.customerName?.toLowerCase().contains(q) ?? false) ||
-            (r.eventName?.toLowerCase().contains(q) ?? false) ||
+        return (r.eventName?.toLowerCase().contains(q) ?? false) ||
             (r.ticketCategoryName?.toLowerCase().contains(q) ?? false);
       }).toList();
     }
@@ -295,18 +294,6 @@ class _OrganizerRefundPageState extends ConsumerState<OrganizerRefundPage>
   // ==================== Refund Card ====================
 
   Widget _buildRefundCard(RefundRequest refund) {
-    final colors = [
-      AppColors.primary,
-      AppColors.warning,
-      AppColors.success,
-      AppColors.danger,
-      const Color(0xFF2196F3),
-      const Color(0xFF9C27B0),
-    ];
-    final colorIndex =
-        (refund.customerName ?? '').hashCode.abs() % colors.length;
-    final avatarColor = colors[colorIndex];
-
     final statusConfig = _getStatusConfig(refund.status);
 
     return GestureDetector(
@@ -337,17 +324,14 @@ class _OrganizerRefundPageState extends ConsumerState<OrganizerRefundPage>
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: avatarColor.withValues(alpha: 0.15),
+                color: AppColors.primary.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
-              child: Center(
-                child: Text(
-                  refund.initials,
-                  style: TextStyle(
-                    color: avatarColor,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                  ),
+              child: const Center(
+                child: Icon(
+                  Icons.receipt_long,
+                  size: 20,
+                  color: AppColors.primary,
                 ),
               ),
             ),
@@ -360,7 +344,7 @@ class _OrganizerRefundPageState extends ConsumerState<OrganizerRefundPage>
                     children: [
                       Flexible(
                         child: Text(
-                          refund.customerName ?? '-',
+                          refund.eventName ?? '-',
                           style: AppTextStyles.bodyMedium.copyWith(
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
@@ -392,7 +376,7 @@ class _OrganizerRefundPageState extends ConsumerState<OrganizerRefundPage>
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    refund.eventName ?? '-',
+                    refund.ticketCategoryName ?? '-',
                     style: AppTextStyles.bodySmall.copyWith(
                       color: AppColors.grey,
                       fontSize: 11,
