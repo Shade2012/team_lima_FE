@@ -104,7 +104,9 @@ void main() {
               customerTicketsProvider.overrideWith(
                 () => MockCustomerTicketsNotifier(),
               ),
-              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
+              customerWalletRepositoryProvider.overrideWithValue(
+                mockWalletRepo,
+              ),
             ],
             child: const MaterialApp(home: CustomerProfilePage()),
           ),
@@ -143,7 +145,9 @@ void main() {
               customerTicketsProvider.overrideWith(
                 () => MockCustomerTicketsNotifier(),
               ),
-              customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
+              customerWalletRepositoryProvider.overrideWithValue(
+                mockWalletRepo,
+              ),
             ],
             child: const MaterialApp(home: CustomerProfilePage()),
           ),

@@ -33,7 +33,8 @@ class MockCustomerWalletRepository implements CustomerWalletRepository {
   @override
   Future<CustomerWalletModel> topUpWallet(int amount) async {
     if (amount <= 0) throw Exception('amount must be a positive integer');
-    if (amount > 10000000) throw Exception('Maximum top up amount is 10,000,000');
+    if (amount > 10000000)
+      throw Exception('Maximum top up amount is 10,000,000');
     balance += amount;
     final tx = CustomerWalletTransactionModel(
       id: 'tx_${DateTime.now().millisecondsSinceEpoch}',
