@@ -385,7 +385,9 @@ class _CustomerEventDetailPageState
   Widget _buildDetailsCard(String dateStr, Event? event) {
     String? salesPeriodStr;
     if (event != null) {
-      final start = DateFormat('dd MMM yyyy, HH:mm').format(event.salesStartTime);
+      final start = DateFormat(
+        'dd MMM yyyy, HH:mm',
+      ).format(event.salesStartTime);
       final end = DateFormat('dd MMM yyyy, HH:mm').format(event.salesEndTime);
       salesPeriodStr = '$start - $end';
     }
@@ -510,7 +512,9 @@ class _CustomerEventDetailPageState
         ? 'Ticket Sales Closed'
         : 'Ticket Sales Opening Soon';
     final endStr = DateFormat('dd MMM yyyy, HH:mm').format(event.salesEndTime);
-    final startStr = DateFormat('dd MMM yyyy, HH:mm').format(event.salesStartTime);
+    final startStr = DateFormat(
+      'dd MMM yyyy, HH:mm',
+    ).format(event.salesStartTime);
     final subtitleText = isEnded
         ? 'Penjualan tiket untuk event ini telah resmi berakhir pada $endStr.'
         : 'Penjualan tiket untuk event ini baru akan dibuka pada $startStr.';
@@ -605,8 +609,6 @@ class _CustomerEventDetailPageState
       ),
     );
   }
-
-
 
   Widget _buildCategoryList(List<TicketCategory> categories) {
     if (categories.isEmpty) return _buildFallbackCategoryList();
@@ -930,9 +932,11 @@ class _CustomerEventDetailPageState
           Consumer(
             builder: (context, ref, child) {
               final now = DateTime.now();
-              final isUpcoming = widget.event != null &&
+              final isUpcoming =
+                  widget.event != null &&
                   now.isBefore(widget.event!.salesStartTime);
-              final isEnded = widget.event != null &&
+              final isEnded =
+                  widget.event != null &&
                   now.isAfter(widget.event!.salesEndTime);
               final isOnSale = !isUpcoming && !isEnded;
 
@@ -1008,8 +1012,8 @@ class _CustomerEventDetailPageState
                     Icon(
                       isOnSale
                           ? (isCategorySeated
-                              ? Icons.event_seat
-                              : Icons.shopping_bag_outlined)
+                                ? Icons.event_seat
+                                : Icons.shopping_bag_outlined)
                           : Icons.block,
                       size: 18,
                       color: Colors.white,

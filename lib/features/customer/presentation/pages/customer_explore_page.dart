@@ -412,13 +412,13 @@ class CustomerExplorePage extends ConsumerWidget {
     final statusText = isOnSale
         ? 'ON SALE'
         : isUpcoming
-            ? 'UPCOMING'
-            : 'SALES CLOSED';
+        ? 'UPCOMING'
+        : 'SALES CLOSED';
     final statusColor = isOnSale
         ? const Color(0xFF10B981)
         : isUpcoming
-            ? const Color(0xFF3B82F6)
-            : const Color(0xFFEF4444);
+        ? const Color(0xFF3B82F6)
+        : const Color(0xFFEF4444);
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -728,11 +728,7 @@ class CustomerExplorePage extends ConsumerWidget {
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: () => TopUpDialog.show(context),
-              icon: const Icon(
-                Icons.add,
-                size: 16,
-                color: AppColors.primary,
-              ),
+              icon: const Icon(Icons.add, size: 16, color: AppColors.primary),
               label: const Text(
                 'Top Up',
                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),

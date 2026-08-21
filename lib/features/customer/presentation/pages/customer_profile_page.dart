@@ -870,7 +870,9 @@ class _CustomerProfilePageState extends ConsumerState<CustomerProfilePage> {
                   height: 1,
                   indent: 56,
                   endIndent: 16,
-                  color: isDark ? const Color(0xFF2C2C35) : const Color(0xFFF0F0F0),
+                  color: isDark
+                      ? const Color(0xFF2C2C35)
+                      : const Color(0xFFF0F0F0),
                 ),
             ],
           );

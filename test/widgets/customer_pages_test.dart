@@ -288,27 +288,24 @@ void main() {
       },
     );
 
-    testWidgets(
-      'Happy Path: CustomerProfilePage renders VelocePay section',
-      (tester) async {
-        await tester.pumpWidget(
-          ProviderScope(
-            overrides: [
-              customerWalletRepositoryProvider.overrideWithValue(
-                mockWalletRepo,
-              ),
-            ],
-            child: const MaterialApp(home: CustomerProfilePage()),
-          ),
-        );
+    testWidgets('Happy Path: CustomerProfilePage renders VelocePay section', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
+          ],
+          child: const MaterialApp(home: CustomerProfilePage()),
+        ),
+      );
 
-        await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
-        expect(find.text('VelocePay'), findsOneWidget);
-        expect(find.text('Available Balance'), findsOneWidget);
-        expect(find.text('Top Up'), findsOneWidget);
-      },
-    );
+      expect(find.text('VelocePay'), findsOneWidget);
+      expect(find.text('Available Balance'), findsOneWidget);
+      expect(find.text('Top Up'), findsOneWidget);
+    });
 
     // ==================== TICKET DETAIL PAGE ====================
     final sampleTicket = CustomerTicket(
