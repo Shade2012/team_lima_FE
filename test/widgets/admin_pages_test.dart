@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:team_five_fe/features/admin/presentation/pages/admin_main_screen.dart';
-import 'package:team_five_fe/features/admin/presentation/pages/admin_refund_request_page.dart';
-import 'package:team_five_fe/features/admin/presentation/providers/admin_refund_provider.dart';
-import 'package:team_five_fe/features/admin/data/models/refund_model.dart';
-import 'package:team_five_fe/features/event/presentation/providers/event_provider.dart';
-import 'package:team_five_fe/features/event/data/models/event_model.dart';
+import 'package:veloce/features/admin/presentation/pages/admin_main_screen.dart';
+import 'package:veloce/features/admin/presentation/pages/admin_refund_request_page.dart';
+import 'package:veloce/features/admin/presentation/providers/admin_refund_provider.dart';
+import 'package:veloce/features/admin/data/models/refund_model.dart';
+import 'package:veloce/features/event/presentation/providers/event_provider.dart';
+import 'package:veloce/features/event/data/models/event_model.dart';
 
 class MockRefundListNotifier extends RefundListNotifier {
   @override

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:team_five_fe/core/theme/app_colors.dart';
-import 'package:team_five_fe/core/theme/app_text_styles.dart';
-import 'package:team_five_fe/features/auth/presentation/pages/profile_page.dart';
+import 'package:veloce/core/theme/app_colors.dart';
+import 'package:veloce/core/theme/app_text_styles.dart';
+import 'package:veloce/features/auth/presentation/pages/profile_page.dart';
 import 'admin_events_page.dart';
 import 'admin_refund_request_page.dart';
 import 'admin_refund_status_page.dart';

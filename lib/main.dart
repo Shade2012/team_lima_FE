@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
-import 'package:team_five_fe/features/auth/presentation/pages/auth_wrapper.dart';
-import 'package:team_five_fe/features/auth/presentation/pages/onboarding_page.dart';
+import 'package:veloce/features/auth/presentation/pages/auth_wrapper.dart';
+import 'package:veloce/features/auth/presentation/pages/onboarding_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

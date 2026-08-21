@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:team_five_fe/features/customer/data/models/customer_ticket_model.dart';
-import 'package:team_five_fe/features/customer/data/models/customer_wallet_model.dart';
-import 'package:team_five_fe/features/customer/data/repositories/customer_wallet_repository.dart';
-import 'package:team_five_fe/features/customer/presentation/pages/customer_main_screen.dart';
-import 'package:team_five_fe/features/customer/presentation/pages/checkout_page.dart';
-import 'package:team_five_fe/features/customer/presentation/pages/customer_event_detail_page.dart';
-import 'package:team_five_fe/features/customer/presentation/pages/customer_explore_page.dart';
-import 'package:team_five_fe/features/customer/presentation/pages/customer_profile_page.dart';
-import 'package:team_five_fe/features/customer/presentation/pages/seat_selection_page.dart';
-import 'package:team_five_fe/features/customer/presentation/pages/ticket_detail_page.dart';
-import 'package:team_five_fe/features/customer/presentation/widgets/top_up_dialog.dart';
-import 'package:team_five_fe/features/customer/presentation/providers/customer_provider.dart';
+import 'package:veloce/features/customer/data/models/customer_ticket_model.dart';
+import 'package:veloce/features/customer/data/models/customer_wallet_model.dart';
+import 'package:veloce/features/customer/data/repositories/customer_wallet_repository.dart';
+import 'package:veloce/features/customer/presentation/pages/customer_main_screen.dart';
+import 'package:veloce/features/customer/presentation/pages/checkout_page.dart';
+import 'package:veloce/features/customer/presentation/pages/customer_event_detail_page.dart';
+import 'package:veloce/features/customer/presentation/pages/customer_explore_page.dart';
+import 'package:veloce/features/customer/presentation/pages/customer_profile_page.dart';
+import 'package:veloce/features/customer/presentation/pages/seat_selection_page.dart';
+import 'package:veloce/features/customer/presentation/pages/ticket_detail_page.dart';
+import 'package:veloce/features/customer/presentation/widgets/top_up_dialog.dart';
+import 'package:veloce/features/customer/presentation/providers/customer_provider.dart';
 
 class MockCustomerExploreNotifier extends CustomerExploreNotifier {
   @override

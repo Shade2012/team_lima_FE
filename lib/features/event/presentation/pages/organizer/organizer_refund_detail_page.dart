@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:team_five_fe/core/theme/app_colors.dart';
-import 'package:team_five_fe/core/theme/app_text_styles.dart';
-import 'package:team_five_fe/features/admin/data/models/refund_model.dart';
+import 'package:veloce/core/theme/app_colors.dart';
+import 'package:veloce/core/theme/app_text_styles.dart';
+import 'package:veloce/features/admin/data/models/refund_model.dart';
 
 class OrganizerRefundDetailPage extends StatelessWidget {
   final RefundRequest refund;

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:team_five_fe/core/theme/app_colors.dart';
-import 'package:team_five_fe/core/theme/app_text_styles.dart';
-import 'package:team_five_fe/features/gate/presentation/providers/gate_operator_dashboard_provider.dart';
-import 'package:team_five_fe/features/auth/presentation/pages/profile_page.dart';
-import 'package:team_five_fe/features/gate/presentation/pages/gate_operator/scanner_page.dart';
+import 'package:veloce/core/theme/app_colors.dart';
+import 'package:veloce/core/theme/app_text_styles.dart';
+import 'package:veloce/features/gate/presentation/providers/gate_operator_dashboard_provider.dart';
+import 'package:veloce/features/auth/presentation/pages/profile_page.dart';
+import 'package:veloce/features/gate/presentation/pages/gate_operator/scanner_page.dart';
 
 class GateOperatorDashboardPage extends ConsumerStatefulWidget {
   const GateOperatorDashboardPage({super.key});

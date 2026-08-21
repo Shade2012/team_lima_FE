@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:team_five_fe/features/gate/presentation/pages/gate_operator/gate_operator_dashboard_page.dart';
-import 'package:team_five_fe/features/gate/presentation/providers/gate_operator_dashboard_provider.dart';
-import 'package:team_five_fe/features/gate/data/models/gate_model.dart';
-import 'package:team_five_fe/features/event/data/models/event_model.dart';
+import 'package:veloce/features/gate/presentation/pages/gate_operator/gate_operator_dashboard_page.dart';
+import 'package:veloce/features/gate/presentation/providers/gate_operator_dashboard_provider.dart';
+import 'package:veloce/features/gate/data/models/gate_model.dart';
+import 'package:veloce/features/event/data/models/event_model.dart';
 
 class MockGateOperatorDashboardNotifier extends GateOperatorDashboardNotifier {
   @override

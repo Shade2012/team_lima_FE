@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:team_five_fe/core/theme/app_colors.dart';
-import 'package:team_five_fe/core/theme/app_text_styles.dart';
-import 'package:team_five_fe/features/event/data/models/event_statistics_model.dart';
-import 'package:team_five_fe/features/event/presentation/providers/event_provider.dart';
-import 'package:team_five_fe/features/ticket_category/presentation/pages/organizer/seat_preview_page.dart';
+import 'package:veloce/core/theme/app_colors.dart';
+import 'package:veloce/core/theme/app_text_styles.dart';
+import 'package:veloce/features/event/data/models/event_statistics_model.dart';
+import 'package:veloce/features/event/presentation/providers/event_provider.dart';
+import 'package:veloce/features/ticket_category/presentation/pages/organizer/seat_preview_page.dart';
 
 class TicketCategoryDetailPage extends ConsumerStatefulWidget {
   final String eventId;

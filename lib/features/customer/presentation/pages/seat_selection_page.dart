@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:team_five_fe/core/theme/app_colors.dart';
-import 'package:team_five_fe/core/theme/app_text_styles.dart';
-import 'package:team_five_fe/features/seat/data/models/seat_model.dart';
-import 'package:team_five_fe/features/seat/presentation/providers/seat_provider.dart';
-import 'package:team_five_fe/features/ticket_category/data/models/ticket_category_model.dart';
-import 'package:team_five_fe/features/ticket_category/presentation/providers/ticket_category_provider.dart';
+import 'package:veloce/core/theme/app_colors.dart';
+import 'package:veloce/core/theme/app_text_styles.dart';
+import 'package:veloce/features/seat/data/models/seat_model.dart';
+import 'package:veloce/features/seat/presentation/providers/seat_provider.dart';
+import 'package:veloce/features/ticket_category/data/models/ticket_category_model.dart';
+import 'package:veloce/features/ticket_category/presentation/providers/ticket_category_provider.dart';
 import 'checkout_page.dart';
 
 class SeatSelectionPage extends ConsumerStatefulWidget {

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:team_five_fe/core/theme/app_colors.dart';
-import 'package:team_five_fe/core/theme/app_text_styles.dart';
-import 'package:team_five_fe/core/widgets/custom_text_field.dart';
-import 'package:team_five_fe/features/auth/presentation/providers/auth_provider.dart';
-import 'package:team_five_fe/features/auth/presentation/pages/signup_page.dart';
-import 'package:team_five_fe/features/admin/presentation/pages/admin_main_screen.dart';
-import 'package:team_five_fe/features/customer/presentation/pages/customer_main_screen.dart';
-import 'package:team_five_fe/features/event/presentation/pages/organizer/organizer_main_screen.dart';
-import 'package:team_five_fe/features/gate/presentation/pages/gate_operator/gate_operator_dashboard_page.dart';
+import 'package:veloce/core/theme/app_colors.dart';
+import 'package:veloce/core/theme/app_text_styles.dart';
+import 'package:veloce/core/widgets/custom_text_field.dart';
+import 'package:veloce/features/auth/presentation/providers/auth_provider.dart';
+import 'package:veloce/features/auth/presentation/pages/signup_page.dart';
+import 'package:veloce/features/admin/presentation/pages/admin_main_screen.dart';
+import 'package:veloce/features/customer/presentation/pages/customer_main_screen.dart';
+import 'package:veloce/features/event/presentation/pages/organizer/organizer_main_screen.dart';
+import 'package:veloce/features/gate/presentation/pages/gate_operator/gate_operator_dashboard_page.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});

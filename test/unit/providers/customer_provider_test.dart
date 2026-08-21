@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:team_five_fe/features/customer/data/models/customer_wallet_model.dart';
-import 'package:team_five_fe/features/customer/data/repositories/customer_wallet_repository.dart';
-import 'package:team_five_fe/features/customer/presentation/providers/customer_provider.dart';
+import 'package:veloce/features/customer/data/models/customer_wallet_model.dart';
+import 'package:veloce/features/customer/data/repositories/customer_wallet_repository.dart';
+import 'package:veloce/features/customer/presentation/providers/customer_provider.dart';
 
 class MockCustomerExploreNotifier extends CustomerExploreNotifier {
   @override

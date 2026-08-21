@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:team_five_fe/core/theme/app_colors.dart';
-import 'package:team_five_fe/core/theme/app_text_styles.dart';
-import 'package:team_five_fe/features/event/presentation/pages/organizer/my_events_page.dart';
-import 'package:team_five_fe/features/auth/presentation/pages/profile_page.dart';
+import 'package:veloce/core/theme/app_colors.dart';
+import 'package:veloce/core/theme/app_text_styles.dart';
+import 'package:veloce/features/event/presentation/pages/organizer/my_events_page.dart';
+import 'package:veloce/features/auth/presentation/pages/profile_page.dart';
 import 'organizer_refund_page.dart';
 
 class OrganizerMainScreen extends StatefulWidget {
