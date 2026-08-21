@@ -40,6 +40,13 @@ class CustomerExplorePage extends ConsumerWidget {
                       const SizedBox(height: 12),
                       // Customer Wallet Card Section
                       _buildWalletCard(context, ref),
+                      const SizedBox(height: 16),
+                      // Inline Search Input Bar (Between Wallet & For You)
+                      _buildInlineSearchBar(
+                        context,
+                        exploreState.searchQuery,
+                        exploreNotifier,
+                      ),
                       const SizedBox(height: 20),
                       // "For You" Section
                       _buildForYouSection(
@@ -71,70 +78,79 @@ class CustomerExplorePage extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Flexible(
-            child: Text(
-              'VELOCE',
-              style: AppTextStyles.title.copyWith(
-                color: AppColors.primary,
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.5,
-              ),
-              overflow: TextOverflow.ellipsis,
+          Text(
+            'VELOCE',
+            style: AppTextStyles.title.copyWith(
+              color: AppColors.primary,
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.5,
             ),
-          ),
-          IconButton(
-            onPressed: () => _showSearchDialog(context, searchQuery, notifier),
-            icon: const Icon(Icons.search, color: AppColors.black, size: 24),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
           ),
         ],
       ),
     );
   }
 
-  void _showSearchDialog(
+  // ==================== Inline Search Input Bar ====================
+
+  Widget _buildInlineSearchBar(
     BuildContext context,
     String currentQuery,
     CustomerExploreNotifier notifier,
   ) {
-    final controller = TextEditingController(text: currentQuery);
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          'Search Events',
-          style: AppTextStyles.title.copyWith(fontSize: 18),
-        ),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(
-            hintText: 'Enter event title...',
-            prefixIcon: const Icon(Icons.search, color: AppColors.primary),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E1E24) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDark ? const Color(0xFF33333E) : const Color(0xFFE5E5EA),
           ),
-          onChanged: (val) => notifier.setSearchQuery(val),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              notifier.setSearchQuery('');
-              Navigator.pop(context);
-            },
-            child: const Text('Clear'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
             ),
-            child: const Text('Search'),
+          ],
+        ),
+        child: TextField(
+          controller: TextEditingController(text: currentQuery)
+            ..selection = TextSelection.fromPosition(
+              TextPosition(offset: currentQuery.length),
+            ),
+          onChanged: (val) => notifier.setSearchQuery(val),
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: Theme.of(context).textTheme.bodyLarge?.color,
+            fontWeight: FontWeight.w500,
           ),
-        ],
+          decoration: InputDecoration(
+            hintText: 'Search events...',
+            hintStyle: AppTextStyles.bodyMedium.copyWith(
+              color: isDark ? Colors.white38 : Colors.black38,
+            ),
+            prefixIcon: const Icon(
+              Icons.search,
+              color: AppColors.primary,
+              size: 20,
+            ),
+            suffixIcon: currentQuery.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.close, size: 18, color: Colors.grey),
+                    onPressed: () => notifier.setSearchQuery(''),
+                  )
+                : null,
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -197,7 +213,9 @@ class CustomerExplorePage extends ConsumerWidget {
                   style: AppTextStyles.title.copyWith(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.black,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : AppColors.black,
                   ),
                 ),
                 TextButton(
@@ -402,15 +420,19 @@ class CustomerExplorePage extends ConsumerWidget {
             ? const Color(0xFF3B82F6)
             : const Color(0xFFEF4444);
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       width: 210,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E1E24) : Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFEFEFEF)),
+        border: Border.all(
+          color: isDark ? const Color(0xFF33333E) : const Color(0xFFEFEFEF),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -488,7 +510,7 @@ class CustomerExplorePage extends ConsumerWidget {
                     Text(
                       timeBadge,
                       style: AppTextStyles.bodySmall.copyWith(
-                        color: Colors.black54,
+                        color: isDark ? Colors.white70 : Colors.black54,
                         fontSize: 11,
                       ),
                     ),
@@ -501,7 +523,7 @@ class CustomerExplorePage extends ConsumerWidget {
                   style: AppTextStyles.bodyLarge.copyWith(
                     fontWeight: FontWeight.w700,
                     fontSize: 15,
-                    color: AppColors.black,
+                    color: isDark ? Colors.white : AppColors.black,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
