@@ -199,36 +199,7 @@ class TicketDetailPage extends ConsumerWidget {
               ),
             )
           else
-            GestureDetector(
-              onTap: () async {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Testing GET /tickets API... Check terminal!',
-                    ),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-                try {
-                  final repo = ref.read(customerTicketRepositoryProvider);
-                  await repo.getMyTickets();
-                  if (ticketId.isNotEmpty) {
-                    await repo.getTicketDetail(ticketId);
-                  }
-                } catch (_) {}
-              },
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: Text(
-                  'Test API',
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-            ),
+            const SizedBox(width: 40),
         ],
       ),
     );

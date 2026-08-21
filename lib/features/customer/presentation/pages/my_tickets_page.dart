@@ -23,20 +23,33 @@ class MyTicketsPage extends ConsumerWidget {
             _buildAppBar(context, ref),
             // Tickets List
             Expanded(
-              child: tickets.isEmpty
-                  ? Center(
-                      child: Text(
-                        'No tickets purchased yet.',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: Colors.black54,
+              child: RefreshIndicator(
+                color: AppColors.primary,
+                onRefresh: () async {
+                  await ref
+                      .read(customerTicketsProvider.notifier)
+                      .loadTickets(forceRefresh: true);
+                },
+                child: tickets.isEmpty
+                    ? SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: Container(
+                          height: MediaQuery.of(context).size.height * 0.7,
+                          alignment: Alignment.center,
+                          child: Text(
+                            'No tickets purchased yet.',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: Colors.black54,
+                            ),
+                          ),
                         ),
-                      ),
-                    )
-                  : ListView.separated(
-                      padding: const EdgeInsets.all(20),
-                      itemCount: tickets.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 14),
-                      itemBuilder: (context, index) {
+                      )
+                    : ListView.separated(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.all(20),
+                        itemCount: tickets.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 14),
+                        itemBuilder: (context, index) {
                         final ticket = tickets[index];
                         final dateFormat = DateFormat('MMM dd, yyyy');
                         final formattedDate = dateFormat.format(
@@ -161,6 +174,7 @@ class MyTicketsPage extends ConsumerWidget {
                         );
                       },
                     ),
+              ),
             ),
           ],
         ),
@@ -187,27 +201,7 @@ class MyTicketsPage extends ConsumerWidget {
               color: AppColors.black,
             ),
           ),
-          IconButton(
-            tooltip: 'Debug GET /tickets/my-tickets',
-            icon: const Icon(
-              Icons.bug_report,
-              color: AppColors.primary,
-              size: 22,
-            ),
-            onPressed: () async {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Testing GET /tickets/my-tickets ... Check terminal logs!',
-                  ),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-              await ref
-                  .read(customerTicketsProvider.notifier)
-                  .loadTickets(forceRefresh: true);
-            },
-          ),
+          const SizedBox(width: 48),
         ],
       ),
     );
