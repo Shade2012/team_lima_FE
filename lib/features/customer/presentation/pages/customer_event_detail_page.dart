@@ -104,7 +104,7 @@ class _CustomerEventDetailPageState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Cover Banner Image Container
-                    _buildCoverBanner(widget.categoryName),
+                    _buildCoverBanner(widget.categoryName, widget.event),
                     const SizedBox(height: 20),
 
                     Padding(
@@ -250,21 +250,41 @@ class _CustomerEventDetailPageState
     );
   }
 
-  Widget _buildCoverBanner(String category) {
+  Widget _buildCoverBanner(String category, Event? event) {
+    final imageUrl = event?.imageUrl;
+    final hasImage = imageUrl != null && imageUrl.isNotEmpty;
+
+    if (hasImage) {
+      return SizedBox(
+        height: 200,
+        width: double.infinity,
+        child: Image.network(
+          imageUrl,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+              _buildCoverFallbackBanner(),
+        ),
+      );
+    }
+
+    return _buildCoverFallbackBanner();
+  }
+
+  Widget _buildCoverFallbackBanner() {
     return Container(
       height: 200,
       width: double.infinity,
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF2C2C2C), Color(0xFF1E1E24)],
+          colors: [AppColors.primaryDark, AppColors.primary],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
       ),
-      child: Center(
+      child: const Center(
         child: Icon(
-          category == 'ELECTRONIC' ? Icons.equalizer : Icons.music_note,
-          color: Colors.white24,
+          Icons.confirmation_number_outlined,
+          color: Colors.white30,
           size: 64,
         ),
       ),
@@ -856,6 +876,7 @@ class _CustomerEventDetailPageState
                       location: widget.location,
                       eventDate: widget.event?.eventDate,
                       venueName: widget.location,
+                      imageUrl: widget.event?.imageUrl,
                     ),
                   ),
                 );

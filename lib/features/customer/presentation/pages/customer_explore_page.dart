@@ -273,10 +273,10 @@ class CustomerExplorePage extends ConsumerWidget {
     }
 
     final gradients = [
-      [const Color(0xFF2C2C2C), const Color(0xFF1E1E24)],
-      [const Color(0xFF3B2F2F), const Color(0xFF1F1A1A)],
-      [const Color(0xFF1E2A38), const Color(0xFF101820)],
-      [const Color(0xFF2E1A47), const Color(0xFF1A0B2E)],
+      [AppColors.primary, AppColors.primaryDark],
+      [const Color(0xFF7C3AED), const Color(0xFF5B21B6)],
+      [const Color(0xFF6366F1), const Color(0xFF4338CA)],
+      [const Color(0xFFEC4899), const Color(0xFFBE185D)],
     ];
 
     final cardItems = state.filteredEvents.map((e) {
@@ -340,7 +340,6 @@ class CustomerExplorePage extends ConsumerWidget {
             separatorBuilder: (_, _) => const SizedBox(width: 16),
             itemBuilder: (context, index) {
               final item = cardItems[index];
-              final isSaved = state.savedEventIds.contains(item['id']);
 
               return _buildEventCard(
                 context,
@@ -351,10 +350,7 @@ class CustomerExplorePage extends ConsumerWidget {
                 title: item['title'] as String,
                 fullTitle: item['fullTitle'] as String,
                 venue: item['venue'] as String,
-                isSaved: isSaved,
                 gradientColors: item['gradient'] as List<Color>,
-                onToggleSave: () =>
-                    notifier.toggleSaveEvent(item['id'] as String),
               );
             },
           ),
@@ -365,6 +361,27 @@ class CustomerExplorePage extends ConsumerWidget {
 
   // ==================== Individual Event Card ====================
 
+  Widget _buildCardFallbackBanner(List<Color> gradientColors) {
+    return Container(
+      height: 135,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: gradientColors,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: const Center(
+        child: Icon(
+          Icons.confirmation_number_outlined,
+          color: Colors.white38,
+          size: 48,
+        ),
+      ),
+    );
+  }
+
   Widget _buildEventCard(
     BuildContext context, {
     required String id,
@@ -374,10 +391,11 @@ class CustomerExplorePage extends ConsumerWidget {
     required String title,
     required String fullTitle,
     required String venue,
-    required bool isSaved,
     required List<Color> gradientColors,
-    required VoidCallback onToggleSave,
   }) {
+    final imageUrl = event?.imageUrl;
+    final hasImage = imageUrl != null && imageUrl.isNotEmpty;
+
     return Container(
       width: 210,
       decoration: BoxDecoration(
@@ -395,60 +413,19 @@ class CustomerExplorePage extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Image Header with Heart Icon
-          Stack(
-            children: [
-              Container(
-                height: 135,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(20),
-                  ),
-                  gradient: LinearGradient(
-                    colors: gradientColors,
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-                child: Center(
-                  child: Icon(
-                    category == 'ELECTRONIC'
-                        ? Icons.equalizer
-                        : Icons.music_note,
-                    color: Colors.white38,
-                    size: 48,
-                  ),
-                ),
-              ),
-              // Heart Toggle Button Top-Right
-              Positioned(
-                top: 10,
-                right: 10,
-                child: GestureDetector(
-                  onTap: onToggleSave,
-                  child: Container(
-                    padding: const EdgeInsets.all(7),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 6,
-                          offset: Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      isSaved ? Icons.favorite : Icons.favorite_border,
-                      size: 18,
-                      color: isSaved ? AppColors.primary : Colors.black87,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          // Image Header (Network Image or Brand Fallback)
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            child: hasImage
+                ? Image.network(
+                    imageUrl,
+                    height: 135,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        _buildCardFallbackBanner(gradientColors),
+                  )
+                : _buildCardFallbackBanner(gradientColors),
           ),
           // Content Area
           Padding(
