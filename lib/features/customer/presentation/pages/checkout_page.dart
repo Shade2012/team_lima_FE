@@ -22,6 +22,7 @@ class CheckoutPage extends ConsumerStatefulWidget {
   final String? venueName;
   final String? venueAddress;
   final String? ticketType;
+  final String? imageUrl;
 
   const CheckoutPage({
     super.key,
@@ -38,6 +39,7 @@ class CheckoutPage extends ConsumerStatefulWidget {
     this.venueName,
     this.venueAddress,
     this.ticketType,
+    this.imageUrl,
   });
 
   @override
@@ -514,15 +516,34 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF2A004E), Color(0xFFAF06FF)],
+                      colors: [AppColors.primaryDark, AppColors.primary],
                     ),
                   ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.music_note,
-                      color: Colors.white,
-                      size: 30,
-                    ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child:
+                        (widget.imageUrl != null && widget.imageUrl!.isNotEmpty)
+                        ? Image.network(
+                            widget.imageUrl!,
+                            width: 70,
+                            height: 70,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Center(
+                                  child: Icon(
+                                    Icons.confirmation_number_outlined,
+                                    color: Colors.white,
+                                    size: 28,
+                                  ),
+                                ),
+                          )
+                        : const Center(
+                            child: Icon(
+                              Icons.confirmation_number_outlined,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                          ),
                   ),
                 ),
                 const SizedBox(width: 12),

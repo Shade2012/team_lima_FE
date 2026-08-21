@@ -50,6 +50,10 @@ class CustomTextField extends StatelessWidget {
       validator: validator,
       enabled: enabled,
       maxLines: maxLines,
+      style: AppTextStyles.bodyMedium.copyWith(
+        color: AppColors.textPrimary,
+        fontWeight: FontWeight.w500,
+      ),
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: AppTextStyles.hint.copyWith(

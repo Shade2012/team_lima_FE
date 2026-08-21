@@ -337,9 +337,7 @@ void main() {
                 mockWalletRepo,
               ),
             ],
-            child: MaterialApp(
-              home: TicketDetailPage(ticket: sampleTicket),
-            ),
+            child: MaterialApp(home: TicketDetailPage(ticket: sampleTicket)),
           ),
         );
 
