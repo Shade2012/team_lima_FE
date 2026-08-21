@@ -73,10 +73,25 @@ class _EditEventPageState extends ConsumerState<EditEventPage> {
           : '',
     );
     _isSeated = widget.isSeated;
-    _salesStartTime = widget.salesStartTime;
-    _salesEndTime = widget.salesEndTime;
-    _eventDate = widget.eventDate;
-    _refundEndDate = widget.refundEndDate;
+    _salesStartTime = _toWallClock(widget.salesStartTime);
+    _salesEndTime = _toWallClock(widget.salesEndTime);
+    _eventDate = _toWallClock(widget.eventDate);
+    _refundEndDate = widget.refundEndDate != null
+        ? _toWallClock(widget.refundEndDate!)
+        : null;
+  }
+
+  DateTime _toWallClock(DateTime dt) {
+    return DateTime(
+      dt.year,
+      dt.month,
+      dt.day,
+      dt.hour,
+      dt.minute,
+      dt.second,
+      dt.millisecond,
+      dt.microsecond,
+    );
   }
 
   @override
@@ -682,8 +697,8 @@ class _EditEventPageState extends ConsumerState<EditEventPage> {
     final date = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
+      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
     );
 
     if (date != null && mounted) {
