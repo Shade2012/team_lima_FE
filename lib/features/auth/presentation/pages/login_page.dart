@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_five_fe/core/theme/app_colors.dart';
 import 'package:team_five_fe/core/theme/app_text_styles.dart';
 import 'package:team_five_fe/core/widgets/custom_text_field.dart';
@@ -151,8 +150,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       _buildSignInButton(authState, authNotifier),
                       const SizedBox(height: 24),
                       _buildSignUpLink(),
-                      const SizedBox(height: 32),
-                      _buildDebugResetButton(),
                     ],
                   ),
                 ),
@@ -324,34 +321,5 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         );
         break;
     }
-  }
-
-  Widget _buildDebugResetButton() {
-    return GestureDetector(
-      onTap: () async {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.remove('hasSeenOnboarding');
-        if (!mounted) return;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const LoginPage()),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: AppColors.warning.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
-        ),
-        child: Text(
-          'Debug: Reset Onboarding',
-          style: AppTextStyles.bodySmall.copyWith(
-            color: AppColors.warning,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
   }
 }
