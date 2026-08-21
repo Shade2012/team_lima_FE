@@ -385,8 +385,8 @@ class _CustomerEventDetailPageState
   Widget _buildDetailsCard(String dateStr, Event? event) {
     String? salesPeriodStr;
     if (event != null) {
-      final start = DateFormat('dd MMM yyyy, HH:mm').format(event.salesStartTime);
-      final end = DateFormat('dd MMM yyyy, HH:mm').format(event.salesEndTime);
+      final start = DateFormat('dd MMM yyyy, HH:mm').format(event.salesStartTime.toLocal());
+      final end = DateFormat('dd MMM yyyy, HH:mm').format(event.salesEndTime.toLocal());
       salesPeriodStr = '$start - $end';
     }
 
@@ -509,8 +509,8 @@ class _CustomerEventDetailPageState
     final titleText = isEnded
         ? 'Ticket Sales Closed'
         : 'Ticket Sales Opening Soon';
-    final endStr = DateFormat('dd MMM yyyy, HH:mm').format(event.salesEndTime);
-    final startStr = DateFormat('dd MMM yyyy, HH:mm').format(event.salesStartTime);
+    final endStr = DateFormat('dd MMM yyyy, HH:mm').format(event.salesEndTime.toLocal());
+    final startStr = DateFormat('dd MMM yyyy, HH:mm').format(event.salesStartTime.toLocal());
     final subtitleText = isEnded
         ? 'Penjualan tiket untuk event ini telah resmi berakhir pada $endStr.'
         : 'Penjualan tiket untuk event ini baru akan dibuka pada $startStr.';
