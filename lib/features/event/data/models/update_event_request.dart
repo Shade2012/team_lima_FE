@@ -33,16 +33,16 @@ class UpdateEventRequest {
       data['isSeated'] = isSeated;
     }
     if (salesStartTime != null) {
-      data['salesStartTime'] = salesStartTime!.toIso8601String();
+      data['salesStartTime'] = salesStartTime!.toUtc().toIso8601String();
     }
     if (salesEndTime != null) {
-      data['salesEndTime'] = salesEndTime!.toIso8601String();
+      data['salesEndTime'] = salesEndTime!.toUtc().toIso8601String();
     }
     if (eventDate != null) {
-      data['eventDate'] = eventDate!.toIso8601String();
+      data['eventDate'] = eventDate!.toUtc().toIso8601String();
     }
     if (refundEndDate != null) {
-      data['refundEndDate'] = refundEndDate!.toIso8601String();
+      data['refundEndDate'] = refundEndDate!.toUtc().toIso8601String();
     }
     if (refundPolicy != null) {
       data['refundPolicy'] = refundPolicy;

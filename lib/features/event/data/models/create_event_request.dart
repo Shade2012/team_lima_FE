@@ -23,10 +23,10 @@ class CreateEventRequest {
     return {
       'name': name,
       'description': description,
-      'salesStartTime': salesStartTime.toIso8601String(),
-      'salesEndTime': salesEndTime.toIso8601String(),
-      'eventDate': eventDate.toIso8601String(),
-      'refundEndDate': refundEndDate.toIso8601String(),
+      'salesStartTime': salesStartTime.toUtc().toIso8601String(),
+      'salesEndTime': salesEndTime.toUtc().toIso8601String(),
+      'eventDate': eventDate.toUtc().toIso8601String(),
+      'refundEndDate': refundEndDate.toUtc().toIso8601String(),
       'refundPolicy': refundPolicy,
       'refundPercentage': refundPercentage,
     };

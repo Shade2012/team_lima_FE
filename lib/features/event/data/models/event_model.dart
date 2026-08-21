@@ -32,6 +32,29 @@ class Event {
   });
 
   factory Event.fromJson(Map<String, dynamic> json) {
+    DateTime parseDate(dynamic val) {
+      if (val == null) return DateTime.now();
+      final str = val.toString();
+      final dt = DateTime.tryParse(str);
+      if (dt == null) return DateTime.now();
+
+      // If the string contains no timezone offset (naive ISO string from backend),
+      // parse it as local time rather than assuming UTC.
+      if (!str.contains('Z') && !str.contains('+') && !str.contains('-')) {
+        return DateTime(
+          dt.year,
+          dt.month,
+          dt.day,
+          dt.hour,
+          dt.minute,
+          dt.second,
+          dt.millisecond,
+          dt.microsecond,
+        );
+      }
+      return dt.toLocal();
+    }
+
     return Event(
       id: json['id']?.toString() ?? '',
       organizerId: json['organizerId']?.toString() ?? '',
@@ -39,29 +62,16 @@ class Event {
       imageUrl: json['imageUrl']?.toString(),
       description: json['description']?.toString(),
       isSeated: json['isSeated'] == true,
-      salesStartTime: json['salesStartTime'] != null
-          ? DateTime.tryParse(json['salesStartTime'].toString()) ??
-                DateTime.now()
-          : DateTime.now(),
-      salesEndTime: json['salesEndTime'] != null
-          ? DateTime.tryParse(json['salesEndTime'].toString()) ?? DateTime.now()
-          : DateTime.now(),
-      eventDate: json['eventDate'] != null
-          ? DateTime.tryParse(json['eventDate'].toString()) ?? DateTime.now()
-          : DateTime.now(),
-      refundEndDate: json['refundEndDate'] != null
-          ? DateTime.tryParse(json['refundEndDate'].toString())
-          : null,
+      salesStartTime: parseDate(json['salesStartTime']),
+      salesEndTime: parseDate(json['salesEndTime']),
+      eventDate: parseDate(json['eventDate']),
+      refundEndDate: json['refundEndDate'] != null ? parseDate(json['refundEndDate']) : null,
       refundPolicy: json['refundPolicy']?.toString(),
       refundPercentage: json['refundPercentage'] is int
           ? json['refundPercentage']
           : int.tryParse(json['refundPercentage']?.toString() ?? ''),
-      createdAt: json['createdAt'] != null
-          ? DateTime.tryParse(json['createdAt'].toString())
-          : null,
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.tryParse(json['updatedAt'].toString())
-          : null,
+      createdAt: json['createdAt'] != null ? parseDate(json['createdAt']) : null,
+      updatedAt: json['updatedAt'] != null ? parseDate(json['updatedAt']) : null,
     );
   }
 
