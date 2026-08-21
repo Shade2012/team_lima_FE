@@ -11,6 +11,7 @@ class AppColors {
   static const Color magenta = Color(0xFFFF00FF);
 
   static const Color black = Color(0xFF000000);
+  static const Color textPrimary = Color(0xFF111827);
   static const Color white = Color(0xFFFFFFFF);
   static const Color grey = Color(0xFF9E9E9E);
   static const Color greyLight = Color(0xFFE0E0E0);
