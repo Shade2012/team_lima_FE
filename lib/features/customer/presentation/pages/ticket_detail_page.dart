@@ -331,49 +331,6 @@ class TicketDetailPage extends ConsumerWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-
-                // Location Tile
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF7ECFF),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.location_on_outlined,
-                        color: AppColors.primary,
-                        size: 20,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            ticket.venueName,
-                            style: AppTextStyles.bodyLarge.copyWith(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14,
-                              color: AppColors.black,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            ticket.venueAddress,
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: Colors.black54,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
           ),

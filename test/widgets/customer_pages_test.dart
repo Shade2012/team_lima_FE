@@ -224,7 +224,7 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        expect(find.text('Top Up Veloce Wallet'), findsOneWidget);
+        expect(find.text('Top Up VelocePay'), findsOneWidget);
         expect(find.text('Rp 100k'), findsOneWidget);
 
         // Tap preset 250k chip
@@ -262,7 +262,7 @@ void main() {
 
     // ==================== DASHBOARD & PROFILE WALLET CARD ====================
     testWidgets(
-      'Happy Path: CustomerExplorePage renders Veloce E-Wallet card banner',
+      'Happy Path: CustomerExplorePage renders VelocePay card banner',
       (tester) async {
         await tester.pumpWidget(
           ProviderScope(
@@ -282,14 +282,14 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        expect(find.text('Veloce E-Wallet'), findsOneWidget);
-        expect(find.text('Wallet Balance'), findsOneWidget);
+        expect(find.text('VelocePay'), findsOneWidget);
+        expect(find.text('Balance'), findsOneWidget);
         expect(find.text('Top Up'), findsOneWidget);
       },
     );
 
     testWidgets(
-      'Happy Path: CustomerProfilePage renders Veloce E-Wallet section',
+      'Happy Path: CustomerProfilePage renders VelocePay section',
       (tester) async {
         await tester.pumpWidget(
           ProviderScope(
@@ -304,7 +304,7 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        expect(find.text('Veloce E-Wallet'), findsOneWidget);
+        expect(find.text('VelocePay'), findsOneWidget);
         expect(find.text('Available Balance'), findsOneWidget);
         expect(find.text('Top Up'), findsOneWidget);
       },

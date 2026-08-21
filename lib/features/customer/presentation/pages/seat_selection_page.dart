@@ -969,7 +969,6 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
                           eventName: widget.eventName,
                           eventCategory: '$categoryLabel ($seatNumLabel)',
                           price: priceToDisplay,
-                          location: 'Main Stage Pavilion',
                         ),
                       ),
                     );

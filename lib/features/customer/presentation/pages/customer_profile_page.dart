@@ -300,7 +300,7 @@ class _CustomerProfilePageState extends ConsumerState<CustomerProfilePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Veloce E-Wallet',
+                        'VelocePay',
                         style: AppTextStyles.title.copyWith(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
