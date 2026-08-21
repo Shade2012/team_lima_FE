@@ -300,7 +300,7 @@ class _CustomerProfilePageState extends ConsumerState<CustomerProfilePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Veloce E-Wallet',
+                        'VelocePay',
                         style: AppTextStyles.title.copyWith(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
@@ -798,13 +798,15 @@ class _CustomerProfilePageState extends ConsumerState<CustomerProfilePage> {
       },
     ];
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: isDark ? const Color(0xFF1E1E24) : AppColors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.04),
+            color: AppColors.black.withValues(alpha: isDark ? 0.2 : 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -830,12 +832,12 @@ class _CustomerProfilePageState extends ConsumerState<CustomerProfilePage> {
                     decoration: BoxDecoration(
                       color: isDanger
                           ? AppColors.danger.withValues(alpha: 0.1)
-                          : AppColors.greyLight.withValues(alpha: 0.5),
+                          : AppColors.primary.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       item['icon'] as IconData,
-                      color: isDanger ? AppColors.danger : AppColors.black,
+                      color: isDanger ? AppColors.danger : AppColors.primary,
                       size: 18,
                     ),
                   ),
@@ -844,26 +846,33 @@ class _CustomerProfilePageState extends ConsumerState<CustomerProfilePage> {
                     style: AppTextStyles.bodyMedium.copyWith(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
-                      color: isDanger ? AppColors.danger : AppColors.black,
+                      color: isDanger
+                          ? AppColors.danger
+                          : (isDark ? Colors.white : AppColors.black),
                     ),
                   ),
                   trailing: isDanger
-                      ? null
+                      ? const Icon(
+                          Icons.chevron_right,
+                          color: AppColors.danger,
+                          size: 20,
+                        )
                       : const Icon(
                           Icons.chevron_right,
                           color: AppColors.grey,
                           size: 20,
                         ),
-                  onTap: item['onTap'] as VoidCallback,
+                  onTap: item['onTap'] as VoidCallback?,
                 ),
               ),
               if (!isLast)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Container(
-                    height: 1,
-                    color: AppColors.greyLight.withValues(alpha: 0.5),
-                  ),
+                Divider(
+                  height: 1,
+                  indent: 56,
+                  endIndent: 16,
+                  color: isDark
+                      ? const Color(0xFF2C2C35)
+                      : const Color(0xFFF0F0F0),
                 ),
             ],
           );

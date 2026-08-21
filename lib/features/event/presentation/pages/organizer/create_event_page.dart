@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:team_five_fe/core/theme/app_colors.dart';
-import 'package:team_five_fe/core/theme/app_text_styles.dart';
-import 'package:team_five_fe/core/widgets/custom_text_field.dart';
-import 'package:team_five_fe/features/event/data/models/create_event_request.dart';
-import 'package:team_five_fe/features/event/presentation/providers/event_provider.dart';
-import 'package:team_five_fe/features/ticket_category/presentation/pages/organizer/ticket_category_page.dart';
+import 'package:veloce/core/theme/app_colors.dart';
+import 'package:veloce/core/theme/app_text_styles.dart';
+import 'package:veloce/core/widgets/custom_text_field.dart';
+import 'package:veloce/features/event/data/models/create_event_request.dart';
+import 'package:veloce/features/event/presentation/providers/event_provider.dart';
+import 'package:veloce/features/ticket_category/presentation/pages/organizer/ticket_category_page.dart';
 
 class CreateEventPage extends ConsumerStatefulWidget {
   const CreateEventPage({super.key});

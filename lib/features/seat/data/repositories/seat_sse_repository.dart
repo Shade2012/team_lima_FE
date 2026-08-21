@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:team_five_fe/core/network/sse_client.dart';
-import 'package:team_five_fe/core/network/dio_client.dart';
-import 'package:team_five_fe/core/constants/api_constants.dart';
-import 'package:team_five_fe/features/seat/data/models/seat_model.dart';
+import 'package:veloce/core/network/sse_client.dart';
+import 'package:veloce/core/network/dio_client.dart';
+import 'package:veloce/core/constants/api_constants.dart';
+import 'package:veloce/features/seat/data/models/seat_model.dart';
 
 class SeatUpdateEvent {
   final String categoryId;

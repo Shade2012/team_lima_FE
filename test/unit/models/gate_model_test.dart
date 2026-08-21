@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:team_five_fe/features/gate/data/models/gate_model.dart';
+import 'package:veloce/features/gate/data/models/gate_model.dart';
 
 void main() {
   group('Gate Model Tests', () {

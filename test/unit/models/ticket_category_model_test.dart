@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:team_five_fe/features/ticket_category/data/models/ticket_category_model.dart';
-import 'package:team_five_fe/features/ticket_category/data/models/create_ticket_category_request.dart';
+import 'package:veloce/features/ticket_category/data/models/ticket_category_model.dart';
+import 'package:veloce/features/ticket_category/data/models/create_ticket_category_request.dart';
 
 void main() {
   group('TicketCategory & Request Model Tests', () {

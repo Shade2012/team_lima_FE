@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:team_five_fe/features/ticket_category/presentation/providers/ticket_category_provider.dart';
-import 'package:team_five_fe/features/ticket_category/data/models/ticket_category_model.dart';
+import 'package:veloce/features/ticket_category/presentation/providers/ticket_category_provider.dart';
+import 'package:veloce/features/ticket_category/data/models/ticket_category_model.dart';
 
 class MockCategoriesNotifier extends CategoriesNotifier {
   @override

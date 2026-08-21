@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:team_five_fe/core/theme/app_colors.dart';
-import 'package:team_five_fe/features/auth/presentation/pages/auth_wrapper.dart';
+import 'package:veloce/core/theme/app_colors.dart';
+import 'package:veloce/features/auth/presentation/pages/auth_wrapper.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});

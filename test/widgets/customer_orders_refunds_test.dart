@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:team_five_fe/features/customer/presentation/pages/customer_orders_page.dart';
-import 'package:team_five_fe/features/customer/presentation/pages/customer_refunds_page.dart';
-import 'package:team_five_fe/features/customer/presentation/providers/customer_provider.dart';
-import 'package:team_five_fe/features/customer/data/models/customer_order_model.dart';
-import 'package:team_five_fe/features/customer/data/models/customer_refund_model.dart';
+import 'package:veloce/features/customer/presentation/pages/customer_orders_page.dart';
+import 'package:veloce/features/customer/presentation/pages/customer_refunds_page.dart';
+import 'package:veloce/features/customer/presentation/providers/customer_provider.dart';
+import 'package:veloce/features/customer/data/models/customer_order_model.dart';
+import 'package:veloce/features/customer/data/models/customer_refund_model.dart';
 
 class MockCustomerOrdersNotifier extends CustomerOrdersNotifier {
   final List<CustomerOrderModel> mockOrders;

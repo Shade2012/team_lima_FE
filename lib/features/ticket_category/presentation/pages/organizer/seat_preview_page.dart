@@ -3,10 +3,10 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:team_five_fe/core/theme/app_colors.dart';
-import 'package:team_five_fe/core/theme/app_text_styles.dart';
-import 'package:team_five_fe/features/ticket_category/presentation/providers/ticket_category_provider.dart';
-import 'package:team_five_fe/features/seat/presentation/providers/seat_provider.dart';
+import 'package:veloce/core/theme/app_colors.dart';
+import 'package:veloce/core/theme/app_text_styles.dart';
+import 'package:veloce/features/ticket_category/presentation/providers/ticket_category_provider.dart';
+import 'package:veloce/features/seat/presentation/providers/seat_provider.dart';
 
 class SeatPreviewPage extends ConsumerStatefulWidget {
   final String eventId;

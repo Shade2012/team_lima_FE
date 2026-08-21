@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:team_five_fe/features/event/data/models/event_model.dart';
-import 'package:team_five_fe/features/event/data/models/create_event_request.dart';
-import 'package:team_five_fe/features/event/data/models/update_event_request.dart';
-import 'package:team_five_fe/features/event/data/models/event_statistics_model.dart';
+import 'package:veloce/features/event/data/models/event_model.dart';
+import 'package:veloce/features/event/data/models/create_event_request.dart';
+import 'package:veloce/features/event/data/models/update_event_request.dart';
+import 'package:veloce/features/event/data/models/event_statistics_model.dart';
 
 void main() {
   group('Event Model Tests', () {

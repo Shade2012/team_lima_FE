@@ -40,6 +40,13 @@ class CustomerExplorePage extends ConsumerWidget {
                       const SizedBox(height: 12),
                       // Customer Wallet Card Section
                       _buildWalletCard(context, ref),
+                      const SizedBox(height: 16),
+                      // Inline Search Input Bar (Between Wallet & For You)
+                      _buildInlineSearchBar(
+                        context,
+                        exploreState.searchQuery,
+                        exploreNotifier,
+                      ),
                       const SizedBox(height: 20),
                       // "For You" Section
                       _buildForYouSection(
@@ -71,78 +78,79 @@ class CustomerExplorePage extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          IconButton(
-            onPressed: () {
-              if (Navigator.canPop(context)) Navigator.pop(context);
-            },
-            icon: const Icon(Icons.arrow_back, color: AppColors.black),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-          ),
-          Flexible(
-            child: Text(
-              'VELOCE',
-              style: AppTextStyles.title.copyWith(
-                color: AppColors.primary,
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.5,
-              ),
-              overflow: TextOverflow.ellipsis,
+          Text(
+            'VELOCE',
+            style: AppTextStyles.title.copyWith(
+              color: AppColors.primary,
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.5,
             ),
-          ),
-          IconButton(
-            onPressed: () => _showSearchDialog(context, searchQuery, notifier),
-            icon: const Icon(Icons.search, color: AppColors.black, size: 24),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
           ),
         ],
       ),
     );
   }
 
-  void _showSearchDialog(
+  // ==================== Inline Search Input Bar ====================
+
+  Widget _buildInlineSearchBar(
     BuildContext context,
     String currentQuery,
     CustomerExploreNotifier notifier,
   ) {
-    final controller = TextEditingController(text: currentQuery);
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          'Search Events',
-          style: AppTextStyles.title.copyWith(fontSize: 18),
-        ),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(
-            hintText: 'Enter event title...',
-            prefixIcon: const Icon(Icons.search, color: AppColors.primary),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E1E24) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDark ? const Color(0xFF33333E) : const Color(0xFFE5E5EA),
           ),
-          onChanged: (val) => notifier.setSearchQuery(val),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              notifier.setSearchQuery('');
-              Navigator.pop(context);
-            },
-            child: const Text('Clear'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
             ),
-            child: const Text('Search'),
+          ],
+        ),
+        child: TextField(
+          controller: TextEditingController(text: currentQuery)
+            ..selection = TextSelection.fromPosition(
+              TextPosition(offset: currentQuery.length),
+            ),
+          onChanged: (val) => notifier.setSearchQuery(val),
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: Theme.of(context).textTheme.bodyLarge?.color,
+            fontWeight: FontWeight.w500,
           ),
-        ],
+          decoration: InputDecoration(
+            hintText: 'Search events...',
+            hintStyle: AppTextStyles.bodyMedium.copyWith(
+              color: isDark ? Colors.white38 : Colors.black38,
+            ),
+            prefixIcon: const Icon(
+              Icons.search,
+              color: AppColors.primary,
+              size: 20,
+            ),
+            suffixIcon: currentQuery.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.close, size: 18, color: Colors.grey),
+                    onPressed: () => notifier.setSearchQuery(''),
+                  )
+                : null,
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -205,7 +213,9 @@ class CustomerExplorePage extends ConsumerWidget {
                   style: AppTextStyles.title.copyWith(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.black,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : AppColors.black,
                   ),
                 ),
                 TextButton(
@@ -349,7 +359,6 @@ class CustomerExplorePage extends ConsumerWidget {
                 timeBadge: item['timeBadge'] as String,
                 title: item['title'] as String,
                 fullTitle: item['fullTitle'] as String,
-                venue: item['venue'] as String,
                 gradientColors: item['gradient'] as List<Color>,
               );
             },
@@ -390,21 +399,40 @@ class CustomerExplorePage extends ConsumerWidget {
     required String timeBadge,
     required String title,
     required String fullTitle,
-    required String venue,
     required List<Color> gradientColors,
   }) {
     final imageUrl = event?.imageUrl;
     final hasImage = imageUrl != null && imageUrl.isNotEmpty;
 
+    final now = DateTime.now();
+    final isUpcoming = event != null && now.isBefore(event.salesStartTime);
+    final isEnded = event != null && now.isAfter(event.salesEndTime);
+    final isOnSale = !isUpcoming && !isEnded;
+
+    final statusText = isOnSale
+        ? 'ON SALE'
+        : isUpcoming
+        ? 'UPCOMING'
+        : 'SALES CLOSED';
+    final statusColor = isOnSale
+        ? const Color(0xFF10B981)
+        : isUpcoming
+        ? const Color(0xFF3B82F6)
+        : const Color(0xFFEF4444);
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       width: 210,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E1E24) : Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFEFEFEF)),
+        border: Border.all(
+          color: isDark ? const Color(0xFF33333E) : const Color(0xFFEFEFEF),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -413,19 +441,48 @@ class CustomerExplorePage extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Image Header (Network Image or Brand Fallback)
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-            child: hasImage
-                ? Image.network(
-                    imageUrl,
-                    height: 135,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        _buildCardFallbackBanner(gradientColors),
-                  )
-                : _buildCardFallbackBanner(gradientColors),
+          // Image Header with Sales Status Overlay Badge
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
+                child: hasImage
+                    ? Image.network(
+                        imageUrl,
+                        height: 135,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            _buildCardFallbackBanner(gradientColors),
+                      )
+                    : _buildCardFallbackBanner(gradientColors),
+              ),
+              Positioned(
+                top: 10,
+                right: 10,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: statusColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    statusText,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 9,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
           // Content Area
           Padding(
@@ -453,7 +510,7 @@ class CustomerExplorePage extends ConsumerWidget {
                     Text(
                       timeBadge,
                       style: AppTextStyles.bodySmall.copyWith(
-                        color: Colors.black54,
+                        color: isDark ? Colors.white70 : Colors.black54,
                         fontSize: 11,
                       ),
                     ),
@@ -466,18 +523,7 @@ class CustomerExplorePage extends ConsumerWidget {
                   style: AppTextStyles.bodyLarge.copyWith(
                     fontWeight: FontWeight.w700,
                     fontSize: 15,
-                    color: AppColors.black,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                // Venue
-                Text(
-                  venue,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: Colors.black54,
-                    fontSize: 12,
+                    color: isDark ? Colors.white : AppColors.black,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -545,7 +591,7 @@ class CustomerExplorePage extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 10),
-                // Get Tickets Button Row (Aligned right)
+                // Action Button Row (Get Tickets for ON SALE, View Details for UPCOMING/CLOSED)
                 Align(
                   alignment: Alignment.centerRight,
                   child: ElevatedButton(
@@ -558,14 +604,17 @@ class CustomerExplorePage extends ConsumerWidget {
                             eventId: id,
                             eventName: fullTitle,
                             categoryName: category,
-                            location: venue,
                           ),
                         ),
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFF6E8FF),
-                      foregroundColor: AppColors.primary,
+                      backgroundColor: isOnSale
+                          ? const Color(0xFFF6E8FF)
+                          : const Color(0xFFF3F4F6),
+                      foregroundColor: isOnSale
+                          ? AppColors.primary
+                          : Colors.black54,
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 14,
@@ -578,9 +627,9 @@ class CustomerExplorePage extends ConsumerWidget {
                       ),
                     ),
                     child: Text(
-                      'Get Tickets',
+                      isOnSale ? 'Get Tickets' : 'View Details',
                       style: AppTextStyles.button.copyWith(
-                        color: AppColors.primary,
+                        color: isOnSale ? AppColors.primary : Colors.black54,
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                       ),
@@ -645,11 +694,12 @@ class CustomerExplorePage extends ConsumerWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Veloce E-Wallet',
+                    'VelocePay',
                     style: AppTextStyles.bodySmall.copyWith(
                       color: Colors.white.withValues(alpha: 0.9),
                       fontWeight: FontWeight.w700,
-                      fontSize: 12,
+                      fontSize: 13,
+                      letterSpacing: 0.5,
                     ),
                   ),
                 ],
@@ -658,7 +708,7 @@ class CustomerExplorePage extends ConsumerWidget {
           ),
           const SizedBox(height: 14),
           Text(
-            'Wallet Balance',
+            'Balance',
             style: AppTextStyles.bodySmall.copyWith(
               color: Colors.white.withValues(alpha: 0.75),
               fontSize: 11,
@@ -674,61 +724,25 @@ class CustomerExplorePage extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () => TopUpDialog.show(context),
-                  icon: const Icon(
-                    Icons.add,
-                    size: 16,
-                    color: AppColors.primary,
-                  ),
-                  label: const Text(
-                    'Top Up',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 0,
-                  ),
-                ),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => TopUpDialog.show(context),
+              icon: const Icon(Icons.add, size: 16, color: AppColors.primary),
+              label: const Text(
+                'Top Up',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Veloce QR Pay coming soon!'),
-                      ),
-                    );
-                  },
-                  icon: const Icon(
-                    Icons.qr_code_scanner,
-                    size: 16,
-                    color: Colors.white,
-                  ),
-                  label: const Text(
-                    'QR Pay',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    side: const BorderSide(color: Colors.white54),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: AppColors.primary,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
+                elevation: 0,
               ),
-            ],
+            ),
           ),
         ],
       ),

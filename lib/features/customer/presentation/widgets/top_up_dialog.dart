@@ -131,7 +131,7 @@ class _TopUpDialogState extends ConsumerState<TopUpDialog> {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Top Up Veloce Wallet',
+              'Top Up VelocePay',
               style: AppTextStyles.title.copyWith(
                 fontSize: 17,
                 fontWeight: FontWeight.w800,

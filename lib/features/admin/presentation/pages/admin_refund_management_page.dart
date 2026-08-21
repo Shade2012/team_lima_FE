@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:team_five_fe/core/theme/app_colors.dart';
-import 'package:team_five_fe/core/theme/app_text_styles.dart';
-import 'package:team_five_fe/features/admin/data/models/refund_model.dart';
-import 'package:team_five_fe/features/admin/presentation/providers/admin_refund_provider.dart';
-import 'package:team_five_fe/features/admin/presentation/pages/admin_refund_detail_page.dart';
+import 'package:veloce/core/theme/app_colors.dart';
+import 'package:veloce/core/theme/app_text_styles.dart';
+import 'package:veloce/features/admin/data/models/refund_model.dart';
+import 'package:veloce/features/admin/presentation/providers/admin_refund_provider.dart';
+import 'package:veloce/features/admin/presentation/pages/admin_refund_detail_page.dart';
 
 class AdminRefundManagementPage extends ConsumerStatefulWidget {
   const AdminRefundManagementPage({super.key});

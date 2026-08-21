@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:team_five_fe/features/customer/data/models/customer_ticket_model.dart';
+import 'package:veloce/features/customer/data/models/customer_ticket_model.dart';
 
 void main() {
   group('CustomerTicket Model Unit Tests', () {

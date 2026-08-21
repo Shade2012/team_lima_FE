@@ -16,11 +16,8 @@ class CheckoutPage extends ConsumerStatefulWidget {
   final String eventName;
   final String eventCategory;
   final double price;
-  final String location;
   final DateTime? eventDate;
   final String? eventTimeRange;
-  final String? venueName;
-  final String? venueAddress;
   final String? ticketType;
   final String? imageUrl;
 
@@ -33,11 +30,8 @@ class CheckoutPage extends ConsumerStatefulWidget {
     this.eventName = 'Event Ticket',
     this.eventCategory = 'General Admission',
     this.price = 750000.0,
-    this.location = 'Main Stage Pavilion',
     this.eventDate,
     this.eventTimeRange,
-    this.venueName,
-    this.venueAddress,
     this.ticketType,
     this.imageUrl,
   });
@@ -571,28 +565,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.location_on_outlined,
-                            size: 12,
-                            color: Colors.black54,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              widget.location,
-                              style: AppTextStyles.bodySmall.copyWith(
-                                color: Colors.black54,
-                                fontSize: 11,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
                     ],
                   ),
                 ),
@@ -660,8 +632,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                         attendeeName: attendeeName,
                         eventDate: widget.eventDate,
                         eventTimeRange: widget.eventTimeRange,
-                        venueName: widget.venueName ?? widget.location,
-                        venueAddress: widget.venueAddress,
                         ticketType: widget.ticketType,
                       );
                       if (context.mounted) {

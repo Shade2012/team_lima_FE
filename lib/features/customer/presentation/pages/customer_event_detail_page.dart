@@ -49,7 +49,6 @@ class CustomerEventDetailPage extends ConsumerStatefulWidget {
   final String eventName;
   final String categoryName;
   final double price;
-  final String location;
 
   const CustomerEventDetailPage({
     super.key,
@@ -58,7 +57,6 @@ class CustomerEventDetailPage extends ConsumerStatefulWidget {
     this.eventName = 'Sonic Resonance Festival 2024',
     this.categoryName = 'ELECTRONIC',
     this.price = 1500000.0,
-    this.location = 'Main Stage Pavilion • Oct 15-17',
   });
 
   @override
@@ -112,8 +110,10 @@ class _CustomerEventDetailPageState
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Title & Category Tag
-                          Row(
+                          // Title & Category / Admission Tags
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
                             children: [
                               Container(
                                 padding: const EdgeInsets.symmetric(
@@ -135,6 +135,46 @@ class _CustomerEventDetailPageState
                                   ),
                                 ),
                               ),
+                              if (widget.event != null)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: widget.event!.isSeated
+                                        ? const Color(0xFFF3E8FF)
+                                        : const Color(0xFFEFEFEF),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        widget.event!.isSeated
+                                            ? Icons.event_seat
+                                            : Icons.groups_outlined,
+                                        size: 13,
+                                        color: widget.event!.isSeated
+                                            ? AppColors.primary
+                                            : Colors.black87,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        widget.event!.isSeated
+                                            ? 'Numbered Seating'
+                                            : 'Free Standing',
+                                        style: AppTextStyles.bodySmall.copyWith(
+                                          color: widget.event!.isSeated
+                                              ? AppColors.primary
+                                              : Colors.black87,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                             ],
                           ),
                           const SizedBox(height: 10),
@@ -149,13 +189,21 @@ class _CustomerEventDetailPageState
                           ),
                           const SizedBox(height: 16),
 
-                          // Date & Venue Details Card
-                          _buildDetailsCard(eventDateStr, widget.location),
+                          // Date & Time Details Card (with Sales Period Range)
+                          _buildDetailsCard(eventDateStr, widget.event),
                           const SizedBox(height: 20),
 
-                          // Venue Floor Plan Overview Card (UX Improvement)
-                          _buildVenueOverviewCard(),
-                          const SizedBox(height: 20),
+                          // Sales Status Warning / Info Banner (if Sales Closed or Upcoming)
+                          _buildSalesStatusBanner(widget.event),
+
+                          // Event Description Card (ONLY if present & non-empty)
+                          if (widget.event?.description != null &&
+                              widget.event!.description!.trim().isNotEmpty) ...[
+                            _buildDescriptionCard(
+                              widget.event!.description!.trim(),
+                            ),
+                            const SizedBox(height: 20),
+                          ],
 
                           // Refund Policy Box
                           _buildRefundPolicyCard(
@@ -291,7 +339,59 @@ class _CustomerEventDetailPageState
     );
   }
 
-  Widget _buildDetailsCard(String dateStr, String venueStr) {
+  Widget _buildDescriptionCard(String description) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E5EA)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.description_outlined,
+                color: AppColors.primary,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'About Event',
+                style: AppTextStyles.title.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.black,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            description,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: Colors.black87,
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailsCard(String dateStr, Event? event) {
+    String? salesPeriodStr;
+    if (event != null) {
+      final start = DateFormat(
+        'dd MMM yyyy, HH:mm',
+      ).format(event.salesStartTime);
+      final end = DateFormat('dd MMM yyyy, HH:mm').format(event.salesEndTime);
+      salesPeriodStr = '$start - $end';
+    }
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -340,52 +440,131 @@ class _CustomerEventDetailPageState
               ),
             ],
           ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Divider(height: 1, color: Color(0xFFF0F0F0)),
-          ),
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
+          if (salesPeriodStr != null) ...[
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Divider(height: 1, color: Color(0xFFF0F0F0)),
+            ),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.access_time_outlined,
+                    color: AppColors.primary,
+                    size: 18,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.location_on_outlined,
-                  color: AppColors.primary,
-                  size: 18,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Location & Venue',
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: Colors.black45,
-                        fontSize: 11,
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Ticket Sales Period',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: Colors.black45,
+                          fontSize: 11,
+                        ),
                       ),
-                    ),
-                    Text(
-                      venueStr,
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
-                        color: AppColors.black,
+                      Text(
+                        salesPeriodStr,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                          color: AppColors.black,
+                        ),
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildSalesStatusBanner(Event? event) {
+    if (event == null) return const SizedBox.shrink();
+
+    final now = DateTime.now();
+    final isUpcoming = now.isBefore(event.salesStartTime);
+    final isEnded = now.isAfter(event.salesEndTime);
+
+    if (!isUpcoming && !isEnded) return const SizedBox.shrink();
+
+    final bannerColor = isEnded
+        ? const Color(0xFFFEF2F2)
+        : const Color(0xFFEFF6FF);
+    final borderColor = isEnded
+        ? const Color(0xFFFCA5A5)
+        : const Color(0xFF93C5FD);
+    final iconColor = isEnded
+        ? const Color(0xFFDC2626)
+        : const Color(0xFF2563EB);
+    final titleText = isEnded
+        ? 'Ticket Sales Closed'
+        : 'Ticket Sales Opening Soon';
+    final endStr = DateFormat('dd MMM yyyy, HH:mm').format(event.salesEndTime);
+    final startStr = DateFormat(
+      'dd MMM yyyy, HH:mm',
+    ).format(event.salesStartTime);
+    final subtitleText = isEnded
+        ? 'Penjualan tiket untuk event ini telah resmi berakhir pada $endStr.'
+        : 'Penjualan tiket untuk event ini baru akan dibuka pada $startStr.';
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: bannerColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: borderColor),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              isEnded
+                  ? Icons.remove_shopping_cart_outlined
+                  : Icons.hourglass_top_outlined,
+              color: iconColor,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    titleText,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      color: iconColor,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitleText,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: Colors.black87,
+                      fontSize: 12,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -428,101 +607,6 @@ class _CustomerEventDetailPageState
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildVenueOverviewCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E5EA)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.map, size: 18, color: AppColors.primary),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Venue Floor Plan & Layout Overview',
-                  style: AppTextStyles.title.copyWith(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.black,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Container(
-            height: 120,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: const Color(0xFF1E1E24),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Text(
-                    'S T A G E',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 3,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildZoneChip('Standing Zone', const Color(0xFF00D68F)),
-                    _buildZoneChip('VIP Seated', const Color(0xFF6C63FF)),
-                    _buildZoneChip('Regular Zone', const Color(0xFFFFB800)),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildZoneChip(String label, Color color) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: const TextStyle(color: Colors.white70, fontSize: 10),
-        ),
-      ],
     );
   }
 
@@ -845,71 +929,107 @@ class _CustomerEventDetailPageState
             ),
           ),
           const SizedBox(width: 16),
-          ElevatedButton(
-            onPressed: () {
-              if (isCategorySeated) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => SeatSelectionPage(
-                      eventId:
-                          widget.event?.id ??
-                          widget.eventId ??
-                          '019146a0-event',
-                      eventName: title,
-                      categoryName: categoryName,
-                      categoryId: categoryId,
-                      price: categoryPrice,
-                    ),
+          Consumer(
+            builder: (context, ref, child) {
+              final now = DateTime.now();
+              final isUpcoming =
+                  widget.event != null &&
+                  now.isBefore(widget.event!.salesStartTime);
+              final isEnded =
+                  widget.event != null &&
+                  now.isAfter(widget.event!.salesEndTime);
+              final isOnSale = !isUpcoming && !isEnded;
+
+              final buttonText = isOnSale
+                  ? (isCategorySeated ? 'Select Seat' : 'Checkout Now')
+                  : (isEnded ? 'Sales Closed' : 'Sales Not Started');
+
+              return ElevatedButton(
+                onPressed: () {
+                  if (!isOnSale) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          isEnded
+                              ? 'Ticket sales for this event have closed.'
+                              : 'Ticket sales for this event have not started yet.',
+                        ),
+                        backgroundColor: AppColors.danger,
+                      ),
+                    );
+                    return;
+                  }
+
+                  if (isCategorySeated) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => SeatSelectionPage(
+                          eventId:
+                              widget.event?.id ??
+                              widget.eventId ??
+                              '019146a0-event',
+                          eventName: title,
+                          categoryName: categoryName,
+                          categoryId: categoryId,
+                          price: categoryPrice,
+                        ),
+                      ),
+                    );
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CheckoutPage(
+                          eventId: widget.event?.id ?? widget.eventId,
+                          categoryId: categoryId,
+                          eventName: title,
+                          eventCategory: categoryName,
+                          price: categoryPrice,
+                          eventDate: widget.event?.eventDate,
+                          imageUrl: widget.event?.imageUrl,
+                        ),
+                      ),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isOnSale
+                      ? AppColors.primary
+                      : Colors.grey.shade400,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 14,
                   ),
-                );
-              } else {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => CheckoutPage(
-                      eventId: widget.event?.id ?? widget.eventId,
-                      categoryId: categoryId,
-                      eventName: title,
-                      eventCategory: categoryName,
-                      price: categoryPrice,
-                      location: widget.location,
-                      eventDate: widget.event?.eventDate,
-                      venueName: widget.location,
-                      imageUrl: widget.event?.imageUrl,
-                    ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                );
-              }
+                  elevation: 0,
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      isOnSale
+                          ? (isCategorySeated
+                                ? Icons.event_seat
+                                : Icons.shopping_bag_outlined)
+                          : Icons.block,
+                      size: 18,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      buttonText,
+                      style: AppTextStyles.button.copyWith(
+                        color: Colors.white,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              );
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              elevation: 0,
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  isCategorySeated
-                      ? Icons.event_seat
-                      : Icons.shopping_bag_outlined,
-                  size: 18,
-                  color: Colors.white,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  isCategorySeated ? 'Select Seat' : 'Checkout Now',
-                  style: AppTextStyles.button.copyWith(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
           ),
         ],
       ),

@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:team_five_fe/features/gate/data/models/gate_model.dart';
-import 'package:team_five_fe/features/event/data/models/event_model.dart';
+import 'package:veloce/features/gate/data/models/gate_model.dart';
+import 'package:veloce/features/event/data/models/event_model.dart';
 import 'gate_provider.dart';
 
 class GateOperatorEvent {

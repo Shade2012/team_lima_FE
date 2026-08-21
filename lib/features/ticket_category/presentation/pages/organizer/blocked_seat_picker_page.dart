@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:team_five_fe/core/theme/app_colors.dart';
-import 'package:team_five_fe/core/theme/app_text_styles.dart';
+import 'package:veloce/core/theme/app_colors.dart';
+import 'package:veloce/core/theme/app_text_styles.dart';
 
 class BlockedSeatPickerPage extends StatefulWidget {
   final int rows;

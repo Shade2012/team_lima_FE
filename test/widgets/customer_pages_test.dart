@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:team_five_fe/features/customer/data/models/customer_ticket_model.dart';
-import 'package:team_five_fe/features/customer/data/models/customer_wallet_model.dart';
-import 'package:team_five_fe/features/customer/data/repositories/customer_wallet_repository.dart';
-import 'package:team_five_fe/features/customer/presentation/pages/customer_main_screen.dart';
-import 'package:team_five_fe/features/customer/presentation/pages/checkout_page.dart';
-import 'package:team_five_fe/features/customer/presentation/pages/customer_event_detail_page.dart';
-import 'package:team_five_fe/features/customer/presentation/pages/customer_explore_page.dart';
-import 'package:team_five_fe/features/customer/presentation/pages/customer_profile_page.dart';
-import 'package:team_five_fe/features/customer/presentation/pages/seat_selection_page.dart';
-import 'package:team_five_fe/features/customer/presentation/pages/ticket_detail_page.dart';
-import 'package:team_five_fe/features/customer/presentation/widgets/top_up_dialog.dart';
-import 'package:team_five_fe/features/customer/presentation/providers/customer_provider.dart';
+import 'package:veloce/features/customer/data/models/customer_ticket_model.dart';
+import 'package:veloce/features/customer/data/models/customer_wallet_model.dart';
+import 'package:veloce/features/customer/data/repositories/customer_wallet_repository.dart';
+import 'package:veloce/features/customer/presentation/pages/customer_main_screen.dart';
+import 'package:veloce/features/customer/presentation/pages/checkout_page.dart';
+import 'package:veloce/features/customer/presentation/pages/customer_event_detail_page.dart';
+import 'package:veloce/features/customer/presentation/pages/customer_explore_page.dart';
+import 'package:veloce/features/customer/presentation/pages/customer_profile_page.dart';
+import 'package:veloce/features/customer/presentation/pages/seat_selection_page.dart';
+import 'package:veloce/features/customer/presentation/pages/ticket_detail_page.dart';
+import 'package:veloce/features/customer/presentation/widgets/top_up_dialog.dart';
+import 'package:veloce/features/customer/presentation/providers/customer_provider.dart';
 
 class MockCustomerExploreNotifier extends CustomerExploreNotifier {
   @override
@@ -224,7 +224,7 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        expect(find.text('Top Up Veloce Wallet'), findsOneWidget);
+        expect(find.text('Top Up VelocePay'), findsOneWidget);
         expect(find.text('Rp 100k'), findsOneWidget);
 
         // Tap preset 250k chip
@@ -262,7 +262,7 @@ void main() {
 
     // ==================== DASHBOARD & PROFILE WALLET CARD ====================
     testWidgets(
-      'Happy Path: CustomerExplorePage renders Veloce E-Wallet card banner',
+      'Happy Path: CustomerExplorePage renders VelocePay card banner',
       (tester) async {
         await tester.pumpWidget(
           ProviderScope(
@@ -282,33 +282,30 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        expect(find.text('Veloce E-Wallet'), findsOneWidget);
-        expect(find.text('Wallet Balance'), findsOneWidget);
+        expect(find.text('VelocePay'), findsOneWidget);
+        expect(find.text('Balance'), findsOneWidget);
         expect(find.text('Top Up'), findsOneWidget);
       },
     );
 
-    testWidgets(
-      'Happy Path: CustomerProfilePage renders Veloce E-Wallet section',
-      (tester) async {
-        await tester.pumpWidget(
-          ProviderScope(
-            overrides: [
-              customerWalletRepositoryProvider.overrideWithValue(
-                mockWalletRepo,
-              ),
-            ],
-            child: const MaterialApp(home: CustomerProfilePage()),
-          ),
-        );
+    testWidgets('Happy Path: CustomerProfilePage renders VelocePay section', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            customerWalletRepositoryProvider.overrideWithValue(mockWalletRepo),
+          ],
+          child: const MaterialApp(home: CustomerProfilePage()),
+        ),
+      );
 
-        await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
-        expect(find.text('Veloce E-Wallet'), findsOneWidget);
-        expect(find.text('Available Balance'), findsOneWidget);
-        expect(find.text('Top Up'), findsOneWidget);
-      },
-    );
+      expect(find.text('VelocePay'), findsOneWidget);
+      expect(find.text('Available Balance'), findsOneWidget);
+      expect(find.text('Top Up'), findsOneWidget);
+    });
 
     // ==================== TICKET DETAIL PAGE ====================
     final sampleTicket = CustomerTicket(

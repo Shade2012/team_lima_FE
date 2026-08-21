@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:team_five_fe/features/auth/data/models/login_request.dart';
-import 'package:team_five_fe/features/auth/data/models/register_request.dart';
+import 'package:veloce/features/auth/data/models/login_request.dart';
+import 'package:veloce/features/auth/data/models/register_request.dart';
 
 void main() {
   group('Auth Requests Unit Tests', () {

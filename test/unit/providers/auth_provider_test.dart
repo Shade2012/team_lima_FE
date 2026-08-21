@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:team_five_fe/features/auth/presentation/providers/auth_provider.dart';
+import 'package:veloce/features/auth/presentation/providers/auth_provider.dart';
 
 void main() {
   group('AuthNotifier Unit Tests', () {
