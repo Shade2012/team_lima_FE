@@ -50,130 +50,131 @@ class MyTicketsPage extends ConsumerWidget {
                         itemCount: tickets.length,
                         separatorBuilder: (_, _) => const SizedBox(height: 14),
                         itemBuilder: (context, index) {
-                        final ticket = tickets[index];
-                        final dateFormat = DateFormat('MMM dd, yyyy');
-                        final formattedDate = dateFormat.format(
-                          ticket.eventDate,
-                        );
+                          final ticket = tickets[index];
+                          final dateFormat = DateFormat('MMM dd, yyyy');
+                          final formattedDate = dateFormat.format(
+                            ticket.eventDate,
+                          );
 
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    TicketDetailPage(ticket: ticket),
-                              ),
-                            );
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: const Color(0xFFEFEFEF),
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.03),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      TicketDetailPage(ticket: ticket),
                                 ),
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 56,
-                                  height: 56,
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [
-                                        Color(0xFF8A00CC),
-                                        Color(0xFFAF06FF),
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(14),
-                                  ),
-                                  child: const Center(
-                                    child: Icon(
-                                      Icons.confirmation_number_outlined,
-                                      color: Colors.white,
-                                      size: 26,
-                                    ),
-                                  ),
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: const Color(0xFFEFEFEF),
                                 ),
-                                const SizedBox(width: 14),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            ticket.status,
-                                            style: AppTextStyles.bodySmall
-                                                .copyWith(
-                                                  color:
-                                                      ticket.status ==
-                                                          'REFUNDED'
-                                                      ? AppColors.danger
-                                                      : AppColors.primary,
-                                                  fontWeight: FontWeight.w800,
-                                                  fontSize: 11,
-                                                ),
-                                          ),
-                                          Text(
-                                            ticket.ticketCode,
-                                            style: AppTextStyles.bodySmall
-                                                .copyWith(
-                                                  color: Colors.black54,
-                                                  fontSize: 11,
-                                                ),
-                                          ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.03),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 56,
+                                    height: 56,
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          Color(0xFF8A00CC),
+                                          Color(0xFFAF06FF),
                                         ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
                                       ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        ticket.eventName,
-                                        style: AppTextStyles.bodyLarge.copyWith(
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 15,
-                                          color: AppColors.black,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    child: const Center(
+                                      child: Icon(
+                                        Icons.confirmation_number_outlined,
+                                        color: Colors.white,
+                                        size: 26,
                                       ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        '$formattedDate • ${ticket.categoryName}',
-                                        style: AppTextStyles.bodyMedium
-                                            .copyWith(
-                                              color: Colors.black54,
-                                              fontSize: 12,
-                                            ),
-                                      ),
-                                    ],
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                const Icon(
-                                  Icons.chevron_right,
-                                  color: Colors.black38,
-                                  size: 22,
-                                ),
-                              ],
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              ticket.status,
+                                              style: AppTextStyles.bodySmall
+                                                  .copyWith(
+                                                    color:
+                                                        ticket.status ==
+                                                            'REFUNDED'
+                                                        ? AppColors.danger
+                                                        : AppColors.primary,
+                                                    fontWeight: FontWeight.w800,
+                                                    fontSize: 11,
+                                                  ),
+                                            ),
+                                            Text(
+                                              ticket.ticketCode,
+                                              style: AppTextStyles.bodySmall
+                                                  .copyWith(
+                                                    color: Colors.black54,
+                                                    fontSize: 11,
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          ticket.eventName,
+                                          style: AppTextStyles.bodyLarge
+                                              .copyWith(
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 15,
+                                                color: AppColors.black,
+                                              ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '$formattedDate • ${ticket.categoryName}',
+                                          style: AppTextStyles.bodyMedium
+                                              .copyWith(
+                                                color: Colors.black54,
+                                                fontSize: 12,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const Icon(
+                                    Icons.chevron_right,
+                                    color: Colors.black38,
+                                    size: 22,
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                    ),
+                          );
+                        },
+                      ),
               ),
             ),
           ],

@@ -521,7 +521,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: (widget.imageUrl != null && widget.imageUrl!.isNotEmpty)
+                    child:
+                        (widget.imageUrl != null && widget.imageUrl!.isNotEmpty)
                         ? Image.network(
                             widget.imageUrl!,
                             width: 70,
@@ -529,12 +530,12 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) =>
                                 const Center(
-                              child: Icon(
-                                Icons.confirmation_number_outlined,
-                                color: Colors.white,
-                                size: 28,
-                              ),
-                            ),
+                                  child: Icon(
+                                    Icons.confirmation_number_outlined,
+                                    color: Colors.white,
+                                    size: 28,
+                                  ),
+                                ),
                           )
                         : const Center(
                             child: Icon(
