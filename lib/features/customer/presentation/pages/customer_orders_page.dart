@@ -33,7 +33,8 @@ class CustomerOrdersPage extends ConsumerWidget {
         centerTitle: false,
       ),
       body: RefreshIndicator(
-        onRefresh: () => ref.read(customerOrdersProvider.notifier).loadOrders(),
+        onRefresh: () =>
+            ref.read(customerOrdersProvider.notifier).loadOrders(forceRefresh: true),
         color: AppColors.primary,
         child: ordersState.isLoading
             ? const Center(child: CircularProgressIndicator())
